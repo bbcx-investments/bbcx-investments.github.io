@@ -7,7 +7,9 @@ book:
   date: "8/18/2022"
   chapters:
     - index.qmd
-    - time-value-money.qmd
+    - miracle.qmd
+    - funds.qmd
+    - returns.qmd
     - portfolios.qmd
     - fixed-income.qmd
     - references.qmd

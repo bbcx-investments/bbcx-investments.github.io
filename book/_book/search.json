@@ -1,0 +1,44 @@
+[
+  {
+    "objectID": "index.html",
+    "href": "index.html",
+    "title": "Modern Investments: Theory, Data, and Practice",
+    "section": "",
+    "text": "This is a book about investments."
+  },
+  {
+    "objectID": "miracle.html",
+    "href": "miracle.html",
+    "title": "1  Miracle of Compound Interest",
+    "section": "",
+    "text": "A chapter about time value of money"
+  },
+  {
+    "objectID": "funds.html",
+    "href": "funds.html",
+    "title": "2  Asset Classes and Funds",
+    "section": "",
+    "text": "A chapter about asset classes and funds"
+  },
+  {
+    "objectID": "returns.html",
+    "href": "returns.html",
+    "title": "3  Asset Returns",
+    "section": "",
+    "text": "A chapter about returns. There will be some more text here."
+  },
+  {
+    "objectID": "portfolios.html",
+    "href": "portfolios.html",
+    "title": "4  Portfolios",
+    "section": "",
+    "text": "A chapter about portfolios"
+  },
+  {
+    "objectID": "fixed-income.html",
+    "href": "fixed-income.html",
+    "title": "5  Fixed Income",
+    "section": "",
+    "text": "A chapter about fixed income"
+  }
+]
