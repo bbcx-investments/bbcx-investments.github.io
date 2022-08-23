@@ -1,5 +1,207 @@
 # Risk and Return of Portfolios
 
-A chapter about portfolios
+Porfolios are combinations of underlying assets.  In this chapter, we will explore the risk and return of portfolios and how we can form optimal portfolios.  Our discussion will focus on the expected return and standard deviation of portfolio.  
+
+## Portfolio Statistics
+
+### Expected Return
+The expected return of a portfolio is simply the weighted sum of the expected returns of each asset in the portfolio, where the weights are fraction of capital invested in each asset:
+$$ E[r_p] = \sum_{i=1}^{N} w_i E[r_i] $$
+Unless otherwise stated, we will assume the portfolio is fully invested; that is, that $\sum_i w_i = 1$.  We will occasionally use the notation $E(r_i)=\mu_i$.
+
+
+### Variance and Standard Deviation
+To measure the variability of the portfolio return, we will alternatively work with the portfolio variance or the portfolio standard deviation.  The portfolio variance of an $N$-asset portfolio is:
+$$ \text{var}[r_p] = \sum_{i=1}^{N} \sum_{j=1}^{N} w_i w_j \text{cov}[r_i,r_j]\,,$$
+where $\text{cov}[r_i,r_j]$ is the covariance between assets $i$ and $j$. Of course, the portfolio standard deviation is simply the square root of the portfolio variance. We will occasionally use the notation $\sigma^2_p$ to represent portfolio variance, $\sigma_{i,j}$ for the covariance between the returns of assets $i$ and $j$, and $\sigma_p$ for the standard deviation of portfolio $p$'s return.
+
+Some insights into the portfolio variance can be obtained by considering each term in matrix view.  The nine terms in the three asset case are:
+<table border="1">
+  <!-- Row 1 -->
+  <tr> 
+    <td style="text-align:center; background-color:gray">$w_1 w_1 \text{cov}[r_1,r_1]$</td>
+    <td style="text-align:center">$w_1 w_2 \text{cov}[r_1,r_2]$</td>
+    <td style="text-align:center">$w_1 w_3 \text{cov}[r_1,r_3]$</td>
+  </tr>
+  <!-- Row 2 -->
+  <tr>
+    <td style="text-align:center">$w_2 w_1 \text{cov}[r_2,r_1]$</td>
+    <td style="text-align:center; background-color:gray">$w_2 w_2 \text{cov}[r_2,r_2]$</td>
+    <td style="text-align:center">$w_2 w_3 \text{cov}[r_2,r_3]$</td>
+  </tr>
+  <!-- Row 3 -->
+  <tr>
+    <td style="text-align:center">$w_3 w_1 \text{cov}[r_3,r_1]$</td>
+    <td style="text-align:center">$w_3 w_2 \text{cov}[r_3,r_2]$</td>
+    <td style="text-align:center; background-color:gray">$w_3 w_3 \text{cov}[r_3,r_3]$</td>
+  </tr>
+</table>
+The shaded cells along the diagonal contain covariances of an asset return with itself.  These are variance terms, so the diagonal can be rewritten as:
+<table border="1">
+  <!-- Row 1 -->
+  <tr> 
+    <td style="text-align:center; background-color:gray">$w_1^2 \text{var}[r_1]$</td>
+    <td style="text-align:center">$w_1 w_2 \text{cov}[r_1,r_2]$</td>
+    <td style="text-align:center">$w_1 w_3 \text{cov}[r_1,r_3]$</td>
+  </tr>
+  <!-- Row 2 -->
+  <tr>
+    <td style="text-align:center">$w_2 w_1 \text{cov}[r_2,r_1]$</td>
+    <td style="text-align:center; background-color:gray">$w_2^2 \text{var}[r_2]$</td>
+    <td style="text-align:center">$w_2 w_3 \text{cov}[r_2,r_3]$</td>
+  </tr>
+  <!-- Row 3 -->
+  <tr>
+    <td style="text-align:center">$w_3 w_1 \text{cov}[r_3,r_1]$</td>
+    <td style="text-align:center">$w_3 w_2 \text{cov}[r_3,r_2]$</td>
+    <td style="text-align:center; background-color:gray">$w_3^2 \text{var}[r_3]$</td>
+  </tr>
+</table>
+Further simplication is possible by looking at same-colored pairs of elements in the matrix below.  
+<table border="1">
+  <!-- Row 1 -->
+  <tr> 
+    <td style="text-align:center; background-color:gray">$w_1^2 \text{var}[r_1]$</td>
+    <td style="text-align:center; background-color:lightblue">$w_1 w_2 \text{cov}[r_1,r_2]$</td>
+    <td style="text-align:center; background-color:lightcoral">$w_1 w_3 \text{cov}[r_1,r_3]$</td>
+  </tr>
+  <!-- Row 2 -->
+  <tr>
+    <td style="text-align:center; background-color:lightblue">$w_2 w_1 \text{cov}[r_2,r_1]$</td>
+    <td style="text-align:center; background-color:gray">$w_2^2 \text{var}[r_2]$</td>
+    <td style="text-align:center; background-color:#d9f2d9">$w_2 w_3 \text{cov}[r_2,r_3]$</td>
+  </tr>
+  <!-- Row 3 -->
+  <tr>
+    <td style="text-align:center; background-color:lightcoral">$w_3 w_1 \text{cov}[r_3,r_1]$</td>
+    <td style="text-align:center; background-color:#d9f2d9">$w_3 w_2 \text{cov}[r_3,r_2]$</td>
+    <td style="text-align:center; background-color:gray">$w_3^2 \text{var}[r_3]$</td>
+  </tr>
+</table>
+The two terms in each pair have the same value because $\text{cov}[r_i,r_j]=\text{cov}[r_j,r_i]$.  Thus, the portfolio variance can be rewritten as:
+$$ \text{var}[r_p] = \sum_{i=1}^{N} w_i^2 \text{var}[r_i]+ 2 \sum_{i=1}^{N} \sum_{j>i} w_i w_j \text{cov}[r_i,r_j]\,.$$
+
+#### Calculating Porfolio Variance
+
+Calculating each term and adding them up can quickly become tedious.  Given a covariance matrix $V$:
+\begin{equation*}
+    V = 
+    \begin{bmatrix}
+        \text{var}[r_1]     & \text{cov}[r_1,r_2] & \dots  & \text{cov}[r_1,r_N] \\
+        \text{cov}[r_2,r_1] & \text{var}[r_2]     & \dots  & \text{cov}[r_2,r_N] \\
+        \vdots              & \vdots              & \ddots &  \vdots \\
+        \text{cov}[r_N,r_1] & \text{cov}[r_N,r_2] & \dots  & \text{var}[r_N] \\
+    \end{bmatrix}
+\end{equation*}
+and a vector of weights 
+$$w'=[w_1\, w_2\,...\,w_N]\,,$$
+we can calculate the portfolio variance as the matrix product
+$$ \text{var}[r_p] = w'Vw \,.$$
+
+In python, this can be accomplished using the w' @ V @ w.  In Excel, the command is =MMULT(TRANSPOSE(w),MMULT(V,w)).
+
+Alternatively, we can use the bordered covariance method.  ADD EXCEL SNIPPET HERE?
+
+### Covariance and Correlation
+
+When measuring comovement across assets, we will use either the covariance, an absolute measure of comovement, or correlation, which is scaled by the product of each asset's standard deviations:
+$$ \text{corr}[r_i,r_j] = \rho_{ij} = \frac{\text{cov}[r_i,r_j]}{\text{sd}[r_i]\cdot\text{sd}[r_j]}\,.$$
+Correlations range between -1 (perfectly negatively correlated) and 1 (perfectly correlated).  Covariances, on the other hand, can take any values.
+
+
+## Preferences
+
+In order to make statements about "optimal" portfolios, we need to describe the preferences of investors in some way.  A standard way to do so is to use mean-variance utility.  Simply put, we will assume that investors like higher expected returns and dislike portfolios with riskier returns.  The amount of extra expected return needed for an investor to take on additional risk is governed by the investor's risk aversion, which we will denote $A$.
+
+Mathematically, mean-variance utility for a given portfolio return $r_p$ is:
+$$ U(r_p)=E[r_p] - 0.5\cdot A \cdot \text{var}[r_p]\,.$$
+The utility of a risky investment is simply its expected return minus a penalty for variance.  More risk averse investors have higher values for $A$, meaning that they put greater penalties on variance.  @fig-indifference0 shows indifference curves for three different levels of risk aversion, but the same level of utility.  A higher expected return is required to reach the utility for a given level of risk when risk aversion is higher, and the extra expected return increases when risk increases.
+```{python}
+#| label: fig-indifference0
+#| fig-cap: Indifference curves with different levels of risk aversion
+import numpy as np
+import pandas as pd
+from scipy.stats import norm
+import plotly.express as px
+
+# Parameters
+raver1 = 2
+raver2 = 5
+raver3 = 10
+u1 = 0.10
+u2 = 0.10
+u3 = 0.10
+string1='Risk Aversion='+str(raver1)
+string2='Risk Aversion='+str(raver2)
+string3='Risk Aversion='+str(raver3)
+
+# Generate data
+sd = np.arange(0,0.405,0.005)
+U1 = u1 + 0.5*raver1* (sd**2)
+U2 = u2 + 0.5*raver2* (sd**2) 
+U3 = u3 + 0.5*raver3* (sd**2)
+df = pd.DataFrame(data={'Standard Deviation': sd, string1: U1, string2: U2,string3: U3})
+df = df*100
+
+# Plot data
+fig = px.line(df,x='Standard Deviation', y=[string1, string2, string3])
+fig.update_layout(title='',
+                   xaxis_title='Standard Deviation',
+                   yaxis_title='Expected Return',
+    legend_title_text='',)
+fig.update_yaxes(tickformat=".0f", ticksuffix="%")
+fig.update_xaxes(tickformat=".0f", ticksuffix="%")
+fig.show()
+```
+
+
+
+
+
+
+Investors are indifferent between portfolios that generate the same utility.  @fig-indifference1 shows three different levels of utility, holding risk aversion fixed.  A utility of, for example, 10% means that the investor would be indifferent between the risky investment and a risk-free investment with a return of 10%.  That is, any portfolio located on the green indifference curve in @fig-indifference1 provides the same level of utility to this investor.  Higher utility is achieved with either a higher expected return or lower risk or both.
+```{python}
+#| label: fig-indifference1
+#| fig-cap: Indifference curves with same level of risk aversion
+import numpy as np
+import pandas as pd
+from scipy.stats import norm
+import plotly.express as px
+# import plotly.io as pio
+# pio.renderers.default='notebook'
+
+# Parameters
+raver = 10
+u1 = 0.05
+u2 = 0.075
+u3 = 0.10
+string1='Utility='+str(np.round(u1*100,1))+'%'
+string2='Utility='+str(np.round(u2*100,1))+'%'
+string3='Utility='+str(np.round(u3*100,1))+'%'
+
+# Generate data
+sd = np.arange(0,0.405,0.005)
+U1 = u1 + 0.5*raver* (sd**2)
+U2 = u2 + 0.5*raver* (sd**2) 
+U3 = u3 + 0.5*raver* (sd**2)
+df = pd.DataFrame(data={'Standard Deviation': sd, string1: U1, string2: U2,string3: U3})
+df = df*100
+
+# Plot data
+fig = px.line(df,x='Standard Deviation', y=[string1, string2, string3])
+fig.update_layout(title='',
+                   xaxis_title='Standard Deviation',
+                   yaxis_title='Expected Return',
+    legend_title_text='',)
+fig.update_yaxes(tickformat=".0f", ticksuffix="%")
+fig.update_xaxes(tickformat=".0f", ticksuffix="%")
+fig.show()
+```
+
+## Allocating Capital Between a Risky Asset and a Risk-free Asset
+
+The decision to invest any money in a risky asset is perhaps the most fundamental decision an investor makes.  We will assume the existence of a risk-free asset.  In the real world, this would be an asset like a Treasury bill or a money-market mutual fund.  To fix ideas, we will consider a broad stock market index fund as the risky asset.
+
+How much capital should be invested in each of these two assets?  For a given portfolio weight in the risky asset $w_{\text{risky}}$, we first need to determine  the portfolio's expected return and standard deviation.  Considering all possible risky portfolio weights traces out the set of possible investments, which is called the capital allocation line in expected return/standard deviation space.  Finally, we choose the risky portfolio weight that maximizes the investor's utility.
 
 
