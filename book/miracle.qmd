@@ -1,3 +1,36 @@
+
+
 # Miracle of Compound Interest
 
-A chapter about time value of money
+If an investment account earns a steady rate of return and funds are not withdrawn from the account, then the account balance will grow exponentially.  This is sometimes called the "miracle of compound interest."  @fig-miracle-exponential shows the growth of an investment account earning 8% per year, which is what the U.S. stock market earned in real terms over the thirty year period 1992-2021.  Each dollar grows to $10 over a 30 year period at an 8% annual return.  The exponential nature of the growth can be seen from the figure.
+
+```{python}
+#| label: fig-miracle-exponential
+#| fig-cap: "Growth of an Investment Account"
+
+
+import plotly.express as px
+import numpy as np
+
+fig = px.line(
+    x=np.arange(31), 
+    y=1.08**np.arange(31)
+)
+fig.update_traces(
+    hovertemplate="""
+    Year %{x}<br>
+    $%{y:.2f}<extra></extra>
+    """
+)
+fig.layout.xaxis["title"] = "Year"
+fig.layout.yaxis["title"] = "Account Balance"
+fig.update_layout(
+    yaxis_tickprefix="$", 
+    yaxis_tickformat=",.0f"
+)
+fig.show()
+```
+
+Investments grow exponentially because they earn returns each year not just on the starting balance but also on all prior returns.  Exponential growth is much better than linear growth.  By "linear growth," we mean that doubling the investment period would double the account growth.  Exponential is much better than that.  As can be seen from the figure, $1 would grow to slightly more than $3 in 15 years at 8% per year.  Doubling the investment horizon to 30 years more than triples the growth.    Because of exponential growth, it is incredibly important to invest early and to refrain from borrowing whenever possible (unless the borrowing finances the purchase of long-term assets).
+
+Exponential growth also means that the rate of return one earns is extremely important.  For example, one might think that earning 8% is twice as good as earning 4%, but that is an understatement.  Over a 30 year period, earning 8% is more than three times as good as earning 4%---a dollar would grow to $10 over 30 years at 8% but to less than $3.25 at 4%.
