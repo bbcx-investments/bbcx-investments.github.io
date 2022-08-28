@@ -492,8 +492,6 @@ def figtbl(mn, sd, s, extra, raver1, raver2):
     fig.add_trace(trace6)
     fig.layout.xaxis["title"] = "Standard Deviation"
     fig.layout.yaxis["title"] = "Expected Return"    
-    fig.layout.xaxis["title"] = "Risk Aversion"
-    fig.layout.yaxis["title"] = "Weight in Risky Asset"
     fig.update_yaxes(tickformat=".0%")
     fig.update_xaxes(tickformat=".0%")
     fig.show()
