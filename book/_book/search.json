@@ -11,7 +11,7 @@
     "href": "miracle.html",
     "title": "1  Miracle of Compound Interest",
     "section": "",
-    "text": "Code\nimport plotly.graph_objects as go\nimport numpy as np\n\ntrace1= go.Scatter(\n    x=np.arange(31), \n    y=1.08**np.arange(31),\n    mode=\"lines\",\n    name=\"8%\"\n)\n\ntrace2 = go.Scatter(\n    x=np.arange(31), \n    y=1.04**np.arange(31),\n    mode=\"lines\",\n    name=\"4%\"\n)\n\nfig = go.Figure()\nfig.layout.template = \"plotly_dark\"\nfig.add_trace(trace1)\nfig.add_trace(trace2)\nfig.update_traces(\n    hovertemplate=\"\"\"\n    Year %{x}<br>\n    $%{y:.2f}<extra></extra>\n    \"\"\"\n)\nfig.layout.xaxis[\"title\"] = \"Year\"\nfig.layout.yaxis[\"title\"] = \"Account Balance\"\nfig.update_layout(\n    yaxis_tickprefix=\"$\", \n    yaxis_tickformat=\",.0f\",\n    legend=dict(\n        yanchor=\"top\", \n        y=0.99, \n        xanchor=\"left\", \n        x=0.01\n        )\n)\nfig.show()\n\n\n\n\n                                                \nFigure 1.1: Growth of an Investment Account\n\n\n\nInvestments grow exponentially because they earn returns each year not just on the starting balance but also on all prior returns. Exponential growth is much better than linear growth. By “linear growth,” we mean that doubling the investment period would double the account growth. Exponential is much better than that. As can be seen from the figure, $1 would grow to slightly more than $3 in 15 years at 8% per year. Doubling the investment horizon to 30 years more than triples the growth. Because of exponential growth, it is incredibly important to invest early and to refrain from borrowing whenever possible (unless the borrowing finances the purchase of long-term assets).\nExponential growth also means that the rate of return one earns is extremely important. For example, one might think that earning 8% is twice as good as earning 4%, but that is an understatement. Over a 30 year period, earning 8% is more than three times as good as earning 4%—a dollar would grow to $10 over 30 years at 8% but to less than $3.25 at 4%."
+    "text": "If an investment account earns a steady rate of return and funds are not withdrawn from the account, then the account balance will grow exponentially. This is sometimes called the “miracle of compound interest.” Figure 1.1 shows the growth of an investment account earning 8% per year, which is what the U.S. stock market earned in real terms over the thirty year period 1992-2021. Each dollar grows to $10 (actually $10.06) over a 30 year period at an 8% annual return. The exponential nature of the growth can be seen from the figure. Hover over the plot to see the exact values.\nInvestments grow exponentially because they earn returns each year not just on the starting balance but also on all prior returns. Exponential growth is much better than linear growth. By “linear growth,” we mean that doubling the investment period would double the account growth. Exponential is much better than that. As can be seen from the figure, $1 would grow to slightly more than $3 in 15 years at 8% per year. Doubling the investment horizon to 30 years more than triples the growth. Because of exponential growth, it is incredibly important to invest early and to refrain from borrowing whenever possible (unless the borrowing finances the purchase of long-term assets).\nExponential growth also means that the rate of return one earns is extremely important. For example, one might think that earning 8% is twice as good as earning 4%, but that is an understatement. Over a 30 year period, earning 8% is more than three times as good as earning 4%—a dollar would grow to $10 over 30 years at 8% but to less than $3.25 at 4%.\nThe values in Figure 1.1 are .calculated from the following logic. $1 invested for 1 year at 8% grows to $1.08. After another year at 8%, we would have \\[\\begin{align*}\n1.08 + (0.08 \\times 1.08) &= (1.08 \\times 1) + (1.08 \\times 0.08)\\\\ &  = 1.08 \\times 1.08 \\\\ &= 1.08^2\n\\end{align*}\\] Continuing with this logic, we can see that after \\(n\\) years, we would have \\(1.08^n\\). Thus, the number of years is the exponent of the factor 1.08, which is the definition of exponential growth.\nAs remarked above, the exponential growth is due to earning returns on top of returns or “interest on interest.” After two years at 8%, we have\n\\[1.08^2 = 1 + 0.08 + 0.08 + 0.08\\times 0.08.\\] Linear growth would be just adding up the returns \\(0.08 + 0.08\\). Exponential growth is due to the “interest on interest” term \\(0.08 \\times 0.08.\\) This is a small number when there are only two years, but it becomes a very large number over many years. It is responsible for the more than tripling of the investment account (from $3.17 to $10.06) when we double the investment horizon from 15 to 30 years with 8% returns."
   },
   {
     "objectID": "funds.html",
@@ -39,7 +39,7 @@
     "href": "fixed-income.html",
     "title": "5  Fixed Income",
     "section": "",
-    "text": "Text tested by Yh"
+    "text": "A chapter about fixed income"
   },
   {
     "objectID": "portfolios.html#portfolio-statistics",
@@ -82,5 +82,47 @@
     "title": "1  Miracle of Compound Interest",
     "section": "1.1 ",
     "text": "1.1"
+  },
+  {
+    "objectID": "miracle.html#future-values-and-present-values",
+    "href": "miracle.html#future-values-and-present-values",
+    "title": "1  Miracle of Compound Interest",
+    "section": "1.1 Future values and present values",
+    "text": "1.1 Future values and present values\nWe call \\(1.08^n\\) the future value of $1 for an \\(n\\)-year horizon and 8% returns. We can write this more generally as \\((1+r)^n\\), where \\(r\\) is the rate of return (0.08 in our example). The future value \\((1+r)^n\\) is what \\$1 grows to in \\(n\\) years when the rate of return is \\(r\\).\nWe also call $1 the present value of \\((1+r)^n\\). It is how much you need to invest to reach \\((1+r)^n\\) in \\(n\\) years when the rate of return is \\(r\\). More generally, we call \\(x\\) the present value of \\(y\\), and we call \\(y\\) the future value of \\(x\\) when \\(y=x(1+r)^n\\), because \\(x\\) will grow to \\(y\\) in \\(n\\) years when the rate of return is \\(r\\). We compute the future value \\(y\\) from the present value \\(x\\) by mutliplying \\(x\\) by \\((1+r)^n\\), we call \\((1+r)^n\\) the future value factor. Because the relation \\(y=x(1+r)^n\\) is equivalent to\n\\[x = \\frac{y}{(1+r)^n},\\]\nwe can also compute the present value \\(x\\) from the future value \\(y\\) by dividing by \\((1+r)^n\\) or, equivalently, by multiplying by \\(1/(1+r)^n\\). We call \\(1/(1+r)^n\\) the present value factor or discount factor. The operation of multiplying by the discount factor is called discounting, and the operation of multiplying by the future value factor is called compounding.\nThe values in Figure Figure 1.1 are future value factors at 4% and 8%, for various \\(n\\). Figure Figure 1.2 presents the analogous present value factors.\n\n\nCode\nimport plotly.graph_objects as go\nimport numpy as np\n\ntrace1= go.Scatter(\n    x=np.arange(31), \n    y=1.08**(-np.arange(31)),\n    mode=\"lines\",\n    name=\"8%\"\n)\n\ntrace2 = go.Scatter(\n    x=np.arange(31), \n    y=1.04**(-np.arange(31)),\n    mode=\"lines\",\n    name=\"4%\"\n)\n\nfig = go.Figure()\nfig.layout.template = \"plotly_dark\"\nfig.add_trace(trace1)\nfig.add_trace(trace2)\nfig.update_traces(\n    hovertemplate=\"\"\"\n    Year %{x}<br>\n    $%{y:.2f}<extra></extra>\n    \"\"\"\n)\nfig.layout.xaxis[\"title\"] = \"Year\"\nfig.layout.yaxis[\"title\"] = \"Present Value Factor\"\nfig.update_layout(\n    yaxis_tickprefix=\"$\", \n    yaxis_tickformat=\",.0f\",\n    legend=dict(\n        yanchor=\"top\", \n        y=0.99, \n        xanchor=\"right\", \n        x=0.99\n        )\n)\nfig.show()\n\n\n\n\n                                                \nFigure 1.2: Present Value Factors"
+  },
+  {
+    "objectID": "fixed-income.html#basic-concepts",
+    "href": "fixed-income.html#basic-concepts",
+    "title": "5  Fixed Income",
+    "section": "5.1 Basic Concepts",
+    "text": "5.1 Basic Concepts\n\n5.1.1 Spot Rates, Zero-Coupon Rates\n\n\n5.1.2 Forward Rates\n\n\n5.1.3 Yield to Maturity\n\n\n5.1.4 Term Structure of Interest Rate"
+  },
+  {
+    "objectID": "fixed-income.html#price-risk",
+    "href": "fixed-income.html#price-risk",
+    "title": "5  Fixed Income",
+    "section": "5.2 Price Risk",
+    "text": "5.2 Price Risk"
+  },
+  {
+    "objectID": "fixed-income.html#bond-with-embedded-options",
+    "href": "fixed-income.html#bond-with-embedded-options",
+    "title": "5  Fixed Income",
+    "section": "5.3 Bond with Embedded options",
+    "text": "5.3 Bond with Embedded options"
+  },
+  {
+    "objectID": "fixed-income.html#structured-finance-product",
+    "href": "fixed-income.html#structured-finance-product",
+    "title": "5  Fixed Income",
+    "section": "5.4 Structured Finance Product",
+    "text": "5.4 Structured Finance Product"
+  },
+  {
+    "objectID": "miracle.html#multiple-cash-flows",
+    "href": "miracle.html#multiple-cash-flows",
+    "title": "1  Miracle of Compound Interest",
+    "section": "1.2 Multiple cash flows",
+    "text": "1.2 Multiple cash flows"
   }
 ]
