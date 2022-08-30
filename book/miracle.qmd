@@ -110,8 +110,7 @@ fig.update_traces(
 fig.layout.xaxis["title"] = "Year"
 fig.layout.yaxis["title"] = "Present Value Factor"
 fig.update_layout(
-    yaxis_tickprefix="$", 
-    yaxis_tickformat=",.0f",
+    yaxis_tickformat=".0%",
     legend=dict(
         yanchor="top", 
         y=0.99, 
