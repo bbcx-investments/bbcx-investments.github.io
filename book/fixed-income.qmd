@@ -10,6 +10,8 @@ A chapter about fixed income
 
 ### Yield to Maturity
 
+### Term Structure of Interest Rate
+
 ## Price Risk
 
 ## Bond with Embedded options
