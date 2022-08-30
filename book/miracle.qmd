@@ -68,12 +68,12 @@ $$1.08^2 = 1 + 0.08 + 0.08 + 0.08\times 0.08.$$  Linear growth would be just add
 
 We call $1.08^n$ the future value of $1 for an $n$-year horizon and 8\% returns.  We can write this more generally as $(1+r)^n$, where $r$ is the rate of return (0.08 in our example).  The future value $(1+r)^n$ is what \\$1 grows to in $n$ years when the rate of return is $r$.  
 
-We also call $1 the present value of $(1+r)^n$.  It is how much you need to invest to reach $(1+r)^n$ in $n$ years when the rate of return is $r$.  More generally, we call $x$ the *present value* of $y$, and we call $y$ the *future value* of $x$ when $x$ and $y$ are related as 
-$$y=x(1+r)^n,$$ because $x$ will grow to $y$ in $n$ years when the rate of return is $r$.  We compute the future value $y$ from the present value $x$ by mutliplying $x$ by $(1+r)^n$, so we call $(1+r)^n$ the *future value factor*.  Because the relation $y=x(1+r)^n$ is equivalent to 
+We also call $1 the present value of $(1+r)^n$.  It is how much you need to invest to reach $(1+r)^n$ in $n$ years when the rate of return is $r$.  More generally, we call $x$ the [present value]{style="color: Tomato;"} of $y$, and we call $y$ the [future value]{style="color: Tomato;"} of $x$ when $x$ and $y$ are related as 
+$$y=x(1+r)^n,$$ because $x$ will grow to $y$ in $n$ years when the rate of return is $r$.  We compute the future value $y$ from the present value $x$ by mutliplying $x$ by $(1+r)^n$, so we call $(1+r)^n$ the [future value factor]{style="color: Tomato;"}.  Because the relation $y=x(1+r)^n$ is equivalent to 
 $$x = \frac{y}{(1+r)^n},$$
-we can also compute the present value $x$ from the future value $y$ by dividing by $(1+r)^n$ or, equivalently, by multiplying by $1/(1+r)^n$.  Consequently, we call $1/(1+r)^n$ the *present value factor* (or *discount factor*).  The operation of multiplying by the discount factor is called *discounting*, and the operation of multiplying by the future value factor is called *compounding.*  We also call the rate of return $r$ the *discount rate*.
+we can also compute the present value $x$ from the future value $y$ by dividing by $(1+r)^n$ or, equivalently, by multiplying by $1/(1+r)^n$.  Consequently, we call $1/(1+r)^n$ the [present value factor]{style="color: Tomato;"} (or discount factor).  The operation of multiplying by the discount factor is called discounting, and the operation of multiplying by the future value factor is called compounding.  We also call the rate of return $r$ the discount rate.
 
-The values in Figure @fig-miracle-exponential are future value factors at 4% and 8%, for various $n$.  Figure @fig-miracle-pvfactors presents the analogous present value factors.  Present value factors are smaller the further out in the future we look, and they are smaller when the discount rate is larger.
+The values in  @fig-miracle-exponential are future value factors at 4% and 8%, for various $n$.   @fig-miracle-pvfactors presents the analogous present value factors.  Present value factors are smaller the further out in the future we look, and they are smaller when the discount rate is larger.
 
 ```{python}
 #| label: fig-miracle-pvfactors
@@ -126,11 +126,8 @@ fig.show()
 
 
 
-::: {.border}
 
-    Some text here.
-:::
-
+<p style="background-color:DodgerBlue; color:White">A highlighted block of text...</p>
  
  
 
