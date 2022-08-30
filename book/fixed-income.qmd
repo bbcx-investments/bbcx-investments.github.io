@@ -6,6 +6,22 @@ A chapter about fixed income
 
 ### Spot Rates, Zero-Coupon Rates
 
+Try some equations (how to index equation?)
+$$ Q_{N}= \frac{100}{(1+\frac{R_{N}}{2})^N}  $$ 
+
+Try some plots
+
+
+```{python}
+#| label: fig-price-yield
+#| fig-cap: "Bond Price and Yield"
+
+
+
+
+```
+
+
 ### Forward Rates
 
 ### Yield to Maturity
