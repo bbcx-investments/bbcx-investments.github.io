@@ -51,24 +51,24 @@ fig.update_layout(
 fig.show()
 ```
 
-Investments grow exponentially because they earn returns each year not just on the starting balance but also on all prior returns.  Exponential growth is much better than linear growth.  By "linear growth," we mean that doubling the investment period would double the account growth.  Exponential is much better than that.  As can be seen from the figure, $1 would grow to slightly more than $3 in 15 years at 8% per year.  Doubling the investment horizon to 30 years more than triples the growth.    Because of exponential growth, it is incredibly important to invest early and to refrain from borrowing whenever possible (unless the borrowing finances the purchase of long-term assets).
+Investments grow exponentially because they earn returns each year not just on the starting balance but also on all prior returns.  Exponential growth is much better than linear growth.  By "linear growth," we mean that doubling the investment period would double the account growth.  Exponential is much better than that.  As can be seen from the figure, $1 would grow to slightly more than $3 in 15 years at 8% per year, so the growth in value is slightly more than $2.  Doubling the investment horizon to 30 years increases the growth to $9 (from $1 to $10), so the growth in value is more than four times larger when the horizon doubles, with an 8% return.   Because of exponential growth, it is incredibly important to invest early and to refrain from borrowing whenever possible (unless the borrowing finances the purchase of long-term assets).
 
-Exponential growth also means that the rate of return one earns is extremely important.  For example, one might think that earning 8% is twice as good as earning 4%, but that is an understatement.  Over a 30 year period, earning 8% is more than three times as good as earning 4%---a dollar would grow to $10 over 30 years at 8% but to less than $3.25 at 4%.
+Exponential growth also means that the rate of return one earns is extremely important.  For example, one might think that earning 8% is twice as good as earning 4%, but that is an understatement.  Over a 30 year period, earning 8% is more than four times as good as earning 4%---a dollar grows by $9 to $10 over 30 years at 8%, but it grows by less than $2.25 at 4%.
 
-The values in @fig-miracle-exponential are .calculated from the following logic.  $1 invested for 1 year at 8% grows to $1.08.  After another year at 8%, we would have 
+The values in @fig-miracle-exponential are calculated from the following logic.  $1 invested for 1 year at 8% grows to $1.08.  After another year at 8%, we have 
 \begin{align*}
 1.08 + (0.08 \times 1.08) &= (1.08 \times 1) + (1.08 \times 0.08)\\ &  = 1.08 \times 1.08 \\ &= 1.08^2
 \end{align*}
-Continuing with this logic, we can see that after $n$ years, we would have $1.08^n$.  Thus, the number of years is the exponent of the factor 1.08, which is the definition of exponential growth.
+Continuing with this logic, we can see that after $n$ years, we have $1.08^n$.  Thus, the number of years is the exponent of the factor 1.08, which is the definition of exponential growth.
 
 As remarked above, the exponential growth is due to earning returns on top of returns or "interest on interest."  After two years at 8%, we have
-$$1.08^2 = 1 + 0.08 + 0.08 + 0.08\times 0.08.$$  Linear growth would be just adding up the returns $0.08 + 0.08$.  Exponential growth is due to the "interest on interest" term $0.08 \times 0.08.$  This is a small number when there are only two years, but it becomes a very large number over many years.  It is responsible for the investment account tripling (from $3.17 to $10.06) when the investment horizon is doubled (from 15 to 30 years) with 8% returns.
+$$1.08^2 = 1 + 0.08 + 0.08 + (0.08\times 0.08).$$  Linear growth would be just adding up the returns $0.08 + 0.08$.  Exponential growth is due to the "interest on interest" term $0.08 \times 0.08.$  This is a small number when there are only two years, but these terms add up to a very large number over many years.  It is responsible for the growth in the investment account quadrupling (from $2.17 to $9.06) when the investment horizon is doubled (from 15 to 30 years) with 8% returns.
 
 ## Future values and present values
 
 We call $1.08^n$ the future value of $1 for an $n$-year horizon and 8\% returns.  We can write this more generally as $(1+r)^n$, where $r$ is the rate of return (0.08 in our example).  The future value $(1+r)^n$ is what \\$1 grows to in $n$ years when the rate of return is $r$.  
 
-We also call $1 the present value of $(1+r)^n$.  It is how much you need to invest to reach $(1+r)^n$ in $n$ years when the rate of return is $r$.  More generally, we call $x$ the [present value]{style="color: Tomato;"} of $y$, and we call $y$ the [future value]{style="color: Tomato;"} of $x$ when $x$ and $y$ are related as 
+We also call $1 the present value of $(1+r)^n$.  It is how much you need to invest to reach $(1+r)^n$ in $n$ years when the rate of return is $r$.  More generally, we call [$x$ the present value]{style="color: Tomato;"} of $y$, and we call [$y$ the future value]{style="color: Tomato;"} of $x$ when $x$ and $y$ are related as 
 $$y=x(1+r)^n,$$ because $x$ will grow to $y$ in $n$ years when the rate of return is $r$.  We compute the future value $y$ from the present value $x$ by mutliplying $x$ by $(1+r)^n$, so we call $(1+r)^n$ the [future value factor]{style="color: Tomato;"}.  Because the relation $y=x(1+r)^n$ is equivalent to 
 $$x = \frac{y}{(1+r)^n},$$
 we can also compute the present value $x$ from the future value $y$ by dividing by $(1+r)^n$ or, equivalently, by multiplying by $1/(1+r)^n$.  Consequently, we call $1/(1+r)^n$ the [present value factor]{style="color: Tomato;"} (or discount factor).  The operation of multiplying by the discount factor is called discounting, and the operation of multiplying by the future value factor is called compounding.  We also call the rate of return $r$ the discount rate.
@@ -126,14 +126,39 @@ fig.show()
 
 
 
+::: callout-note
+## A title for a note
+This is a highlighted block of text.
+:::
 
-<p style="background-color:DodgerBlue; color:White">A highlighted block of text...</p>
- 
- 
+::: callout-tip
+## A title for a tip
+Here's another.
+:::
+
+::: callout-important
+## A title for something important
+Something important goes here
+:::
+
+::: callout-warning
+## A title for a warning
+
+Some warning goes here
+:::
+
+::: callout
+## A simple title
+
+Anything could go here
+::: 
+
+``` p
+# this is a displayed code block
+
+import numpy as np
+x = np.arange(4)
+```
 
 
-
-
-
-  
 
