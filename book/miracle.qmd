@@ -62,17 +62,18 @@ The values in @fig-miracle-exponential are .calculated from the following logic.
 Continuing with this logic, we can see that after $n$ years, we would have $1.08^n$.  Thus, the number of years is the exponent of the factor 1.08, which is the definition of exponential growth.
 
 As remarked above, the exponential growth is due to earning returns on top of returns or "interest on interest."  After two years at 8%, we have
-$$1.08^2 = 1 + 0.08 + 0.08 + 0.08\times 0.08.$$  Linear growth would be just adding up the returns $0.08 + 0.08$.  Exponential growth is due to the "interest on interest" term $0.08 \times 0.08.$  This is a small number when there are only two years, but it becomes a very large number over many years.  It is responsible for the more than tripling of the investment account (from $3.17 to $10.06) when we double the investment horizon from 15 to 30 years with 8% returns.
+$$1.08^2 = 1 + 0.08 + 0.08 + 0.08\times 0.08.$$  Linear growth would be just adding up the returns $0.08 + 0.08$.  Exponential growth is due to the "interest on interest" term $0.08 \times 0.08.$  This is a small number when there are only two years, but it becomes a very large number over many years.  It is responsible for the investment account tripling (from $3.17 to $10.06) when the investment horizon is doubled (from 15 to 30 years) with 8% returns.
 
 ## Future values and present values
 
 We call $1.08^n$ the future value of $1 for an $n$-year horizon and 8\% returns.  We can write this more generally as $(1+r)^n$, where $r$ is the rate of return (0.08 in our example).  The future value $(1+r)^n$ is what \\$1 grows to in $n$ years when the rate of return is $r$.  
 
-We also call $1 the present value of $(1+r)^n$.  It is how much you need to invest to reach $(1+r)^n$ in $n$ years when the rate of return is $r$.  More generally, we call $x$ the present value of $y$, and we call $y$ the future value of $x$ when $y=x(1+r)^n$, because $x$ will grow to $y$ in $n$ years when the rate of return is $r$.  We compute the future value $y$ from the present value $x$ by mutliplying $x$ by $(1+r)^n$, we call $(1+r)^n$ the *future value factor*.  Because the relation $y=x(1+r)^n$ is equivalent to 
+We also call $1 the present value of $(1+r)^n$.  It is how much you need to invest to reach $(1+r)^n$ in $n$ years when the rate of return is $r$.  More generally, we call $x$ the *present value* of $y$, and we call $y$ the *future value* of $x$ when $x$ and $y$ are related as 
+$$y=x(1+r)^n,$$ because $x$ will grow to $y$ in $n$ years when the rate of return is $r$.  We compute the future value $y$ from the present value $x$ by mutliplying $x$ by $(1+r)^n$, so we call $(1+r)^n$ the *future value factor*.  Because the relation $y=x(1+r)^n$ is equivalent to 
 $$x = \frac{y}{(1+r)^n},$$
-we can also compute the present value $x$ from the future value $y$ by dividing by $(1+r)^n$ or, equivalently, by multiplying by $1/(1+r)^n$.  We call $1/(1+r)^n$ the *present value factor* or *discount factor*.  The operation of multiplying by the discount factor is called *discounting*, and the operation of multiplying by the future value factor is called *compounding.*
+we can also compute the present value $x$ from the future value $y$ by dividing by $(1+r)^n$ or, equivalently, by multiplying by $1/(1+r)^n$.  Consequently, we call $1/(1+r)^n$ the *present value factor* (or *discount factor*).  The operation of multiplying by the discount factor is called *discounting*, and the operation of multiplying by the future value factor is called *compounding.*  We also call the rate of return $r$ the *discount rate*.
 
-The values in Figure @fig-miracle-exponential are future value factors at 4% and 8%, for various $n$.  Figure @fig-miracle-pvfactors presents the analogous present value factors.
+The values in Figure @fig-miracle-exponential are future value factors at 4% and 8%, for various $n$.  Figure @fig-miracle-pvfactors presents the analogous present value factors.  Present value factors are smaller the further out in the future we look, and they are smaller when the discount rate is larger.
 
 ```{python}
 #| label: fig-miracle-pvfactors
@@ -122,6 +123,13 @@ fig.show()
 ```
 
 ## Multiple cash flows
+
+
+
+::: {.border}
+
+    Some text here.
+:::
 
  
  
