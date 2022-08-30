@@ -20,6 +20,10 @@ format:
   html:
     theme: flatly
     code-fold: true
+    comments: 
+      hypothesis:
+        theme: clean
+        openSidebar: false
   pdf:
     documentclass: scrreprt
     keep-tex: true
