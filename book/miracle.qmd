@@ -27,7 +27,7 @@ trace2 = go.Scatter(
 )
 
 fig = go.Figure()
-fig.layout.template = "plotly_dark"
+fig.layout.template = "none"
 fig.add_trace(trace1)
 fig.add_trace(trace2)
 fig.update_traces(
@@ -98,7 +98,7 @@ trace2 = go.Scatter(
 )
 
 fig = go.Figure()
-fig.layout.template = "plotly_dark"
+fig.layout.template = "none"
 fig.add_trace(trace1)
 fig.add_trace(trace2)
 fig.update_traces(
@@ -132,8 +132,16 @@ This is a highlighted block of text.
 :::
 
 ::: callout-tip
-## A title for a tip
-Here's another.
+## FV and PV factors in python
+
+The numpy arange function makes it easy to create sequences (arrays) of future value and present value factors.  
+``` p
+import numpy as np
+n = 30
+r = 0.08
+fvFactors = (1+r)**np.arange(1, n+1)
+pvFactors = (1+r)**np.arange(-1, -n-1, -1)
+```
 :::
 
 ::: callout-important
