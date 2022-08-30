@@ -18,8 +18,12 @@ bibliography: references.bib
 
 format:
   html:
-    theme: cosmo
+    theme: flatly
     code-fold: true
+    comments: 
+      hypothesis:
+        theme: clean
+        openSidebar: false
   pdf:
     documentclass: scrreprt
     keep-tex: true

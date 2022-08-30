@@ -69,7 +69,7 @@ plt.show()
 <!-- <iframe src="http://bbcx-investments.com/portfolios/diversification" title="Diversification" width="1500" height="1500"></iframe> -->
 
 
-## *Some math with animation*{auto-animate=true}
+## *Some math with animation Let's learn calculus*{auto-animate=true}
 
 ```{=tex}
 \begin{align*}
