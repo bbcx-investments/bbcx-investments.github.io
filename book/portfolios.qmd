@@ -112,86 +112,50 @@ Porfolios are combinations of underlying assets.  In this chapter, we will explo
 
 ## Portfolio Statistics
 
-### Expected Return
-The expected return of a portfolio is simply the weighted sum of the expected returns of each asset in the portfolio, where the weights are fraction of capital invested in each asset:
-$$ E[r_p] = \sum_{i=1}^{N} w_i E[r_i] $$ {#eq-port-expret-N}
-Unless otherwise stated, we will assume the portfolio is fully invested; that is, that $\sum_i w_i = 1$.  We will occasionally use the notation $E(r_i)=\mu_i$.
+We will calculate portfolio statistics as a function of the portfolio statistics of underlying assets (which themselves may be portfolios).  Assume that the distribution of each asset's return is known.  The return of asset $i$ has an expected value $E[r_i]$.  Assuming that the asset is risky, there is also some dispersion in potential realizations of the return above or below the mean.  The variance $\text{var}[r_i]$ is the expected squared deviations of the possible deviations from the asset's expected value: $E\big[(r_i-E[r_i])^2\big]$.  The standard deviation $\text{sd}[r_p]$ is simply the square root of the portfolio variance.  
 
 
-### Variance and Standard Deviation
-To measure the variability of the portfolio return, we will alternatively work with the portfolio variance or the portfolio standard deviation.  The portfolio variance of an $N$-asset portfolio is:
-$$ \text{var}[r_p] = \sum_{i=1}^{N} \sum_{j=1}^{N} w_i w_j \text{cov}[r_i,r_j]\,,$$ {#eq-port-var-N}
-where $\text{cov}[r_i,r_j]$ is the covariance between assets $i$ and $j$. Of course, the portfolio standard deviation is simply the square root of the portfolio variance. We will occasionally use the notation $\sigma^2_p$ to represent portfolio variance, $\sigma_{i,j}$ for the covariance between the returns of assets $i$ and $j$, and $\sigma_p$ for the standard deviation of portfolio $p$'s return.
+When measuring comovement across assets, we will use either the covariance, an absolute measure of comovement, or correlation, which is scaled by the product of each asset's standard deviations.  Recall that the covariance of two assets measures the expected value of the product of each asset's return deviation from its expected value:
+$$ \text{cov}[r_i,r_j] = E\big[(r_i-E[r_i])(r_j-E[r_j])\big]\\,. $$ {#eq-cov-defn}
+If return $i$ and $j$ both tend to have return realizations either above or below their expected values in the same underlying states of the world, then their covariance will be positive and the returns are said to comove.  Alternatively, if one asset tends to have realizations above its expected value in states of the world when the other asset has return realizations below its expected value, their covariance will be negative.  Comovement is also commonly measured using correlation:
+$$ \text{corr}[r_i,r_j] = \rho_{ij} = \frac{\text{cov}[r_i,r_j]}{\text{sd}[r_i]\cdot\text{sd}[r_j]}\,.$$ {#eq-corr-defn}
+Correlations range between -1 (perfectly negatively correlated) and 1 (perfectly correlated).  Covariances, on the other hand, can take any values.
 
-Some insights into the portfolio variance can be obtained by considering each term in matrix view.  The nine terms in the three asset case are:
-<table border="1">
-  <!-- Row 1 -->
-  <tr> 
-    <td style="text-align:center; background-color:gray">$w_1 w_1 \text{cov}[r_1,r_1]$</td>
-    <td style="text-align:center">$w_1 w_2 \text{cov}[r_1,r_2]$</td>
-    <td style="text-align:center">$w_1 w_3 \text{cov}[r_1,r_3]$</td>
-  </tr>
-  <!-- Row 2 -->
-  <tr>
-    <td style="text-align:center">$w_2 w_1 \text{cov}[r_2,r_1]$</td>
-    <td style="text-align:center; background-color:gray">$w_2 w_2 \text{cov}[r_2,r_2]$</td>
-    <td style="text-align:center">$w_2 w_3 \text{cov}[r_2,r_3]$</td>
-  </tr>
-  <!-- Row 3 -->
-  <tr>
-    <td style="text-align:center">$w_3 w_1 \text{cov}[r_3,r_1]$</td>
-    <td style="text-align:center">$w_3 w_2 \text{cov}[r_3,r_2]$</td>
-    <td style="text-align:center; background-color:gray">$w_3 w_3 \text{cov}[r_3,r_3]$</td>
-  </tr>
-</table>
-The shaded cells along the diagonal contain covariances of an asset return with itself.  These are variance terms, so the diagonal can be rewritten as:
-<table border="1">
-  <!-- Row 1 -->
-  <tr> 
-    <td style="text-align:center; background-color:gray">$w_1^2 \text{var}[r_1]$</td>
-    <td style="text-align:center">$w_1 w_2 \text{cov}[r_1,r_2]$</td>
-    <td style="text-align:center">$w_1 w_3 \text{cov}[r_1,r_3]$</td>
-  </tr>
-  <!-- Row 2 -->
-  <tr>
-    <td style="text-align:center">$w_2 w_1 \text{cov}[r_2,r_1]$</td>
-    <td style="text-align:center; background-color:gray">$w_2^2 \text{var}[r_2]$</td>
-    <td style="text-align:center">$w_2 w_3 \text{cov}[r_2,r_3]$</td>
-  </tr>
-  <!-- Row 3 -->
-  <tr>
-    <td style="text-align:center">$w_3 w_1 \text{cov}[r_3,r_1]$</td>
-    <td style="text-align:center">$w_3 w_2 \text{cov}[r_3,r_2]$</td>
-    <td style="text-align:center; background-color:gray">$w_3^2 \text{var}[r_3]$</td>
-  </tr>
-</table>
-Further simplication is possible by looking at same-colored pairs of elements in the matrix below.  
-<table border="1">
-  <!-- Row 1 -->
-  <tr> 
-    <td style="text-align:center; background-color:gray">$w_1^2 \text{var}[r_1]$</td>
-    <td style="text-align:center; background-color:lightblue">$w_1 w_2 \text{cov}[r_1,r_2]$</td>
-    <td style="text-align:center; background-color:lightcoral">$w_1 w_3 \text{cov}[r_1,r_3]$</td>
-  </tr>
-  <!-- Row 2 -->
-  <tr>
-    <td style="text-align:center; background-color:lightblue">$w_2 w_1 \text{cov}[r_2,r_1]$</td>
-    <td style="text-align:center; background-color:gray">$w_2^2 \text{var}[r_2]$</td>
-    <td style="text-align:center; background-color:#d9f2d9">$w_2 w_3 \text{cov}[r_2,r_3]$</td>
-  </tr>
-  <!-- Row 3 -->
-  <tr>
-    <td style="text-align:center; background-color:lightcoral">$w_3 w_1 \text{cov}[r_3,r_1]$</td>
-    <td style="text-align:center; background-color:#d9f2d9">$w_3 w_2 \text{cov}[r_3,r_2]$</td>
-    <td style="text-align:center; background-color:gray">$w_3^2 \text{var}[r_3]$</td>
-  </tr>
-</table>
-The two terms in each pair have the same value because $\text{cov}[r_i,r_j]=\text{cov}[r_j,r_i]$.  Thus, the portfolio variance can be rewritten as:
-$$ \text{var}[r_p] = \sum_{i=1}^{N} w_i^2 \text{var}[r_i]+ 2 \sum_{i=1}^{N} \sum_{j>i} w_i w_j \text{cov}[r_i,r_j]\,.$$
+### Two-Asset Portfolios
+The return of a two-asset portfolio is the weighted sum of the returns of the underlying assets:
+$$ r_p = w_1 r_1 + w_2 r_2\,, $$ {#eq-2asset-return}
+where $w_1$ and $w_2$ are the portfolio weights.  Unless otherwise stated, we will assume that portfolios are fully invested; that is, that the sum of the weights equal 1.  What is the expected return and riskiness of the portfolio of the two assets?  The expected return is simply the weighted average of each assets expected return:
+$$ E[r_p] = w_1 E[r_1] + w_2 E[r_2]\,. $$ {#eq-2asset-expret}
+The riskiness of the portfolio return can be measured by its variance, which measures the expected (squared) magnitude of deviations in the portfolio return from its expected value.  Specifically, the portfolio variance is:
+$$
+\begin{align}
+\text{var}[r_p] =& E\big[(r_p-E[r_p])^2\big] \\
+=& E\big[( w_1 r_1 + w_2 r_2-w_1 E[r_1] - w_2 E[r_2])^2\big] \\
+=& E\big[( w_1 (r_1 - E[r_1])+ w_2 (r_2-E[r_2]))^2\big] \\
+=& E\big[(w_1^2(r_1 - E[r_1]))^2 + w_2^2(r_2-E[r_2])^2 + 2 w_1 w_2 (r_1 - E[r_1])(r_2-E[r_2])\big] \\
+=& w_1^2 \text{var}[r_1] + w_2^2\text{var}[r_2]  + 2 w_1 w_2 \text{cov}[r_1,r_2]\,.
+\end{align}
+$$ {#eq-2asset-variance}
 
-#### Calculating Porfolio Variance
+### Portfolios of N Assets
 
-Calculating each term and adding them up can quickly become tedious.  Given a covariance matrix $V$:
+The return of a portfolio combining $N$ assets is simply the weighted average of the underlying asset returns:
+$$ r_p = \sum_{i=1}^{N} w_i r_i\,, $$ {#eq-n-asset-return}
+where the weights $\{w_i\}_{i=1}^N$ are the fractions of capital invested in each asset.  The expected return of the portfolio is  the weighted sum of the expected returns of each asset:
+$$ E[r_p] = \sum_{i=1}^{N} w_i E[r_i]\,.$$ {#eq-n-asset-expret}
+The riskiness of the portfolio, as measured by the portfolio variance, is:
+$$
+\begin{align}
+\text{var}[r_p] =& E\bigg[(r_p-E[r_p])^2\bigg] \\
+=& E\bigg[\left( \sum_{i=1}^{N} w_i r_i - \sum_{i=1}^{N} w_i E[r_i]\right)^2\bigg] \\
+=& E\bigg[\left( \sum_{i=1}^{N} w_i (r_i - E[r_i]) \right)^2\bigg] \\
+=& E\bigg[\sum_{i=1}^{N} w_i^2 (r_i - E[r_i])^2 + 2 \sum_{i=1}^{N} \sum_{j>i} w_i w_j (r_i - E[r_i])(r_j-E[r_j])\bigg] \\
+=& \sum_{i=1}^{N} w_i^2 \text{var}[r_i] + 2 \sum_{i=1}^{N} \sum_{j>i} w_i w_j \text{cov}[r_i,r_j]\,.
+\end{align}
+$$ {#eq-n-asset-variance}
+
+
+Calculating each term in the last line of @eq-n-asset-variance and adding them up can quickly become tedious.  Given a covariance matrix $V$:
 \begin{equation*}
     V = 
     \begin{bmatrix}
@@ -201,354 +165,51 @@ Calculating each term and adding them up can quickly become tedious.  Given a co
         \text{cov}[r_N,r_1] & \text{cov}[r_N,r_2] & \dots  & \text{var}[r_N] \\
     \end{bmatrix}
 \end{equation*}
-and a vector of weights 
+and a vector of portfolio weights 
 $$w'=[w_1\, w_2\,...\,w_N]\,,$$
 we can calculate the portfolio variance as the matrix product
-$$ \text{var}[r_p] = w'Vw \,.$$
+$$ \text{var}[r_p] = w'Vw \,.$$ {#eq-mmult-portvar}
 
-In python, this can be accomplished using the w' @ V @ w.  In Excel, the command is =MMULT(TRANSPOSE(w),MMULT(V,w)).
+::: callout-tip
+## Calculating Portfolio Statistics in Python^[In Excel, given an array of expected returns and portfolio weights, the portfolio expected return can be calculated using the SUMPRODUCT command.  The equivalent Excel command to calculate the portfolio variance  is MMULT(TRANSPOSE(w),MMULT(V,w)) where w is a column of portfolio weights and V is the covariance matrix.]
 
-Alternatively, we can use the bordered covariance method.  ADD EXCEL SNIPPET HERE?
+Given a vector of weights, calculating the portfolio variance in python is easy using matrix multiplication in numpy.  Note the inputs below are decimal notation.  Multiply the expected returns, standard deviations, and correlations by 100 to get percents!  
+``` p
+import numpy
+# Expected returns
+mns = np.array([0.10, 0.05, 0.07])
+# Standard deviations
+sds = np.array([0.20, 0.12, 0.15])
+# Correlations
+corr12 = 0.3
+corr13 = 0.3
+corr23 = 0.3
+# Covariances
+cov12 = corr12 * sds[0] * sds[1]
+cov13 = corr13 * sds[0] * sds[2]
+cov23 = corr23 * sds[1] * sds[2]
+# Covariance matrix
+cov = np.array([[sds[0]**2,  cov12,     cov13], \
+                [cov12,      sds[1]**2, cov23], \
+                [cov13,      cov23,     sds[2]**2]])
+# Portfolio weights
+wgts = np.array([0.25, 0.5, 0.25])
 
-### Covariance and Correlation
+#Portfolio expected return
+port_expret = wgts.T @ mns
 
-When measuring comovement across assets, we will use either the covariance, an absolute measure of comovement, or correlation, which is scaled by the product of each asset's standard deviations:
-$$ \text{corr}[r_i,r_j] = \rho_{ij} = \frac{\text{cov}[r_i,r_j]}{\text{sd}[r_i]\cdot\text{sd}[r_j]}\,.$$
-Correlations range between -1 (perfectly negatively correlated) and 1 (perfectly correlated).  Covariances, on the other hand, can take any values.
+#Portfolio variance
+port_var = wgts.T @ cov @ wgts
 
-
-## Preferences
-
-In order to make statements about "optimal" portfolios, we need to describe the preferences of investors in some way.  A standard way to do so is to use mean-variance utility.  Simply put, we will assume that investors like higher expected returns and dislike portfolios with riskier returns.  The amount of extra expected return needed for an investor to take on additional risk is governed by the investor's risk aversion, which we will denote $A$.
-
-Mathematically, mean-variance utility for a given portfolio return $r_p$ is:
-$$ U(r_p)=E[r_p] - 0.5\cdot A \cdot \text{var}[r_p]\,.$$
-The utility of a risky investment is simply its expected return minus a penalty for variance.  More risk averse investors have higher values for $A$, meaning that they put greater penalties on variance.  @fig-indifference0 shows indifference curves for three different levels of risk aversion, but the same level of utility.  A higher expected return is required to reach the utility for a given level of risk when risk aversion is higher, and the extra expected return increases when risk increases.
-```{python}
-#| label: fig-indifference0
-#| fig-cap: Indifference curves with different levels of risk aversion
-import numpy as np
-import pandas as pd
-from scipy.stats import norm
-import plotly.express as px
-
-# Parameters
-raver1 = 2
-raver2 = 5
-raver3 = 10
-u1 = 0.10
-u2 = 0.10
-u3 = 0.10
-string1='Risk Aversion='+str(raver1)
-string2='Risk Aversion='+str(raver2)
-string3='Risk Aversion='+str(raver3)
-
-# Generate data
-sd = np.arange(0,0.405,0.005)
-U1 = u1 + 0.5*raver1* (sd**2)
-U2 = u2 + 0.5*raver2* (sd**2) 
-U3 = u3 + 0.5*raver3* (sd**2)
-df = pd.DataFrame(data={'Standard Deviation': sd, string1: U1, string2: U2,string3: U3})
-df = df*100
-
-# Plot data
-fig = px.line(df,x='Standard Deviation', y=[string1, string2, string3])
-fig.update_layout(title='',
-                   xaxis_title='Standard Deviation',
-                   yaxis_title='Expected Return',
-    legend_title_text='',)
-fig.update_yaxes(tickformat=".0f", ticksuffix="%")
-fig.update_xaxes(tickformat=".0f", ticksuffix="%")
-fig.show()
+#Portfolio standard deviation
+port_sd  = np.sqrt(port_var)
 ```
+:::
+::: callout-note
+## Calculating Portfolio Statistics in Excel
+SHOULD WE DO THIS??
+:::
 
-Investors are indifferent between portfolios that generate the same utility.  @fig-indifference1 shows three different levels of utility, holding risk aversion fixed.  A utility of, for example, 10% means that the investor would be indifferent between the risky investment and a risk-free investment with a return of 10%.  That is, any portfolio located on the green indifference curve in @fig-indifference1 provides the same level of utility to this investor.  Higher utility is achieved with either a higher expected return or lower risk or both.
-```{python}
-#| label: fig-indifference1
-#| fig-cap: Indifference curves with same level of risk aversion
-import numpy as np
-import pandas as pd
-from scipy.stats import norm
-import plotly.express as px
-# import plotly.io as pio
-# pio.renderers.default='notebook'
-
-# Parameters
-raver = 10
-u1 = 0.05
-u2 = 0.075
-u3 = 0.10
-string1='Utility='+str(np.round(u1*100,1))+'%'
-string2='Utility='+str(np.round(u2*100,1))+'%'
-string3='Utility='+str(np.round(u3*100,1))+'%'
-
-# Generate data
-sd = np.arange(0,0.405,0.005)
-U1 = u1 + 0.5*raver* (sd**2)
-U2 = u2 + 0.5*raver* (sd**2) 
-U3 = u3 + 0.5*raver* (sd**2)
-df = pd.DataFrame(data={'Standard Deviation': sd, string1: U1, string2: U2,string3: U3})
-df = df*100
-
-# Plot data
-fig = px.line(df,x='Standard Deviation', y=[string1, string2, string3])
-fig.update_layout(title='',
-                   xaxis_title='Standard Deviation',
-                   yaxis_title='Expected Return',
-    legend_title_text='',)
-fig.update_yaxes(tickformat=".0f", ticksuffix="%")
-fig.update_xaxes(tickformat=".0f", ticksuffix="%")
-fig.show()
-```
-
-## Allocating Capital Between a Risky Asset and a Risk-free Asset
-
-The decision to invest any money in a risky asset is perhaps the most fundamental decision an investor makes.  We will assume the existence of a risk-free asset.  In the real world, this would be an asset like a Treasury bill or a money-market mutual fund.  To fix ideas, we will consider a broad stock market index fund as the risky asset.
-
-How much capital should be invested in each of these two assets?  For a given portfolio weight in the risky asset $w_{\text{risky}}$, we first need to determine the portfolio's expected return and standard deviation.  Considering all possible risky portfolio weights traces out the set of possible investments, which is called the capital allocation line in expected return/standard deviation space.  Finally, we choose the risky portfolio weight that maximizes the investor's utility.
-
-From the two-asset case of @eq-port-var-N, we see that the variance of portfolio $r_p$ with non-negative $w_{\text{risky}}$ invested in the risky asset and $1-w_{\text{risky}}$ invested in the risk-free rate is:
-$$
-\begin{align}
-    \text{var}[r_p] =& w_{\text{risky}}^2 \text{var}[r_{\text{risky}}]+ (1-w_{\text{risky}})^2 \text{var}[r_f]+ 2 w_{\text{risky}}(1-w_{\text{risky}}) \text{cov}[r_{\text{risky}},r_f] \\ 
-                    =& w_{\text{risky}}^2 \text{var}[r_{\text{risky}}]+ (1-w_{\text{risky}})^2 \cdot 0 + 2 w_{\text{risky}}(1-w_{\text{risky}}) \cdot 0 \\
-                     =&w_{\text{risky}}^2 \text{var}[r_{\text{risky}}]\,, 
-\end{align} 
-$$ {#eq-test}
-where we have used the facts that the risk-free asset's return is risk-free ($\text{var}[r_f]=0$) and does not covary with the risky asset return.  Thus, the portfolio's standard deviation is:
-$$ \text{sd}[r_p] = w_{\text{risky}}\cdot \text{sd}[r_{\text{risky}}]\,.$$ {#eq-sd-rf-risky}
-
-The expected return of the portfolio is:
-$$ E[r_p] = w_{\text{risky}} E[r_{\text{risky}}]+ (1-w_{\text{risky}}) r_f \,.$$ {#eq-expret-rf-risky}
-Solving @eq-sd-rf-risky for $w_{\text{risky}}$, substituting into @eq-expret-rf-risky, and rearranging yields the relationship between expected return and standard deviation along the capital allocation line:
-$$ E[r_p] = r_f + \bigg[ \frac{E[r_{\text{risky}}]-r_f}{\text{sd}[r_{\text{risky}}] }\bigg] \cdot \text{sd}[r_p] \,.$$ {#eq-cal}
-The capital allocation line for a risky asset is a set of portfolios combining the risky asset with the risk-free asset.  In expected return/volatility space, the $y$-intercept is the risk-free rate of return and the slope of the line is the ratio of the expected excess return of the risky asset to its standard deviation.  This ratio is called the Sharpe ratio, after William Sharpe.  We discuss it in more detail below in @sec-multiple-cals.  
-
-When $w_{\text{risky}}>100\%$, the portfolio is borrowing at the risk-free rate (that is, issuing bonds at the same rate as, say, US Treasuries).  This is probably not a reasonable assumption.  For most investors, $r^{\text{borrow}}>r^{\text{saving}}$.  In this case, the capital allocation line is kinked at the risky-asset:
-\begin{equation}
-\text{E}[r_p] = \begin{cases}
- r_f^{\text{saving}} + \bigg[ \frac{E[r_{\text{risky}}]-r_f^{\text{saving}}}{\text{sd}[r_{\text{risky}}] }\bigg]\cdot \text{sd}[r_p] & \text{if } \text{sd}[r_p] \le \text{sd}[r_{\text{risky}}] \\
-  r_f^{\text{borrow}} + \bigg[ \frac{E[r_{\text{risky}}]-r_f^{\text{borrow}}}{\text{sd}[r_{\text{risky}}] }\bigg]\cdot \text{sd}[r_p] & \text{if } \text{sd}[r_p] > \text{sd}[r_{\text{risky}}] \\
-\end{cases}
-\end{equation}
-@fig-cal shows the set of possible portfolios along the capital allocation line.
-
-```{python}
-#| label: fig-cal
-#| fig-cap: Capital Allocation Line
-import numpy as np
-import pandas as pd
-import plotly.graph_objects as go
-
-# Parameter values (in percent)
-mn = 8
-sd = 20
-s = 2
-extra = 3    #incremental borrowing rate
-
-def data(mn, sd, s, b):
-    grid = np.linspace(0, 2, 201)
-    mns = [(s + w * (mn - s) if w <= 1 else b + w * (mn - b)) for w in grid]
-    sds = [w * sd for w in grid]
-    return grid, mns, sds
-
-def figtbl(mn, sd, s, extra):
-    mn /= 100
-    sd /= 100
-    b = s+extra
-    s /= 100
-    b /= 100
-    grid, mns, sds = data(mn, sd, s, b)
-    string = "wealth in market = %{text:.0f}%<extra></extra>"
-    trace1 = go.Scatter(
-        x=sds, y=mns, mode="lines", text=100 * grid, hovertemplate=string, name='CAL'
-    )
-    string = "wealth in market = 100%<extra></extra>"
-    trace2 = go.Scatter(
-        x=[sd], y=[mn], mode="markers", hovertemplate=string, marker=dict(size=15), name='Market'
-    )
-    string = "wealth in market = 0%<extra></extra>"
-    trace3 = go.Scatter(
-        x=[0], y=[s], mode="markers", hovertemplate=string, marker=dict(size=15), name='Risk-free (Saving)'
-    )  
-    string = "Borrowing rate<extra></extra>"
-    trace4 = go.Scatter(
-        x=[0], y=[b], mode="markers", hovertemplate=string, marker=dict(size=15), name='Risk-free (Borrowing)'
-    )       
-    fig = go.Figure()
-    fig.add_trace(trace1)
-    fig.add_trace(trace2)
-    fig.add_trace(trace3)
-    fig.add_trace(trace4)
-    fig.layout.xaxis["title"] = "Standard Deviation"
-    fig.layout.yaxis["title"] = "Expected Return"
-    fig.update_yaxes(tickformat=".0%")
-    fig.update_xaxes(tickformat=".0%")
-    fig.show()
-figtbl(mn, sd, s, extra)
-```
-
-The choice of where to locate along the CAL is the choice of how much to invest in a risky portfolio $w_{\text{risky}}$.  A mean-variance investor chooses $w_{\text{risky}}$ to solve:
-$$ \underset{w_{\text{risky}}}\max E[r_p] - 0.5\cdot A \cdot \text{var}[r_p]\,. $$  {#eq-cal-optimization}
-
-Plugging in the expected return (@eq-expret-rf-risky) and standard deviation ( @eq-sd-rf-risky) into @eq-cal-optimization and considering the first-order condition with respect to $w_{\text{risky}}$ provides the optimal weight to invest in the risky asset:
-<!-- $$ w^*_{\text{risky}} = \frac{E[r_{\text{risky}}-r_f]}{A \cdot \text{var}_{\text{risky}}}\,.$$ {#eq-cal-opt-wgt} -->
-<!-- ```{tex} -->
-\begin{equation}
-w^*_{\text{risky}} = \begin{cases}
-    \frac{E[r_{\text{risky}}-r_f^{\text{saving}}]}{A \cdot \text{var}_{\text{risky}}} & \text{if } A > \frac{E[r_{\text{risky}}-r_f^{\text{saving}}]}{\text{var}_{\text{risky}}} \\
-    100\% & \text{if } \frac{E[r_{\text{risky}}-r_f^{\text{borrow}}]}{ \text{var}_{\text{risky}}} \le A \le \frac{E[r_{\text{risky}}-r_f^{\text{saving}}]}{\text{var}_{\text{risky}}} \\
-    \frac{E[r_{\text{risky}}-r_f^{\text{borrow}}]}{A \cdot \text{var}_{\text{risky}}} & \text{if } A < \frac{E[r_{\text{risky}}-r_f^{\text{borrow}}]}{ \text{var}_{\text{risky}}} \,. \\
-\end{cases}
-\end{equation}
-<!-- ``` -->
-
-Thus, an investor's location on the CAL depends on risk aversion.  Investors with different risk aversion will choose different combinations of the risky asset and the risk-free asset.  This is demonstrated in @fig-cal-preferences.
-
-```{python}
-#| label: fig-cal-preferences
-#| fig-cap: Preferences and the Capital Allocation Line
-import numpy as np
-import pandas as pd
-import plotly.graph_objects as go
-
-# Parameter values (in percent)
-mn = 8
-sd = 20
-s = 2
-extra = 3    #incremental borrowing rate
-raver1 = 3
-raver2 = 0.5
-
-def cal(mn, sd, s, b):
-    grid = np.linspace(0, 2, 201)
-    mns = [(s + w * (mn - s) if w <= 1 else b + w * (mn - b)) for w in grid]
-    sds = [w * sd for w in grid]
-    return grid, mns, sds
-
-def opt_utility(mn, sd, s, b, A):
-    # return/sd inputs must be in decimal
-    wgt = (mn - s) / (A * (sd**2))
-    expret= wgt*mn + (1-wgt)*s
-    sdret = wgt*sd 
-    if wgt > 1:
-        wgt = (mn - b) / (A * (sd**2))
-        wgt = max(wgt,1)
-        expret= wgt*mn + (1-wgt)*b 
-        sdret = wgt*sd   
-    u = expret - 0.5*A*sdret**2
-    return u, wgt
-
-def figtbl(mn, sd, s, extra, raver1, raver2):
-    mn /= 100
-    sd /= 100
-    b = s+extra
-    s /= 100
-    b /= 100
-
-    # CAL Plot Info
-    grid, mns, sds = cal(mn, sd, s, b)
-    string = "wealth in market = %{text:.0f}%<extra></extra>"
-    trace1 = go.Scatter(
-        x=sds, y=mns, mode="lines", text=100 * grid, hovertemplate=string, name='CAL'
-    )
-    string = "wealth in market = 100%<extra></extra>"
-    trace2 = go.Scatter(
-        x=[sd], y=[mn], mode="markers", hovertemplate=string, marker=dict(size=15), name='Market'
-    )
-    string = "wealth in market = 0%<extra></extra>"
-    trace3 = go.Scatter(
-        x=[0], y=[s], mode="markers", hovertemplate=string, marker=dict(size=15), name='Risk-free (Saving)'
-    )  
-    string = "Borrowing rate<extra></extra>"
-    trace4 = go.Scatter(
-        x=[0], y=[b], mode="markers", hovertemplate=string, marker=dict(size=15), name='Risk-free (Borrowing)'
-    )       
-
-    # Utility plot info
-    u1, wgt1 = opt_utility(mn,sd,s,b, raver1)
-    u2, wgt2 = opt_utility(mn,sd,s,b, raver2)
-    string1='Risk Aversion='+str(raver1)
-    string2='Risk Aversion='+str(raver2)
-    eret1 = [u1 + 0.5*raver1* (sd**2) for sd in sds]
-    eret2 = [u2 + 0.5*raver2* (sd**2) for sd in sds] 
-    # df = pd.DataFrame(data={'Standard Deviation': sds, string1: U1, string2: U2})
-    string = "indifference curve for <br>utility obtained from <br>optimal wealth in market = "+str(np.round(100*wgt1,0))+"%<extra></extra>"
-    trace5 = go.Scatter(
-        x=sds, y=eret1, mode="lines", hovertemplate=string, name=string1
-    )  
-    string = "indifference curve for <br>utility obtained from <br>optimal wealth in market = "+str(np.round(100*wgt2,0))+"%<extra></extra>"
-    trace6 = go.Scatter(
-        x=sds, y=eret2, mode="lines", hovertemplate=string, name=string2
-    )  
-
-
-    fig = go.Figure()
-    fig.add_trace(trace1)
-    fig.add_trace(trace2)
-    fig.add_trace(trace3)
-    fig.add_trace(trace4)
-    fig.add_trace(trace5)
-    fig.add_trace(trace6)
-    fig.layout.xaxis["title"] = "Standard Deviation"
-    fig.layout.yaxis["title"] = "Expected Return"    
-    fig.update_yaxes(tickformat=".0%")
-    fig.update_xaxes(tickformat=".0%")
-    fig.show()
-figtbl(mn, sd, s, extra, raver1, raver2)
-```
-
-Another way to see how risk aversion affects capital allocation is to plot the risky asset weight as a function of risk aversion, as in @fig-cal-wgt-by-riskaver.  Higher risk aversion translates into lower holdings of the risky asset.  This effect is monotonic except for a region of risk aversion where the optimal weight is 100% in the market portfolio.  This is due to the kink in the capital allocation line resulting from the difference in risk-free borrowing and savings rates.
-
-```{python}
-#| label: fig-cal-wgt-by-riskaver
-#| fig-cap: Risky asset weight as function of risk aversion
-import numpy as np
-import pandas as pd
-import plotly.graph_objects as go
-
-# Parameter values (in percent)
-mn = 8
-sd = 20
-s = 2
-extra = 3   #incremental borrowing rate
-
-def opt_wgt(mn, sd, s, b, A):
-    # return/sd inputs must be in decimal
-    wgt = (mn - s) / (A * (sd**2))
-    expret= wgt*mn + (1-wgt)*s
-    sdret = wgt*sd 
-    if wgt > 1:
-        wgt = (mn - b) / (A * (sd**2))
-        wgt = max(wgt,1)
-        expret= wgt*mn + (1-wgt)*b 
-        sdret = wgt*sd   
-    u = expret - 0.5*A*sdret**2
-    return wgt
-
-def figtbl(mn, sd, s, extra):
-    mn /= 100
-    sd /= 100
-    b = s+extra
-    s /= 100
-    b /= 100
-
-    ravers = np.arange(0.2,5.1,0.1)
-    wgts = [opt_wgt(mn,sd,s,b,A) for A in ravers]
-    
-    string = "Risk Aversion: %{x:.2f} <br>Risky Asset Weight: %{y:.1%}<extra></extra>"
-    trace1 = go.Scatter(
-        x=ravers, y=wgts, mode="lines", hovertemplate=string, marker=dict(size=15), name='Optimal Weight'
-    )       
-    fig = go.Figure()
-    fig.add_trace(trace1)
-    fig.layout.xaxis["title"] = "Risk Aversion"
-    fig.layout.yaxis["title"] = "Weight in Risky Asset"
-    fig.update_yaxes(tickformat=".1%")
-    fig.update_xaxes(tickformat=".2")
-    fig.show()
-figtbl(mn, sd, s, extra)
-```
 
 ## Diversification and Portfolios of Two Risky Assets {#sec-two-risky}
 
@@ -561,8 +222,6 @@ $$  \text{var}[r_p] = w_S^2 \text{var}[r_S]+ (1-w_S)^2 \text{var}[r_B]+ 2 w_S (1
 Note that we have substituted out the covariance using the definition of correlation.  We plot the possible combinations of the stock fund and bond fund in @fig-two-asset for three distinct correlation values.  The correlation of -5% is the realized correlation between stocks and bonds from 1980 to 2020.  During that period though, the correlation varied dramatically, switching from negative to positive.  From 1980 to 2000, the correlation was -63%, and it was 26% from 2000 to 2020.  These differences can change the investment opportunity set substantially.  With a correlation of -63%, the bond portfolio is dominated by a portfolio that invests just under 80% of wealth in bonds and the other 20% in stocks.  This portfolio generates a higher expected return for the same level of risk.
 
 @fig-two-asset shows the benefits of lower correlations across assets in the portfolio.  For lower levels of correlation between stocks and bonds, it is possible to achieve a lower portfolio standard deviation for the same level of expected return.  (Note: we are holding the stock and bond expected returns and standard deviations constant in the figure.  In practice, these can also vary over time.)
-
-HAVE A PLOT WITH JUST A SINGLE CURVE?
 
 ```{python}
 #| label: fig-two-asset
@@ -678,8 +337,106 @@ figtbl(mn_stock,mn_bond,sd_stock,sd_bond,corr0, corr1, corr2,"Stock","Bond")
 ```
 
 
-## Allocating Capital Between Two Risky Assets and a Risk-free Asset {#sec-multiple-cals}
+## Diversification and N-Asset Portfolios {#sec-n-risky}
 
+ADD GOING FROM 2 TO 3
+
+ADD DIVERSIFICATION CURVE 
+
+
+## GMV {#sec-gmv}
+
+## Short-selling {#sec-short-frontier}
+
+## Allocating Capital Between a Risky Asset and a Risk-free Asset
+
+The decision to invest any money in a risky asset is perhaps the most fundamental decision an investor makes.  We will assume the existence of a risk-free asset.  In the real world, this would be an asset like a Treasury bill or a money-market mutual fund.  To fix ideas, we will consider a broad stock market index fund as the risky asset.
+
+How much capital should be invested in each of these two assets?  For a given portfolio weight in the risky asset $w_{\text{risky}}$, we first need to determine the portfolio's expected return and standard deviation.  Considering all possible risky portfolio weights traces out the set of possible investments, which is called the capital allocation line in expected return/standard deviation space.  Finally, we choose the risky portfolio weight that maximizes the investor's utility.
+
+From @eq-2asset-variance, we see that the variance of portfolio $r_p$ with non-negative $w_{\text{risky}}$ invested in the risky asset and $1-w_{\text{risky}}$ invested in the risk-free rate is:
+\begin{align}
+    \text{var}[r_p] =& w_{\text{risky}}^2 \text{var}[r_{\text{risky}}]+ (1-w_{\text{risky}})^2 \text{var}[r_f]+ 2 w_{\text{risky}}(1-w_{\text{risky}}) \text{cov}[r_{\text{risky}},r_f] \\ 
+                    =& w_{\text{risky}}^2 \text{var}[r_{\text{risky}}]+ (1-w_{\text{risky}})^2 \cdot 0 + 2 w_{\text{risky}}(1-w_{\text{risky}}) \cdot 0 \\
+                     =&w_{\text{risky}}^2 \text{var}[r_{\text{risky}}]\,, 
+\end{align} 
+where we have used the facts that the risk-free asset's return is risk-free ($\text{var}[r_f]=0$) and does not covary with the risky asset return.  Thus, the portfolio's standard deviation is:
+$$ \text{sd}[r_p] = w_{\text{risky}}\cdot \text{sd}[r_{\text{risky}}]\,.$$ {#eq-sd-rf-risky}
+
+The expected return of the portfolio is:
+$$ E[r_p] = w_{\text{risky}} E[r_{\text{risky}}]+ (1-w_{\text{risky}}) r_f \,.$$ {#eq-expret-rf-risky}
+Solving @eq-sd-rf-risky for $w_{\text{risky}}$, substituting into @eq-expret-rf-risky, and rearranging yields the relationship between expected return and standard deviation along the capital allocation line:
+$$ E[r_p] = r_f + \bigg[ \frac{E[r_{\text{risky}}]-r_f}{\text{sd}[r_{\text{risky}}] }\bigg] \cdot \text{sd}[r_p] \,.$$ {#eq-cal}
+The capital allocation line for a risky asset is a set of portfolios combining the risky asset with the risk-free asset.  In expected return/volatility space, the $y$-intercept is the risk-free rate of return and the slope of the line is the ratio of the expected excess return of the risky asset to its standard deviation.  This ratio is called the Sharpe ratio, after William Sharpe.  We discuss it in more detail below in @sec-multiple-cals.  
+
+When $w_{\text{risky}}>100\%$, the portfolio is borrowing at the risk-free rate (that is, issuing bonds at the same rate as, say, US Treasuries).  This is probably not a reasonable assumption.  For most investors, $r^{\text{borrow}}>r^{\text{saving}}$.  In this case, the capital allocation line is kinked at the risky-asset:
+\begin{equation}
+\text{E}[r_p] = \begin{cases}
+ r_f^{\text{saving}} + \bigg[ \frac{E[r_{\text{risky}}]-r_f^{\text{saving}}}{\text{sd}[r_{\text{risky}}] }\bigg]\cdot \text{sd}[r_p] & \text{if } \text{sd}[r_p] \le \text{sd}[r_{\text{risky}}] \\
+  r_f^{\text{borrow}} + \bigg[ \frac{E[r_{\text{risky}}]-r_f^{\text{borrow}}}{\text{sd}[r_{\text{risky}}] }\bigg]\cdot \text{sd}[r_p] & \text{if } \text{sd}[r_p] > \text{sd}[r_{\text{risky}}] \\
+\end{cases}
+\end{equation}
+@fig-cal shows the set of possible portfolios along the capital allocation line.
+
+```{python}
+#| label: fig-cal
+#| fig-cap: Capital Allocation Line
+import numpy as np
+import pandas as pd
+import plotly.graph_objects as go
+
+# Parameter values (in percent)
+mn = 8
+sd = 20
+s = 2
+extra = 3    #incremental borrowing rate
+
+def data(mn, sd, s, b):
+    grid = np.linspace(0, 2, 201)
+    mns = [(s + w * (mn - s) if w <= 1 else b + w * (mn - b)) for w in grid]
+    sds = [w * sd for w in grid]
+    return grid, mns, sds
+
+def figtbl(mn, sd, s, extra):
+    mn /= 100
+    sd /= 100
+    b = s+extra
+    s /= 100
+    b /= 100
+    grid, mns, sds = data(mn, sd, s, b)
+    string = "wealth in market = %{text:.0f}%<extra></extra>"
+    trace1 = go.Scatter(
+        x=sds, y=mns, mode="lines", text=100 * grid, hovertemplate=string, name='CAL'
+    )
+    string = "wealth in market = 100%<extra></extra>"
+    trace2 = go.Scatter(
+        x=[sd], y=[mn], mode="markers", hovertemplate=string, marker=dict(size=15), name='Market'
+    )
+    string = "wealth in market = 0%<extra></extra>"
+    trace3 = go.Scatter(
+        x=[0], y=[s], mode="markers", hovertemplate=string, marker=dict(size=15), name='Risk-free (Saving)'
+    )  
+    string = "Borrowing rate<extra></extra>"
+    trace4 = go.Scatter(
+        x=[0], y=[b], mode="markers", hovertemplate=string, marker=dict(size=15), name='Risk-free (Borrowing)'
+    )       
+    fig = go.Figure()
+    fig.add_trace(trace1)
+    fig.add_trace(trace2)
+    fig.add_trace(trace3)
+    fig.add_trace(trace4)
+    fig.layout.xaxis["title"] = "Standard Deviation"
+    fig.layout.yaxis["title"] = "Expected Return"
+    fig.update_yaxes(tickformat=".0%")
+    fig.update_xaxes(tickformat=".0%")
+    fig.show()
+figtbl(mn, sd, s, extra)
+```
+
+
+
+
+## Allocating Capital Between Two Risky Assets and a Risk-free Asset {#sec-multiple-cals}
 
 We've now seen how to combine two risky assets as well as a risky asset with a risk-free asset.  What if we can invest in two risky assets *and* the risk-free asset?  What is the best way to form a portfolio in this case?  We'll proceed with our stock and bond fund example (assuming a -5% correlation).
 
@@ -1258,6 +1015,259 @@ figtbl(mn_stock,mn_bond,sd_stock,sd_bond,corr,rs,extra,"Stock","Bond")
 
 
 
+## Preferences
+
+In order to make statements about "optimal" portfolios, we need to describe the preferences of investors in some way.  A standard way to do so is to use mean-variance utility.  Simply put, we will assume that investors like higher expected returns and dislike portfolios with riskier returns.  The amount of extra expected return needed for an investor to take on additional risk is governed by the investor's risk aversion, which we will denote $A$.
+
+Mathematically, mean-variance utility for a given portfolio return $r_p$ is:
+$$ U(r_p)=E[r_p] - 0.5\cdot A \cdot \text{var}[r_p]\,.$$
+The utility of a risky investment is simply its expected return minus a penalty for variance.  More risk averse investors have higher values for $A$, meaning that they put greater penalties on variance.  @fig-indifference0 shows indifference curves for three different levels of risk aversion, but the same level of utility.  A higher expected return is required to reach the utility for a given level of risk when risk aversion is higher, and the extra expected return increases when risk increases.
+```{python}
+#| label: fig-indifference0
+#| fig-cap: Indifference curves with different levels of risk aversion
+import numpy as np
+import pandas as pd
+from scipy.stats import norm
+import plotly.express as px
+
+# Parameters
+raver1 = 2
+raver2 = 5
+raver3 = 10
+u1 = 0.10
+u2 = 0.10
+u3 = 0.10
+string1='Risk Aversion='+str(raver1)
+string2='Risk Aversion='+str(raver2)
+string3='Risk Aversion='+str(raver3)
+
+# Generate data
+sd = np.arange(0,0.405,0.005)
+U1 = u1 + 0.5*raver1* (sd**2)
+U2 = u2 + 0.5*raver2* (sd**2) 
+U3 = u3 + 0.5*raver3* (sd**2)
+df = pd.DataFrame(data={'Standard Deviation': sd, string1: U1, string2: U2,string3: U3})
+df = df*100
+
+# Plot data
+fig = px.line(df,x='Standard Deviation', y=[string1, string2, string3])
+fig.update_layout(title='',
+                   xaxis_title='Standard Deviation',
+                   yaxis_title='Expected Return',
+    legend_title_text='',)
+fig.update_yaxes(tickformat=".0f", ticksuffix="%")
+fig.update_xaxes(tickformat=".0f", ticksuffix="%")
+fig.show()
+```
+
+Investors are indifferent between portfolios that generate the same utility.  @fig-indifference1 shows three different levels of utility, holding risk aversion fixed.  A utility of, for example, 10% means that the investor would be indifferent between the risky investment and a risk-free investment with a return of 10%.  That is, any portfolio located on the green indifference curve in @fig-indifference1 provides the same level of utility to this investor.  Higher utility is achieved with either a higher expected return or lower risk or both.
+```{python}
+#| label: fig-indifference1
+#| fig-cap: Indifference curves with same level of risk aversion
+import numpy as np
+import pandas as pd
+from scipy.stats import norm
+import plotly.express as px
+# import plotly.io as pio
+# pio.renderers.default='notebook'
+
+# Parameters
+raver = 10
+u1 = 0.05
+u2 = 0.075
+u3 = 0.10
+string1='Utility='+str(np.round(u1*100,1))+'%'
+string2='Utility='+str(np.round(u2*100,1))+'%'
+string3='Utility='+str(np.round(u3*100,1))+'%'
+
+# Generate data
+sd = np.arange(0,0.405,0.005)
+U1 = u1 + 0.5*raver* (sd**2)
+U2 = u2 + 0.5*raver* (sd**2) 
+U3 = u3 + 0.5*raver* (sd**2)
+df = pd.DataFrame(data={'Standard Deviation': sd, string1: U1, string2: U2,string3: U3})
+df = df*100
+
+# Plot data
+fig = px.line(df,x='Standard Deviation', y=[string1, string2, string3])
+fig.update_layout(title='',
+                   xaxis_title='Standard Deviation',
+                   yaxis_title='Expected Return',
+    legend_title_text='',)
+fig.update_yaxes(tickformat=".0f", ticksuffix="%")
+fig.update_xaxes(tickformat=".0f", ticksuffix="%")
+fig.show()
+```
+
+## Preferences and a Single Risky Asset CAL
+
+The choice of where to locate along the CAL is the choice of how much to invest in a risky portfolio $w_{\text{risky}}$.  A mean-variance investor chooses $w_{\text{risky}}$ to solve:
+$$ \underset{w_{\text{risky}}}\max E[r_p] - 0.5\cdot A \cdot \text{var}[r_p]\,. $$  {#eq-cal-optimization}
+
+Plugging in the expected return (@eq-expret-rf-risky) and standard deviation ( @eq-sd-rf-risky) into @eq-cal-optimization and considering the first-order condition with respect to $w_{\text{risky}}$ provides the optimal weight to invest in the risky asset:
+<!-- $$ w^*_{\text{risky}} = \frac{E[r_{\text{risky}}-r_f]}{A \cdot \text{var}_{\text{risky}}}\,.$$ {#eq-cal-opt-wgt} -->
+<!-- ```{tex} -->
+\begin{equation}
+w^*_{\text{risky}} = \begin{cases}
+    \frac{E[r_{\text{risky}}-r_f^{\text{saving}}]}{A \cdot \text{var}_{\text{risky}}} & \text{if } A > \frac{E[r_{\text{risky}}-r_f^{\text{saving}}]}{\text{var}_{\text{risky}}} \\
+    100\% & \text{if } \frac{E[r_{\text{risky}}-r_f^{\text{borrow}}]}{ \text{var}_{\text{risky}}} \le A \le \frac{E[r_{\text{risky}}-r_f^{\text{saving}}]}{\text{var}_{\text{risky}}} \\
+    \frac{E[r_{\text{risky}}-r_f^{\text{borrow}}]}{A \cdot \text{var}_{\text{risky}}} & \text{if } A < \frac{E[r_{\text{risky}}-r_f^{\text{borrow}}]}{ \text{var}_{\text{risky}}} \,. \\
+\end{cases}
+\end{equation}
+<!-- ``` -->
+
+Thus, an investor's location on the CAL depends on risk aversion.  Investors with different risk aversion will choose different combinations of the risky asset and the risk-free asset.  This is demonstrated in @fig-cal-preferences.
+
+```{python}
+#| label: fig-cal-preferences
+#| fig-cap: Preferences and the Capital Allocation Line
+import numpy as np
+import pandas as pd
+import plotly.graph_objects as go
+
+# Parameter values (in percent)
+mn = 8
+sd = 20
+s = 2
+extra = 3    #incremental borrowing rate
+raver1 = 3
+raver2 = 0.5
+
+def cal(mn, sd, s, b):
+    grid = np.linspace(0, 2, 201)
+    mns = [(s + w * (mn - s) if w <= 1 else b + w * (mn - b)) for w in grid]
+    sds = [w * sd for w in grid]
+    return grid, mns, sds
+
+def opt_utility(mn, sd, s, b, A):
+    # return/sd inputs must be in decimal
+    wgt = (mn - s) / (A * (sd**2))
+    expret= wgt*mn + (1-wgt)*s
+    sdret = wgt*sd 
+    if wgt > 1:
+        wgt = (mn - b) / (A * (sd**2))
+        wgt = max(wgt,1)
+        expret= wgt*mn + (1-wgt)*b 
+        sdret = wgt*sd   
+    u = expret - 0.5*A*sdret**2
+    return u, wgt
+
+def figtbl(mn, sd, s, extra, raver1, raver2):
+    mn /= 100
+    sd /= 100
+    b = s+extra
+    s /= 100
+    b /= 100
+
+    # CAL Plot Info
+    grid, mns, sds = cal(mn, sd, s, b)
+    string = "wealth in market = %{text:.0f}%<extra></extra>"
+    trace1 = go.Scatter(
+        x=sds, y=mns, mode="lines", text=100 * grid, hovertemplate=string, name='CAL'
+    )
+    string = "wealth in market = 100%<extra></extra>"
+    trace2 = go.Scatter(
+        x=[sd], y=[mn], mode="markers", hovertemplate=string, marker=dict(size=15), name='Market'
+    )
+    string = "wealth in market = 0%<extra></extra>"
+    trace3 = go.Scatter(
+        x=[0], y=[s], mode="markers", hovertemplate=string, marker=dict(size=15), name='Risk-free (Saving)'
+    )  
+    string = "Borrowing rate<extra></extra>"
+    trace4 = go.Scatter(
+        x=[0], y=[b], mode="markers", hovertemplate=string, marker=dict(size=15), name='Risk-free (Borrowing)'
+    )       
+
+    # Utility plot info
+    u1, wgt1 = opt_utility(mn,sd,s,b, raver1)
+    u2, wgt2 = opt_utility(mn,sd,s,b, raver2)
+    string1='Risk Aversion='+str(raver1)
+    string2='Risk Aversion='+str(raver2)
+    eret1 = [u1 + 0.5*raver1* (sd**2) for sd in sds]
+    eret2 = [u2 + 0.5*raver2* (sd**2) for sd in sds] 
+    # df = pd.DataFrame(data={'Standard Deviation': sds, string1: U1, string2: U2})
+    string = "indifference curve for <br>utility obtained from <br>optimal wealth in market = "+str(np.round(100*wgt1,0))+"%<extra></extra>"
+    trace5 = go.Scatter(
+        x=sds, y=eret1, mode="lines", hovertemplate=string, name=string1
+    )  
+    string = "indifference curve for <br>utility obtained from <br>optimal wealth in market = "+str(np.round(100*wgt2,0))+"%<extra></extra>"
+    trace6 = go.Scatter(
+        x=sds, y=eret2, mode="lines", hovertemplate=string, name=string2
+    )  
+
+
+    fig = go.Figure()
+    fig.add_trace(trace1)
+    fig.add_trace(trace2)
+    fig.add_trace(trace3)
+    fig.add_trace(trace4)
+    fig.add_trace(trace5)
+    fig.add_trace(trace6)
+    fig.layout.xaxis["title"] = "Standard Deviation"
+    fig.layout.yaxis["title"] = "Expected Return"    
+    fig.update_yaxes(tickformat=".0%")
+    fig.update_xaxes(tickformat=".0%")
+    fig.show()
+figtbl(mn, sd, s, extra, raver1, raver2)
+```
+
+Another way to see how risk aversion affects capital allocation is to plot the risky asset weight as a function of risk aversion, as in @fig-cal-wgt-by-riskaver.  Higher risk aversion translates into lower holdings of the risky asset.  This effect is monotonic except for a region of risk aversion where the optimal weight is 100% in the market portfolio.  This is due to the kink in the capital allocation line resulting from the difference in risk-free borrowing and savings rates.
+
+```{python}
+#| label: fig-cal-wgt-by-riskaver
+#| fig-cap: Risky asset weight as function of risk aversion
+import numpy as np
+import pandas as pd
+import plotly.graph_objects as go
+
+# Parameter values (in percent)
+mn = 8
+sd = 20
+s = 2
+extra = 3   #incremental borrowing rate
+
+def opt_wgt(mn, sd, s, b, A):
+    # return/sd inputs must be in decimal
+    wgt = (mn - s) / (A * (sd**2))
+    expret= wgt*mn + (1-wgt)*s
+    sdret = wgt*sd 
+    if wgt > 1:
+        wgt = (mn - b) / (A * (sd**2))
+        wgt = max(wgt,1)
+        expret= wgt*mn + (1-wgt)*b 
+        sdret = wgt*sd   
+    u = expret - 0.5*A*sdret**2
+    return wgt
+
+def figtbl(mn, sd, s, extra):
+    mn /= 100
+    sd /= 100
+    b = s+extra
+    s /= 100
+    b /= 100
+
+    ravers = np.arange(0.2,5.1,0.1)
+    wgts = [opt_wgt(mn,sd,s,b,A) for A in ravers]
+    
+    string = "Risk Aversion: %{x:.2f} <br>Risky Asset Weight: %{y:.1%}<extra></extra>"
+    trace1 = go.Scatter(
+        x=ravers, y=wgts, mode="lines", hovertemplate=string, marker=dict(size=15), name='Optimal Weight'
+    )       
+    fig = go.Figure()
+    fig.add_trace(trace1)
+    fig.layout.xaxis["title"] = "Risk Aversion"
+    fig.layout.yaxis["title"] = "Weight in Risky Asset"
+    fig.update_yaxes(tickformat=".1%")
+    fig.update_xaxes(tickformat=".2")
+    fig.show()
+figtbl(mn, sd, s, extra)
+```
+
+
+## Preferences and the Tangency CAL
+
+
+## Preferences and Capital Allocation with Differential Borrowing & Lending Rates
 
 
 ```{python}
