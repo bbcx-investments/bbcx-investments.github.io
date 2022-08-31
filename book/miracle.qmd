@@ -193,7 +193,7 @@ Now consider an annuity of $y$ per year for $n$ years.  The present value is
 $$\frac{y}{1+r} + \frac{y}{(1+r)^2}  + \cdots + \frac{y}{(1+r)^n}$$
 This annuity is the difference of two perpetuities: a perpetuity that starts in a year and another perpetuity that starts in $n+1$ years.  So, the present value is the difference of two present values: the present value $y/r$ of the first perpetuity minus the present value of the second perpetuity.  The present value of the second perpetuity as of year $n$ (one year before it begins) is $y/r$ and that value discounted to today is 
 $$\frac{1}{(1+r)^n} \times \frac{y}{r}.$$
-Hence, the value of the annuity is
+Hence, the present value of the annuity is
 $$\frac{y}{r} - \frac{1}{(1+r)^n} \times \frac{y}{r} = \frac{y}{r} \left(1-\frac{1}{(1+r)^n}\right).$$
 
 ::: callout-tip
