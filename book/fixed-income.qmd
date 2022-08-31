@@ -13,12 +13,16 @@ Try some plots
 
 
 ```{python}
+
+from pandas_datareader import DataReader as pdr
+import matplotlib.pyplot as plt
 #| label: fig-price-yield
 #| fig-cap: "Bond Price and Yield"
 
-
-
-
+treasury30=pdr('DGS30', 'fred',start=1980)
+plt.plot(treasury30)
+plt.title('my first plot!')
+plt.show()
 ```
 
 
