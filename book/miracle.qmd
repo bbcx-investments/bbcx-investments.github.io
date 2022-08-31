@@ -62,16 +62,18 @@ The values in @fig-miracle-exponential are calculated from the following logic. 
 Continuing with this logic, we can see that after $n$ years, we have $1.08^n$.  Thus, the number of years is the exponent of the factor 1.08, which is the definition of exponential growth.
 
 As remarked above, the exponential growth is due to earning returns on top of returns or "interest on interest."  After two years at 8%, we have
-$$1.08^2 = 1 + 0.08 + 0.08 + (0.08\times 0.08).$$  Linear growth would be just adding up the returns $0.08 + 0.08$.  Exponential growth is due to the "interest on interest" term $0.08 \times 0.08.$  This is a small number when there are only two years, but these terms add up to a very large number over many years.  It is responsible for the growth in the investment account quadrupling (from $2.17 to $9.06) when the investment horizon is doubled (from 15 to 30 years) with 8% returns.
+$$1.08^2 = 1 + 0.08 + 0.08 + (0.08\times 0.08).$$  Linear growth would be just adding up the returns $0.08 + 0.08$.  Exponential growth is due to the "interest on interest" term $0.08 \times 0.08.$  This is a small number when there are only two years, but these terms add up to a very large number over many years.  They are responsible for the growth in the investment account quadrupling (from $2.17 to $9.06) when the investment horizon is doubled (from 15 to 30 years) with 8% returns.
 
 ## Future values and present values
 
 We call $1.08^n$ the future value of $1 for an $n$-year horizon and 8\% returns.  We can write this more generally as $(1+r)^n$, where $r$ is the rate of return (0.08 in our example).  The future value $(1+r)^n$ is what \\$1 grows to in $n$ years when the rate of return is $r$.  
 
-We also call $1 the present value of $(1+r)^n$.  It is how much you need to invest to reach $(1+r)^n$ in $n$ years when the rate of return is $r$.  More generally, we call [$x$ the present value]{style="color: Tomato;"} of $y$, and we call [$y$ the future value]{style="color: Tomato;"} of $x$ when $x$ and $y$ are related as 
+We also call $1 the present value of $(1+r)^n$.  It is how much you need to invest to reach $(1+r)^n$ in $n$ years when the rate of return is $r$.  More generally, we call [$x$ the present value of $y$]{style="color: Tomato;"}, and we call [$y$ the future value of $x$]{style="color: Tomato;"} when $x$ and $y$ are related as 
 $$y=x(1+r)^n,$$ because $x$ will grow to $y$ in $n$ years when the rate of return is $r$.  We compute the future value $y$ from the present value $x$ by mutliplying $x$ by $(1+r)^n$, so we call $(1+r)^n$ the [future value factor]{style="color: Tomato;"}.  Because the relation $y=x(1+r)^n$ is equivalent to 
 $$x = \frac{y}{(1+r)^n},$$
-we can also compute the present value $x$ from the future value $y$ by dividing by $(1+r)^n$ or, equivalently, by multiplying by $1/(1+r)^n$.  Consequently, we call $1/(1+r)^n$ the [present value factor]{style="color: Tomato;"} (or discount factor).  The operation of multiplying by the discount factor is called discounting, and the operation of multiplying by the future value factor is called compounding.  We also call the rate of return $r$ the discount rate.
+we can also compute the present value $x$ from the future value $y$ by dividing by $(1+r)^n$ or, equivalently, by multiplying by $1/(1+r)^n$.  Consequently, we call $1/(1+r)^n$ the [present value factor]{style="color: Tomato;"} (or discount factor).  The operation of multiplying by the present value factor is called discounting, and the operation of multiplying by the future value factor is called compounding.  We also call the rate of return $r$ the discount rate.
+
+To see why we should multiply the present value $x$ by the future value factor to obtain the future value, consider a concrete example, say $x=10$.  We can think of an investment account starting with $x=10$ as the sum of 10 hypothetical separate accounts, each starting with $1.  We saw earlier that $1 will grow to $(1+r)^n$ dollars in $n$ years when the rate of return is $r$.  At the end of the $n$ years, we can hypothetically consolidate the separate accounts, having a total of 10 times $(1+r)^n$; in other words, $x(1+r)^n$.
 
 The values in  @fig-miracle-exponential are future value factors at 4% and 8%, for various $n$.   @fig-miracle-pvfactors presents the analogous present value factors.  Present value factors are smaller the further out in the future we look, and they are smaller when the discount rate is larger.
 
@@ -121,19 +123,10 @@ fig.update_layout(
 fig.show()
 ```
 
-## Multiple cash flows
-
-
-
-::: callout-note
-## A title for a note
-This is a highlighted block of text.
-:::
-
 ::: callout-tip
-## FV and PV factors in python
+## Python tip
 
-The numpy arange function makes it easy to create sequences (arrays) of future value and present value factors.  
+The numpy arange function is very useful for creating sequences (arrays) of future value and present value factors.  
 ``` p
 import numpy as np
 n = 30
@@ -142,6 +135,61 @@ fvFactors = (1+r)**np.arange(1, n+1)
 pvFactors = (1+r)**np.arange(-1, -n-1, -1)
 ```
 :::
+
+## Multiple cash flows
+
+Suppose we have some money $x_0$ to invest today, will have a possibly different amount $x_1$ to invest in one year, an amount $x_2$ to invest two years from now and so on for $m$ years, and we have an investment horizon of $n\ge m$ years.  How much will we have in $n$ years if we earn a return $r$ each year?  In other words, what is the total future value of the sequence of investments $x_0, \ldots, x_m$?
+
+We can answer this question by treating our investment account as $m+1$ hypothetical separate accounts.  In the first account, we deposit $x_0$ today and it grows for $n$ years to $x_0(1+r)^n$.  In the second account, we deposit $x_1$ in one year and it grows for $n-1$ years to $x_1(1+r)^{n-1}$.  We can continue this through year $m$, and at the end of $n$ years, we can hypothetically consolidate the various accounts, producing a total future value of
+$$x_0(1+r)^n + x_1(1+r)^{n-1} + x_2(1+r)^{n-2} + \cdots + 
+x_m(1+r)^{n-m}.$$
+
+
+::: callout-tip
+## Python tip
+
+We can calculate the total future value by summing the product of two arrays as in the following example.  
+``` p
+import numpy as np
+n = 10
+m = 4
+r = 0.08
+x0, x1, x2, x3, x4 = 100, 120, 130, 140, 150
+x = np.array([x0, x1, x2, x3, x4])
+fvFactors = (1+r)**np.arange(n, n-m-1, -1)
+total = np.sum(x*fvFactors)
+```
+:::
+
+Now, we ask the opposite question.  Suppose we want to spend some amount $y_1$ in one year, a possibly different amount $y_2$ in two years, and continuing for $m$ years.  If we want to finance all of these expenditures from a current investment account, how much do we need to have in the account now, assuming we always earn a return $r$ on the remaining balance?  The answer is that we need to have the total present value of the future values $y_1, y_2, \ldots, y_m$; that is, we need
+$$\frac{y_1}{1+r} + \frac{y_2}{(1+r)^2} + \cdots + \frac{y_m}{(1+r)^m}.$$
+
+::: callout-tip
+## Python tip
+
+Like a future value, we can compute the total present value by summing the product of two arrays, as in the following example.  
+``` p
+import numpy as np
+m = 4
+r = 0.08
+y1, y2, y3, y4 = 100, 120, 130, 140, 150
+y = np.array([y1, y2, y3, y4])
+pvFactors = (1+r)**np.arange(-1, -m-1, -1)
+total = np.sum(y*pvFactors)
+```
+:::
+
+An important application of the present value calculation is the valuation of investment projects by companies.  A typical project involves cash outlays in early years, to purchase plant and equipment and to build up working capital, and then an inflow of cash in later years when revenues outstrip expenses.  The essential question is whether the positive later cash flows are large enough to offset the negative early cash flows.  To make cash flows at different dates comparable, we compute their present values.  We add up the present values of the various cash flows, with early ones being negative and later ones being positive and ask whether the sum is positive.  This sum of positive and negative present values is called the 
+[net present value]{style="color: Tomato;"}.  Projects with positive net present values are good projects.
+
+## Retirement planning
+
+
+::: callout-note
+## A title for a note
+This is a highlighted block of text.
+:::
+
 
 ::: callout-important
 ## A title for something important
