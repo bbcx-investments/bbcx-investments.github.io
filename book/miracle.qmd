@@ -124,9 +124,8 @@ fig.show()
 ```
 
 ::: callout-tip
-## Python tip
 
-The numpy arange function is very useful for creating sequences (arrays) of future value and present value factors.  
+The numpy arange function is useful for creating sequences (arrays) of future value and present value factors.  
 ``` p
 import numpy as np
 n = 30
@@ -146,7 +145,6 @@ x_m(1+r)^{n-m}.$$
 
 
 ::: callout-tip
-## Python tip
 
 We can calculate the total future value by summing the product of two arrays as in the following example.  
 ``` p
@@ -165,7 +163,6 @@ Now, we ask the opposite question.  Suppose we want to spend some amount $y_1$ i
 $$\frac{y_1}{1+r} + \frac{y_2}{(1+r)^2} + \cdots + \frac{y_m}{(1+r)^m}.$$
 
 ::: callout-tip
-## Python tip
 
 Like a future value, we can compute the total present value by summing the product of two arrays, as in the following example.  
 ``` p
@@ -179,8 +176,61 @@ total = np.sum(y*pvFactors)
 ```
 :::
 
-An important application of the present value calculation is the valuation of investment projects by companies.  A typical project involves cash outlays in early years, to purchase plant and equipment and to build up working capital, and then an inflow of cash in later years when revenues outstrip expenses.  The essential question is whether the positive later cash flows are large enough to offset the negative early cash flows.  To make cash flows at different dates comparable, we compute their present values.  We add up the present values of the various cash flows, with early ones being negative and later ones being positive and ask whether the sum is positive.  This sum of positive and negative present values is called the 
-[net present value]{style="color: Tomato;"}.  Projects with positive net present values are good projects.
+Our examples here involved only positive cash flows, but it is also useful to add future values or add present values of cash flows at different dates when some cash flows are positive and some are negative.  In this case, the total present value is usually called the [net present value]{style="color: Tomato;"}, being the present value of the positive cash flows net of the present value of the negative cash flows.
+
+## Perpetuities and annuities
+
+An annuity is a level sequence of cash flows that extend for a finite period of time.  A perpetuity is a level sequence of cash flows that extend forever.  Annuities are encountered frequently, for example, in mortgage or other loan payments.  Perpetuities are encountered less often; however, studying them is still useful, in part because it leads to a simple valuation formula for annuities.
+
+Suppose we want to spend $y$ in one year, another $y$ in two years, and so on forever.  How much do we need to have in an investment account today to finance all of these expenditures, if the account always earns $r$ per year?  The answer is the sum of the present values, which is
+$$\frac{y}{1+r} + \frac{y}{(1+r)^2} + \frac{y}{(1+r)^3} + \cdots$$
+The series of terms $y/(1+r)^n$ is a geometric series, and the present value is the sum of a geometric series, which by a standard formula equals
+$$\frac{y/(1+r)}{1- 1/(1+r)} = \frac{y}{r}.$$
+Thus, $y/r$ is the present value of a perpetuity of $y$ per year, given a rate of return of $r$ per year.
+We can also reach this conclusion without using the formula for the sum of a geometric series.  If we start with $y/r$ in the account, then we will earn $r \times y/r=y$ in the first year, which we can spend without depleting our capital of $y/r$.  Clearly, we can continue this forever, so $y/r$ is exactly the amount we need to finance an expenditure of $y$ per year.
+
+Now consider an annuity of $y$ per year for $n$ years.  The present value is
+$$\frac{y}{1+r} + \frac{y}{(1+r)^2}  + \cdots + \frac{y}{(1+r)^n}$$
+This annuity is the difference of two perpetuities: a perpetuity that starts in a year and another perpetuity that starts in $n+1$ years.  So, the present value is the difference of two present values: the present value $y/r$ of the first perpetuity minus the present value of the second perpetuity.  The present value of the second perpetuity as of year $n$ (one year before it begins) is $y/r$ and that value discounted to today is 
+$$\frac{1}{(1+r)^n} \times \frac{y}{r}.$$
+Hence, the value of the annuity is
+$$\frac{y}{r} - \frac{1}{(1+r)^n} \times \frac{y}{r} = \frac{y}{r} \left(1-\frac{1}{(1+r)^n}\right).$$
+
+::: callout-tip
+## Python tip
+
+Here are three ways to compute the present value of an annuity.
+``` p
+import numpy as np
+n = 10
+y = 100
+r = 0.08
+
+# method 1
+pvFactors = (1+r)**np.arange(-1, -n-1, -1)
+pv = y * np.sum(pvFactors)
+
+# method 2
+pv = (y/r) * (1 - (1+r)**(-n))
+
+# method 3
+import numpy_financial as npf
+pv = npf.pv(rate=r, nper=n, pmt=-y)
+```
+:::
+
+We sometimes encounter finite or infinite sequences of cash flows that grow at a constant rate.  Consider a cash flow of $y$ in one year, $(1+g)y$ in two years, $(1+g)^2y$ in three years, etc., for some growth rate $g$. If the growing cash flows go on forever, then the present value is
+$$\frac{y}{1+r} + \frac{(1+g)y}{(1+r)^2} + \frac{(1+g)^2y}{(1+r)^3} + \cdots$$
+If $g \ge r$, meaning that growth in the cash flows is so fast that it offsets or more than offsets the discounting, then the terms in this series are constant or rising, so the sum is infinite.  If $g<r$, then the formula for the sum of a geometric series shows that the present value is
+$$\frac{y/(1+r)}{1-(1+g)/(1+r)} =  \frac{y}{r-g}.$$
+We can also see this by assuming that we start with $y/(r-g)$.  In the first year, we earn $ry/(r-g)$ from which we can spend $y$ and reinvest $ry/(r-g)-y =gy/(r-g)$, so our account will grow at rate $g$.  This growth is enough to finance a cash flow growing at rate $g$, and this can continue forever.  
+
+If the sequence of growing cash flows lasts for a finite number $n$ of years, then it is a growing annuity, and its value is the difference of the values of two growing perpetuities.  Similar to the case of a level annuity, we can compute the value of a growing annuity as
+$$\frac{y}{r-g} - \frac{1}{(1+r)^n} \times \frac{y}{r-g} = \frac{y}{r-g}\left(1 - \frac{1}{(1+r)^n}\right).$$
+
+## Amortization
+
+## Inflation and real returns
 
 ## Retirement planning
 
