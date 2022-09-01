@@ -1013,13 +1013,13 @@ figtbl(std, corr0, corr1, corr2)
 
 ## Capital Allocation to Risky Assets 
 
-### A Single Risky Asset
+In this section, we introduce risk-free assets for saving and borrowing into the investment opportunity set.  We generally consider assets like Treasury bills or money-market mutual funds as the risk-free asset for saving in practice.  Borrowing rates will depend on the investor's access to debt markets.
 
-The decision to invest any money in a risky asset is perhaps the most fundamental decision an investor makes.  We will assume the existence of a risk-free asset.  In the real world, this would be an asset like a Treasury bill or a money-market mutual fund.  To fix ideas, we will consider a broad stock market index fund as the risky asset.
+### A Single Risky Asset {#sec-cal-1risky}
 
-How much capital should be invested in each of these two assets?  For a given portfolio weight in the risky asset $w_{\text{risky}}$, we first need to determine the portfolio's expected return and standard deviation.  Considering all possible risky portfolio weights traces out the set of possible investments, which is called the capital allocation line in expected return/standard deviation space.  Finally, we choose the risky portfolio weight that maximizes the investor's utility.
+What does the set of possible portfolios look like if we consider the US stock market index fund as the risky asset and Treasury bills as the risk-free asset.  For a given portfolio weight in the risky asset $w_{\text{risky}}$, we first need to determine the portfolio's expected return and standard deviation.  Considering all possible risky portfolio weights traces out the set of possible investments, which is called the **capital allocation line** in expected return/standard deviation space.  
 
-From @eq-2asset-variance, we see that the variance of portfolio $r_p$ with non-negative $w_{\text{risky}}$ invested in the risky asset and $1-w_{\text{risky}}$ invested in the risk-free rate is:
+From @eq-2asset-variance, the variance of portfolio $r_p$ with non-negative $w_{\text{risky}}$ invested in the risky asset and $1-w_{\text{risky}}$ invested in the risk-free rate is:
 \begin{align}
     \text{var}[r_p] =& w_{\text{risky}}^2 \text{var}[r_{\text{risky}}]+ (1-w_{\text{risky}})^2 \text{var}[r_f]+ 2 w_{\text{risky}}(1-w_{\text{risky}}) \text{cov}[r_{\text{risky}},r_f] \\ 
                     =& w_{\text{risky}}^2 \text{var}[r_{\text{risky}}]+ (1-w_{\text{risky}})^2 \cdot 0 + 2 w_{\text{risky}}(1-w_{\text{risky}}) \cdot 0 \\
@@ -1032,15 +1032,17 @@ The expected return of the portfolio is:
 $$ E[r_p] = w_{\text{risky}} E[r_{\text{risky}}]+ (1-w_{\text{risky}}) r_f \,.$$ {#eq-expret-rf-risky}
 Solving @eq-sd-rf-risky for $w_{\text{risky}}$, substituting into @eq-expret-rf-risky, and rearranging yields the relationship between expected return and standard deviation along the capital allocation line:
 $$ E[r_p] = r_f + \bigg[ \frac{E[r_{\text{risky}}]-r_f}{\text{sd}[r_{\text{risky}}] }\bigg] \cdot \text{sd}[r_p] \,.$$ {#eq-cal}
-The capital allocation line for a risky asset is a set of portfolios combining the risky asset with the risk-free asset.  In expected return/volatility space, the $y$-intercept is the risk-free rate of return and the slope of the line is the ratio of the expected excess return of the risky asset to its standard deviation.  This ratio is called the Sharpe ratio, after William Sharpe.  We discuss it in more detail below in @sec-multiple-cals.  
+The capital allocation line for a risky asset is a set of portfolios combining the risky asset with the risk-free asset.  In expected return/standard deviation space, the $y$-intercept is the risk-free rate of return and the slope of the line is the ratio of the expected excess return of the risky asset to its standard deviation.  This ratio is called the Sharpe ratio, after Nobel laureate <a href="https://en.wikipedia.org/wiki/William_F._Sharpe"> William Sharpe </a>.  We discuss it in more detail below in @sec-multiple-cals.  
 
 When $w_{\text{risky}}>100\%$, the portfolio is borrowing at the risk-free rate (that is, issuing bonds at the same rate as, say, US Treasuries).  This is probably not a reasonable assumption.  For most investors, $r^{\text{borrow}}>r^{\text{saving}}$.  In this case, the capital allocation line is kinked at the risky-asset:
+$$
 \begin{equation}
 \text{E}[r_p] = \begin{cases}
  r_f^{\text{saving}} + \bigg[ \frac{E[r_{\text{risky}}]-r_f^{\text{saving}}}{\text{sd}[r_{\text{risky}}] }\bigg]\cdot \text{sd}[r_p] & \text{if } \text{sd}[r_p] \le \text{sd}[r_{\text{risky}}] \\
   r_f^{\text{borrow}} + \bigg[ \frac{E[r_{\text{risky}}]-r_f^{\text{borrow}}}{\text{sd}[r_{\text{risky}}] }\bigg]\cdot \text{sd}[r_p] & \text{if } \text{sd}[r_p] > \text{sd}[r_{\text{risky}}] \\
 \end{cases}
 \end{equation}
+$$
 @fig-cal shows the set of possible portfolios along the capital allocation line.
 
 ```{python}
@@ -1051,10 +1053,10 @@ import pandas as pd
 import plotly.graph_objects as go
 
 # Parameter values (in percent)
-mn = 8
-sd = 20
+mn = 6
+sd = 15
 s = 2
-extra = 3    #incremental borrowing rate
+extra = 2    #incremental borrowing rate
 
 def data(mn, sd, s, b):
     grid = np.linspace(0, 2, 201)
@@ -1094,6 +1096,7 @@ def figtbl(mn, sd, s, extra):
     fig.layout.yaxis["title"] = "Expected Return"
     fig.update_yaxes(tickformat=".0%")
     fig.update_xaxes(tickformat=".0%")
+    fig.update_layout(legend=dict(yanchor="top", y =0.99, xanchor="left", x=0.01))
     fig.show()
 figtbl(mn, sd, s, extra)
 ```
@@ -1102,11 +1105,9 @@ figtbl(mn, sd, s, extra)
 
 ### Two Risky Assets {#sec-multiple-cals}
 
-We've now seen how to combine two risky assets as well as a risky asset with a risk-free asset.  What if we can invest in two risky assets *and* the risk-free asset?  What is the best way to form a portfolio in this case?  We'll proceed with our stock and bond fund example (assuming a -5% correlation).
+We've seen how to combine two risky assets (@sec-two-risky) as well as a risky asset with a risk-free asset (@sec-cal-1risky).  What if we can invest in two risky assets *and* the risk-free asset?  What is the best way to form a portfolio in this case?  Let's assume that in addition to the US stock market fund, we are also considering investing in a long-term bond fund.   Empirically, over the last 30 or 40 years, equities and long-term government bonds have been almost uncorrelated; we will use a correlation of -5% below.
 
-First, let's consider the investment opportunity sets that would obtain if we restricted attention to investing in only a single risky fund, along with the risk-free asset.  We assume for the moment that we can both borrow and save at a single risk-free rate.  The possible portfolios are the capital allocation lines for the stock fund and the bond fund, respectively.  These are plotted as the orange and red lines in @fig-two-asset-plus_rf.  We can see immediately that all portfolios on the CAL for the stock fund are dominated by both the stock-bond frontier (the black line) and by the bond CAL.  The same expected return can be achieved for smaller standard deviation.
-
-Recall from @eq-cal that the slope of the CAL for a risky asset is the Sharpe ratio.  The Sharpe ratio is a measure of the excess return of an investment per unit of risk.  Since investors like expected returns and dislike risk, they want high Sharpe ratios.  Note in @fig-two-asset-plus_rf that the Sharpe ratio of the bond is higher than that of the stock portfolio.  In fact, the Sharpe ratio for all portfolios on the frontier have higher Sharpe ratios than that of the stock portfolio.  The highest Sharpe ratio is obtained by combining the risk-free asset with a risky portfolio so that the CAL slope is as high as possible. This occurs when the CAL is tangent to the curve of risky-only portfolios.  This portfolio of risky assets is thus called the tangency portfolio.  Investing along the CAL of the tangency portfolio offers the highest possible Sharpe ratio, regardless of any desired level of expected return or risk.
+First, consider the investment opportunity sets that would obtain if we restricted attention to investing in only a single risky fund (either the stock or bond fund) in conjunction with the risk-free asset.  We assume for the moment that we can both borrow and save at a single risk-free rate.  The possible portfolios are the capital allocation lines for the stock fund and the bond fund, respectively.  These are plotted as the orange and red lines in @fig-two-asset-plus_rf.  We can see immediately that all portfolios on the CAL for the stock fund are dominated by both the stock-bond frontier (the black line) and by the bond CAL.  The same expected return can be achieved for smaller standard deviation.
 
 ```{python}
 #| label: fig-two-asset-plus_rf
@@ -1115,9 +1116,9 @@ import numpy as np
 import pandas as pd
 import plotly.graph_objects as go
 
-mn_stock = 8
+mn_stock = 6 
 mn_bond  = 3.5
-sd_stock = 20
+sd_stock = 15
 sd_bond  = 3.5
 corr = -5
 
@@ -1226,7 +1227,7 @@ def figtbl(mn1, mn2, sd1, sd2, c, rs, extra, asset1_name, asset2_name):
         line=dict(color="orange"),
         name="CAL: "+asset1_name
     )
-    grid, mns_cal, sds_cal, srs_cal, srb_cal = rf_plus_risky(mn2, sd2, rs, rs + extra, 0, 4.0)
+    grid, mns_cal, sds_cal, srs_cal, srb_cal = rf_plus_risky(mn2, sd2, rs, rs + extra, 0, 2.7)
     string = "wealth in "+asset2_name+"= %{text:.0f}%<br>" + "Sharpe ratio : " + "{:.4f}".format(srs_cal) +"<extra></extra>"
     trace4 = go.Scatter(
         x=sds_cal, 
@@ -1299,7 +1300,7 @@ def figtbl(mn1, mn2, sd1, sd2, c, rs, extra, asset1_name, asset2_name):
             fig.add_trace(trace)
             
             #Plot CAL (no leverage)
-            grid, mns_cal, sds_cal = rf_plus_risky_nokink(mnTang*100, sdTang*100, rs*100,0, 3.0)
+            grid, mns_cal, sds_cal = rf_plus_risky_nokink(mnTang*100, sdTang*100, rs*100,0, 2.2)
             portlabel = 'tangency portfolio' if rb == rs else 'efficient low risk portfolio' if rb != rs else 'tangency portfolio'
             string = "wealth in "+portlabel + " = %{text:.0f}%<br>" + "Sharpe ratio: " +  "{:.4f}".format(srTang) +"<extra></extra>"
             trace5 = go.Scatter(
@@ -1326,10 +1327,6 @@ def figtbl(mn1, mn2, sd1, sd2, c, rs, extra, asset1_name, asset2_name):
                 # showlegend=False
             )           
             # fig.add_trace(trace5a)           
-            
-            
-            
-            
 
     if (rb != rs) and ((gmv > rb) or (not Shorts)):
         portTang = P.tangency(rb)
@@ -1382,15 +1379,19 @@ def figtbl(mn1, mn2, sd1, sd2, c, rs, extra, asset1_name, asset2_name):
     
     fig.layout.xaxis["title"] = "Standard Deviation"
     fig.layout.yaxis["title"] = "Expected Return"
-    fig.update_xaxes(range=[0, 1.25 * df["stdev"].max()])
-    fig.update_yaxes(range=[0, 1.25 * df["mean"].max()])
+    fig.update_xaxes(range=[0, 1.05 * df["stdev"].max()])
+    fig.update_yaxes(range=[0, 1.05 * df["mean"].max()])
     fig.update_yaxes(tickformat=".0%")
     fig.update_xaxes(tickformat=".0%")
+    fig.update_layout(legend=dict(yanchor="top", y =0.5, xanchor="left", x=0.65))
     fig.show()
 figtbl(mn_stock,mn_bond,sd_stock,sd_bond,corr,rs,extra,"Stock","Bond")
 ```
 
-Now relax the restriction that the risk-free rate applies to borrowing as well as saving--$r_f^{\text{borrow}}>r_f^{\text{saving}}$.  If the interest rates are lower than expected returns, the efficient portfolios fall into three regions, separated by blue dots in  @fig-two-asset-plus_rf_saveborrow.^[If interest rates are set higher than expected returns, then the efficient portfolios may not exist.]  These blue dots indicate an efficient low risk portfolio and an efficient high mean portfolio, both comprised solely of risky assets. To the left of the efficient low risk portfolio, the optimal portfolios are scaled-down versions of the efficient low risk portfolio with some savings. To the right of the efficient high mean portfolio, the optimal portfolios are scaled-up versions of the efficient high mean portfolio with some borrowing. Both cases are shown as blue lines in the figure. The third region is the black curve between the efficient low risk and efficient high mean portfolios. These portfolios do not involve saving or borrowing. The blue dotted lines extend the blue solid lines, but the points on the blue dotted lines are infeasible, because they involve saving at the borrowing rate or borrowing at the savings rate. 
+Recall from @eq-cal that the slope of the CAL for a risky asset is the Sharpe ratio.  The **Sharpe ratio** is a measure of the excess return of an investment per unit of risk.  Since investors like expected returns and dislike risk, they want high Sharpe ratios.  Note in @fig-two-asset-plus_rf that the Sharpe ratio of the bond is higher than that of the stock portfolio.  In fact, the Sharpe ratio for all portfolios on the frontier have higher Sharpe ratios than that of the stock portfolio.  The highest Sharpe ratio is obtained by combining the risk-free asset with a risky portfolio so that the CAL slope is as high as possible. This occurs when the CAL is tangent to the curve of risky-only portfolios.  This portfolio of risky assets is thus called the **tangency portfolio**.  Investing along the CAL of the tangency portfolio offers the highest possible Sharpe ratio, regardless of any desired level of expected return or risk.
+
+
+Now relax the restriction that the risk-free rate applies to borrowing as well as saving--$r_f^{\text{borrow}}>r_f^{\text{saving}}$.  In this case, efficient portfolios fall into three regions, separated by blue dots in  @fig-two-asset-plus_rf_saveborrow.^[This is true if the interest rates are lower than expected returns. If interest rates are set higher than expected returns, then the efficient portfolios may not exist.]  These blue dots indicate an efficient low risk portfolio and an efficient high mean portfolio, both comprised solely of risky assets. To the left of the efficient low risk portfolio, the efficient portfolios are scaled-down versions of the efficient low risk portfolio with some savings. To the right of the efficient high mean portfolio, the efficient portfolios are scaled-up versions of the efficient high mean portfolio with some borrowing. Both cases are shown as blue lines in the figure. The third region is the portion of the efficient frontier between the efficient low risk and efficient high mean portfolios. These portfolios do not involve saving or borrowing. The blue dotted lines extend the blue solid lines, but the points on the blue dotted lines are infeasible, because they involve saving at the borrowing rate or borrowing at the savings rate. 
 
 ```{python}
 #| label: fig-two-asset-plus_rf_saveborrow
@@ -1399,9 +1400,9 @@ import numpy as np
 import pandas as pd
 import plotly.graph_objects as go
 
-mn_stock = 8
+mn_stock = 6
 mn_bond  = 3.5
-sd_stock = 20
+sd_stock = 15
 sd_bond  = 3.5
 corr = -5
 
@@ -1570,7 +1571,7 @@ def figtbl(mn1, mn2, sd1, sd2, c, rs, extra, asset1_name, asset2_name):
         if mnTang < np.max(mns):
             sdTang = np.sqrt(portTang @ cov @ portTang)
             srTang = (mnTang - rs)/sdTang
-            string0 = 'tangency portfolio' if rb == rs else 'efficient low risk portfolio' if rb != rs else 'tangency portfolio'
+            string0 = 'tangency portfolio' if rb == rs else 'efficient low risk' if rb != rs else 'tangency portfolio'
             string, cd = custom(string0, [portTang], srTang,0)
             trace = go.Scatter(
                 x=[sdTang],
@@ -1585,7 +1586,7 @@ def figtbl(mn1, mn2, sd1, sd2, c, rs, extra, asset1_name, asset2_name):
             
             #Plot CAL (no leverage)
             grid, mns_cal, sds_cal = rf_plus_risky_nokink(mnTang*100, sdTang*100, rs*100,0, 1.0)
-            portlabel = 'tangency portfolio' if rb == rs else 'efficient low risk portfolio' if rb != rs else 'tangency portfolio'
+            portlabel = 'tangency portfolio' if rb == rs else 'efficient low risk' if rb != rs else 'tangency portfolio'
             string = "wealth in "+portlabel + " = %{text:.0f}%<br>" + "Sharpe ratio: " +  "{:.4f}".format(srTang) +"<extra></extra>"
             trace5 = go.Scatter(
                 x=sds_cal, 
@@ -1637,7 +1638,7 @@ def figtbl(mn1, mn2, sd1, sd2, c, rs, extra, asset1_name, asset2_name):
             
             #Plot CAL (with leverage)            
             grid, mns_cal, sds_cal = rf_plus_risky_nokink(mnTang*100, sdTang*100, rb*100, 1.0, 1.5)
-            string = "wealth in efficient high mean portfolio = %{text:.0f}%<br>" + "Sharpe ratio (relative to borrowing rate): " + "{:.4f}".format(srTang) +"<extra></extra>"
+            string = "wealth in efficient high mean = %{text:.0f}%<br>" + "Sharpe ratio (relative to borrowing rate): " + "{:.4f}".format(srTang) +"<extra></extra>"
             trace6 = go.Scatter(
                 x=sds_cal, 
                 y=mns_cal, 
@@ -1662,24 +1663,23 @@ def figtbl(mn1, mn2, sd1, sd2, c, rs, extra, asset1_name, asset2_name):
             )           
             fig.add_trace(trace6a)      
 
-
- 
-    
     fig.layout.xaxis["title"] = "Standard Deviation"
     fig.layout.yaxis["title"] = "Expected Return"
     fig.update_xaxes(range=[0, 1.25 * df["stdev"].max()])
-    fig.update_yaxes(range=[0, 1.25 * df["mean"].max()])
+    fig.update_yaxes(range=[0, 1.15 * df["mean"].max()])
     fig.update_yaxes(tickformat=".0%")
     fig.update_xaxes(tickformat=".0%")
+    fig.update_layout(legend=dict(yanchor="top", y =0.65, xanchor="left", x=0.535))
     fig.show()
 figtbl(mn_stock,mn_bond,sd_stock,sd_bond,corr,rs,extra,"Stock","Bond")
 ```
 
 
 
-
-
 ## Preferences and Optimal Portfolios {#sec-preferences}
+
+In this section, we consider perhaps the most fundamental allocation decision an investor makes: how much capital should be allocated to risky assets relative to a risk-free asset.  We will thus assume the existence of a risk-free asset for both saving and borrowing.  In the world, we generally consider assets like a Treasury bill or a money-market mutual fund as the risk-free asset for saving.
+
 
 In order to make statements about "optimal" portfolios, we need to describe the preferences of investors in some way.  A standard way to do so is to use mean-variance utility.  Simply put, we will assume that investors like higher expected returns and dislike portfolios with riskier returns.  The amount of extra expected return needed for an investor to take on additional risk is governed by the investor's risk aversion, which we will denote $A$.
 
@@ -1721,6 +1721,7 @@ fig.update_layout(title='',
     legend_title_text='',)
 fig.update_yaxes(tickformat=".0f", ticksuffix="%")
 fig.update_xaxes(tickformat=".0f", ticksuffix="%")
+fig.update_layout(legend=dict(yanchor="top", y =0.99, xanchor="left", x=0.74))
 fig.show()
 ```
 
@@ -1760,6 +1761,7 @@ fig.update_layout(title='',
     legend_title_text='',)
 fig.update_yaxes(tickformat=".0f", ticksuffix="%")
 fig.update_xaxes(tickformat=".0f", ticksuffix="%")
+fig.update_layout(legend=dict(yanchor="top", y =0.99, xanchor="left", x=0.74))
 fig.show()
 ```
 
@@ -1871,6 +1873,7 @@ def figtbl(mn, sd, s, extra, raver1, raver2):
     fig.layout.yaxis["title"] = "Expected Return"    
     fig.update_yaxes(tickformat=".0%")
     fig.update_xaxes(tickformat=".0%")
+    fig.update_layout(legend=dict(yanchor="top", y =0.99, xanchor="left", x=0.74))
     fig.show()
 figtbl(mn, sd, s, extra, raver1, raver2)
 ```
@@ -1923,6 +1926,7 @@ def figtbl(mn, sd, s, extra):
     fig.layout.yaxis["title"] = "Weight in Risky Asset"
     fig.update_yaxes(tickformat=".1%")
     fig.update_xaxes(tickformat=".2")
+    fig.update_layout(legend=dict(yanchor="top", y =0.99, xanchor="left", x=0.74))
     fig.show()
 figtbl(mn, sd, s, extra)
 ```
@@ -2260,6 +2264,7 @@ def figtbl(mn1, mn2, sd1, sd2, c, rs, extra, raver1, raver2, asset1_name, asset2
     fig.update_yaxes(range=[0, 1.25 * df["mean"].max()])
     fig.update_yaxes(tickformat=".0%")
     fig.update_xaxes(tickformat=".0%")
+    fig.update_layout(legend=dict(yanchor="top", y =0.99, xanchor="left", x=0.74))
     fig.show()
 
 
@@ -2294,6 +2299,7 @@ def figtbl(mn1, mn2, sd1, sd2, c, rs, extra, raver1, raver2, asset1_name, asset2
     fig.layout.yaxis["title"] = "Weight in Risky Assets"
     fig.update_yaxes(tickformat=".1%")
     fig.update_xaxes(tickformat=".2")
+    fig.update_layout(legend=dict(yanchor="top", y =0.99, xanchor="left", x=0.74))
     # fig.show()
 
 
