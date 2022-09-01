@@ -170,7 +170,7 @@ $$w'=[w_1\, w_2\,...\,w_N]\,,$$
 we can calculate the portfolio variance as the matrix product
 $$ \text{var}[r_p] = w'Vw \,.$$ {#eq-mmult-portvar}
 
-::: callout-tip
+:::  {.callout-tip collapse="true"}
 ## Calculating Portfolio Statistics in Python^[In Excel, given an array of expected returns and portfolio weights, the portfolio expected return can be calculated using the SUMPRODUCT command.  The equivalent Excel command to calculate the portfolio variance  is MMULT(TRANSPOSE(w),MMULT(V,w)) where w is a column of portfolio weights and V is the covariance matrix.]
 
 Given a vector of weights, calculating the portfolio variance in python is easy using matrix multiplication in numpy.  Note the inputs below are decimal notation.  Multiply the expected returns, standard deviations, and correlations by 100 to get percents!  
@@ -205,9 +205,11 @@ port_var = wgts.T @ cov @ wgts
 port_sd  = np.sqrt(port_var)
 ```
 :::
+
+
 ::: callout-note
 ## Calculating Portfolio Statistics in Excel
-SHOULD WE DO THIS??
+SHOULD WE DO THIS? AN ALTERNATIVE IS TO PUT ALL EXCEL INFORMATION IN AN APPENDIX TO EVERY CHAPTER
 :::
 
 
@@ -638,18 +640,63 @@ figtbl(mn1, mn2, mn3, sd1, sd2, sd3, corr12, corr13, corr23, ["US Equity", "Deve
 ```
 
 
-::: callout-tip
-## Calculating the Frontier in Python
+::: {.callout-tip collapse="true"}
+## Calculating the Frontier and GMV in Python
 
-Some notes and code...
+The code below relies on a Portfolio python object, which needs to be executed or imported before using this code.  See @sec-portfolio-class for details.
 
+``` p
+import numpy as np
+import plotly.graph_objects as go
+
+# Expected returns
+mns = np.array([0.10, 0.05, 0.07])
+# Standard deviations
+sds = np.array([0.20, 0.12, 0.15])
+# Correlations
+corr12 = 0.3
+corr13 = 0.3
+corr23 = 0.3
+# Covariances
+cov12 = corr12 * sds[0] * sds[1]
+cov13 = corr13 * sds[0] * sds[2]
+cov23 = corr23 * sds[1] * sds[2]
+# Covariance matrix
+cov = np.array([[sds[0]**2,  cov12,     cov13], \
+                [cov12,      sds[1]**2, cov23], \
+                [cov13,      cov23,     sds[2]**2]])
+
+# Define portfolios class object
+AllowShorting = False
+P = portfolio(mns, cov, AllowShorting)
+
+##### Frontier Portfolios
+# Set grid of expected return targets
+mingrid = np.min(mns)
+maxgrid = np.max(mns)
+mnsFrontier = np.linspace(mingrid, maxgrid, 50)
+# Calculate portfolios weights for each target expected return
+portsFrontier = [P.frontier(m) for m in mnsFrontier]
+# Calculate frontier standard deviations for each portfolio
+sdsFrontier = [np.sqrt(w @ cov @ w) for w in portsFrontier]
+
+##### GMV Portfolio
+gmv = P.GMV
+mn_gmv = gmv @ mns
+sd_gmv = np.sqrt(gmv @ cov @ gmv)
+```
 :::
 
 
 ### Short-Selling {#sec-short-frontier}
 
-``` {python}
+Short-selling involves borrowing a security from another owner and selling it.  The short-seller then has a liability to return the security to the security lender;  this liability is equal to the security's market value.  Short-sellers hope to purchase the security later for a lower price.  Thus, they reverse the order of the investing maxim: buy low-sell high.  Short-sellers hope to sell high-buy low.  In practice, there are limitations on short selling: it may not be possible to use the proceeds from a short sale to buy other risky assets, less than full interest may be earned on the proceeds, and a fee must be paid to borrow the asset being shorted. In this section, we ignore those issues. We assume that proceeds from short sales are invested in the other risky assets. 
 
+It may sometimes be possible to improve mean-variance efficiency by selling some assets short.  Short positions in a portfolio have negative portfolio weights ($w_i<0$).  @fig-frontier-gmv-shorting shows how the GMV portfolio and frontier changes if we allow short-selling of the three equity portfolios.  With short-selling allowed, a lower global minimum variance is possible.  This portfolio shorts emerging market equity and invests the proceeds and initial capital in a combination of US and developed international equities.
+
+``` {python}
+#| label: fig-frontier-gmv-shorting
+#| fig-cap: Short-Selling and the Frontier
 import numpy as np
 import plotly.graph_objects as go
 
@@ -806,6 +853,9 @@ def figtbl(mn1, mn2, mn3, sd1, sd2, sd3, c12, c13, c23, asset_names):
 figtbl(mn1, mn2, mn3, sd1, sd2, sd3, corr12, corr13, corr23, ["US Equity", "Developed Intl", "Emerging Mkt"])
 ```
 
+The frontier with short-selling coincides with the frontier without short-selling for many expected return values, but shorting allows an investor to reach expected returns values below the minimum expected returns of the assets (the US equity portfolio) and above the maximum expected return of the underlying assets (the emerging market portfolio).  These portfolios entail shorting the emerging market fund or the US equity fund, respectively.  
+
+Within the set of expected returns possible without shorting, lower risk portfolios are possible with shorting for expected returns close to the US market fund's expected return and close to the emerging market fund's expected return.  Thus, short-selling may provide additional diversification benefits relative to those available to a short-sale-constrained investor.
 
 ### N Risky Assets {#sec-n-risky}
 
@@ -2249,3 +2299,139 @@ def figtbl(mn1, mn2, sd1, sd2, c, rs, extra, raver1, raver2, asset1_name, asset2
 
 figtbl(mn_stock,mn_bond,sd_stock,sd_bond,corr,rs,extra,raver1, raver2, "Stock","Bond")
 ```
+
+
+
+## Appendix: The Portfolio Class in Python {#sec-portfolio-class}
+
+A number of the examples in this chapter make use of the Portfolio class object defined below.  The Portfolio class object implements the various quadratic programming problems encountered in mean-variance analysis using the CVXOPT package.  The CVXOPT user guide is available <a href="https://cvxopt.org/userguide/index.html"> here </a>.
+
+The function `cvxopt.solvers.qp` solves problems of the general form:
+\begin{align}
+    \underset{w}{\text{min  }}& \frac{1}{2} w' Q w + p'x \\
+     \text{subject to  } & Gw \le h \\
+                        & Aw = b \\
+\end{align}
+
+For our purposes, the optimizer is usually solving for a $N \times 1$ vector of portfolio weights, $w$.  The objective function often takes $Q$ as the $N \times N$ covariance matrix of returns and $p$ as a $N \times 1$ vector of zeros.  
+
+The constraint $Gw \le h$ can be used to put position limits on the portfolio weights.  The most common use of this is short-selling constraints.  This is accomplished by setting $G$ equal to the negative of the $N \times N$ identity matrix (that is, a matrix with -1s on the diagonal and zero elsewhere), and $h$ equal to a $N \times 1$ vector of zeros.  Additional position limits could be enforced by adding rows to $G$ and $h$.  For instance, many funds have maximum position limits in addition to short-sale constraints.
+
+The constraint $Aw=b$ usually includes the constraint that the portfolio is fulling invested; that is, the portfolio weights sum to 100%.  This is accomplished by setting $A$ equal to a $N \times 1$ vector of ones and setting $b=1$.  $A$ and $b$ can include additional rows for other constraints.  For instance, setting a target expected return would be accomplished by adding a row to $A$ with the asset mean vector and adding a row to $b$ with the target expected return.  This is done when solving for a point on the mean-variance frontier.
+
+::: {.callout-tip collapse="true"}
+
+## Defining the Portfolio Class in Python
+``` p
+import numpy as np
+from cvxopt import matrix
+from cvxopt.solvers import qp as Solver, options as SolverOptions
+from scipy.optimize import minimize_scalar
+
+SolverOptions["show_progress"] = False
+
+class portfolio:
+    def __init__(self, means, cov, Shorts):
+        self.means = np.array(means)
+        self.cov = np.array(cov)
+        self.Shorts = Shorts
+        self.n = len(means)
+        if Shorts:
+            w = np.linalg.solve(cov, np.ones(self.n))
+            self.GMV = w / np.sum(w)
+            w = np.linalg.solve(cov, means)
+            self.piMu = w / np.sum(w)
+        else:
+            n = self.n
+            Q = matrix(cov, tc="d")
+            p = matrix(np.zeros(n), (n, 1), tc="d")
+            G = matrix(-np.identity(n), tc="d")
+            h = matrix(np.zeros(n), (n, 1), tc="d")
+            A = matrix(np.ones(n), (1, n), tc="d")
+            b = matrix([1], (1, 1), tc="d")
+            sol = Solver(Q, p, G, h, A, b)
+            self.GMV = np.array(sol["x"]).flatten() if sol["status"] == "optimal" else np.array(n * [np.nan])
+
+    def frontier(self, m):
+        if self.Shorts:
+            gmv = self.GMV
+            piMu = self.piMu
+            m1 = gmv @ self.means
+            m2 = piMu @ self.means
+            a = (m - m2) / (m1 - m2)
+            return a * gmv + (1 - a) * piMu
+        else:
+            n = self.n
+            Q = matrix(self.cov, tc="d")
+            p = matrix(np.zeros(n), (n, 1), tc="d")
+            G = matrix(-np.identity(n), tc="d")
+            h = matrix(np.zeros(n), (n, 1), tc="d")
+            A = matrix(np.vstack((np.ones(n), self.means)), (2, n), tc="d")
+            b = matrix([1, m], (2, 1), tc="d")
+            sol = Solver(Q, p, G, h, A, b)
+            return np.array(sol["x"]).flatten() if sol["status"] == "optimal" else np.array(n * [np.nan])
+
+    def tangency(self, r):
+        if self.Shorts:
+            w = np.linalg.solve(self.cov, self.means - r)
+            return w / np.sum(w)
+        else:
+            def f(m):
+                w = self.frontier(m)
+                mn = w @ self.means
+                sd = np.sqrt(w.T @ self.cov @ w)
+                return - (mn - r) / sd
+            m = minimize_scalar(f, bounds=[max(r, np.min(self.means)), max(r, np.max(self.means))], method="bounded").x
+            return self.frontier(m)
+
+    def optimal(self, raver, rs=None, rb=None):
+        n = self.n
+        if self.Shorts:
+            if (rs or rs==0) and (rb or rb==0):
+                Q = np.zeros((n + 2, n + 2))
+                Q[2:, 2:] = raver * self.cov
+                Q = matrix(Q, tc="d")
+                p = np.array([-rs, rb] + list(-self.means))
+                p = matrix(p, (n + 2, 1), tc="d")
+                G = np.zeros((2, n + 2))
+                G[0, 0] = G[1, 1] = -1
+                G = matrix(G, (2, n+2), tc="d")
+                h = matrix([0, 0], (2, 1), tc="d")
+                A = matrix([1, -1] + n*[1], (1, n+2), tc="d")
+                b = matrix([1], (1, 1), tc="d")
+                sol = Solver(Q, p, G, h, A, b)
+                return np.array(sol["x"]).flatten()[2:] if sol["status"] == "optimal" else None
+            else:
+                w = np.linalg.solve(self.cov, self.means)
+                a = np.sum(w)
+                return (a/raver)*self.piMu + (1-a/raver)*self.GMV
+        else:
+           if (rs or rs==0) and (rb or rb==0):
+                Q = np.zeros((n + 2, n + 2))
+                Q[2:, 2:] = raver * self.cov
+                Q = matrix(Q, tc="d")
+                p = np.array([-rs, rb] + list(-self.means))
+                p = matrix(p, (n+2, 1), tc="d")
+                G = matrix(-np.identity(n + 2), tc="d")
+                h = matrix(np.zeros(n+2), (n+2, 1), tc="d")
+                A = matrix([1, -1] + n * [1], (1, n+2), tc="d")
+                b = matrix([1], (1, 1), tc="d")
+                sol = Solver(Q, p, G, h, A, b)
+                return np.array(sol["x"]).flatten()[2:] if sol["status"] == "optimal" else None
+           else:
+                Q = matrix(raver * self.cov, tc="d")
+                p = matrix(-self.means, (n, 1), tc="d")
+                G = matrix(-np.identity(n), tc="d")
+                h = matrix(np.zeros(n), (n, 1), tc="d")
+                A = matrix(np.ones(n), (1, n), tc="d")
+                b = matrix([1], (1, 1), tc="d")
+                sol = Solver(Q, p, G, h, A, b)
+                return np.array(sol["x"]).flatten() if sol["status"] == "optimal" else None
+```
+:::
+
+
+## Appendix: Portfolios in Excel {#sec-excel}
+
+MAYBE WE COLLECT ALL OF THE EXCEL TUTORIALS HERE AND DO PYTHON ONLY IN THE MAIN TEXT?
+
