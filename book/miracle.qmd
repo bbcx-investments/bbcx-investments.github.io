@@ -146,7 +146,7 @@ x_m(1+r)^{n-m}.$$
 
 ::: callout-tip
 
-We can calculate the total future value by summing the product of two arrays as in the following example.  
+The total future value can be calculated by summing the product of two arrays as in the following example.  
 ``` p
 import numpy as np
 n = 10
@@ -159,12 +159,12 @@ total = np.sum(x*fvFactors)
 ```
 :::
 
-Now, we ask the opposite question.  Suppose we want to spend some amount $y_1$ in one year, a possibly different amount $y_2$ in two years, and continuing for $m$ years.  If we want to finance all of these expenditures from a current investment account, how much do we need to have in the account now, assuming we always earn a return $r$ on the remaining balance?  The answer is that we need to have the total present value of the future values $y_1, y_2, \ldots, y_m$; that is, we need
+Now, consider the opposite question.  Suppose we want to spend some amount $y_1$ in one year, a possibly different amount $y_2$ in two years, and continuing for $m$ years.  If we want to finance all of these expenditures from a current investment account, how much do we need to have in the account now, assuming we always earn a return $r$ on the remaining balance?  The answer is that we need to have the total present value of the future values $y_1, y_2, \ldots, y_m$; that is, we need
 $$\frac{y_1}{1+r} + \frac{y_2}{(1+r)^2} + \cdots + \frac{y_m}{(1+r)^m}.$$
 
 ::: callout-tip
 
-Like a future value, we can compute the total present value by summing the product of two arrays, as in the following example.  
+The total present value can also be computed by summing the product of two arrays as in the following example.  
 ``` p
 import numpy as np
 m = 4
@@ -176,7 +176,7 @@ total = np.sum(y*pvFactors)
 ```
 :::
 
-Our examples here involved only positive cash flows, but it is also useful to add future values or add present values of cash flows at different dates when some cash flows are positive and some are negative.  In this case, the total present value is usually called the [net present value]{style="color: Tomato;"}, being the present value of the positive cash flows net of the present value of the negative cash flows.
+Our examples here involved only positive cash flows, but it is also possible to compute total future values or total present values in this way when some cash flows are positive and some are negative.  In this case, the total present value is usually called the [net present value]{style="color: Tomato;"}, being the present value of the positive cash flows net of the present value of the negative cash flows.
 
 ## Perpetuities and annuities
 
@@ -196,10 +196,14 @@ $$\frac{1}{(1+r)^n} \times \frac{y}{r}.$$
 Hence, the present value of the annuity is
 $$\frac{y}{r} - \frac{1}{(1+r)^n} \times \frac{y}{r} = \frac{y}{r} \left(1-\frac{1}{(1+r)^n}\right).$$
 
-::: callout-tip
-## Python tip
+We call the following the [annuity factor]{style="color: Tomato;"}:
+$$ \text{AF} = \frac{1}{r} \left(1-\frac{1}{(1+r)^n}\right).$$
+The present value of the annuity is
+$$ y \times \text{AF}.$$
 
-Here are three ways to compute the present value of an annuity.
+::: callout-tip
+
+Here are three ways to compute the present value of an annuity in python.  You may need to install the numpy_financial library ("pip install numpy-financial").  
 ``` p
 import numpy as np
 n = 10
@@ -211,7 +215,8 @@ pvFactors = (1+r)**np.arange(-1, -n-1, -1)
 pv = y * np.sum(pvFactors)
 
 # method 2
-pv = (y/r) * (1 - (1+r)**(-n))
+AF = (1/r) * (1 - (1+r)**(-n))
+pv = y * AF
 
 # method 3
 import numpy_financial as npf
@@ -228,7 +233,136 @@ We can also see this by assuming that we start with $y/(r-g)$.  In the first yea
 If the sequence of growing cash flows lasts for a finite number $n$ of years, then it is a growing annuity, and its value is the difference of the values of two growing perpetuities.  Similar to the case of a level annuity, we can compute the value of a growing annuity as
 $$\frac{y}{r-g} - \frac{1}{(1+r)^n} \times \frac{y}{r-g} = \frac{y}{r-g}\left(1 - \frac{1}{(1+r)^n}\right).$$
 
-## Amortization
+## Monthly rates, etc.
+
+We frequently encounter rates of return, including interest rates, at frequencies other than a year, for example, when calculating monthly mortgage payments.  There are two ways of relating monthly rates to annual rates.  One is to compound monthly rates; the other is to multiply by 12.
+
+First we address compounding.  Just as we calculated a future value by compounding an annual rate, we can also calculate a future value by compounding a monthly rate.  The future value of $1 in one year, with a monthly rate of $r_m$, is $(1+r_m)^{12}$.  The growth in value is
+$$(1+r_m)^{12} - 1.$$
+This is the annual rate of return obtained by monthly compounding at the monthly rate $r_m$.  For example, if the monthly rate is 1%, then the annual rate is
+$$ r_a = (1+r_m)^{12} - 1 = 1.01^{12} - 1 = 0.1268.$$
+So, a monthly rate of 1% compounds to 12.68% annually.  
+
+We can reverse this calculation and compute the monthly rate given the annual rate.  The formula for the monthly rate is
+$$r_m = (1+r_a)^{1/12} - 1.$$
+If we plug in $r_a = 0.1268$, we'll get $r_m = 0.01$ (up to rounding error).  
+
+This is a logical way to define monthly rates from annual rates, but it is not the way a bank does it when you take out a loan.  If a bank says that the annual rate is 12.68%, then it will charge you
+$$\frac{0.1268}{12} = 0.0106.$$
+So, the bank will charge you 1.06% monthly.  Obviously, this works in the bank's favor, relative to the calculation based on compounding.
+
+Returning to the compounding calculation, we could also compound at frequencies other than a month or a year.  If we compound daily at a daily rate of $r_d$, then the corresponding annual rate is
+$$r_a = (1+r_d)^{365} - 1.$$
+The annual rate achieved by compounding is higher the more frequently a bank compounds.  Continuing with our previous example of 12.68%, with monthly compounding we have
+$$\left(1 + \frac{0.1268}{12}\right)^{12} - 1 = 0.1344$$
+and with daily compounding we have
+$$\left(1 + \frac{0.1268}{365}\right)^{365} - 1 = 0.1351.$$
+Thus, increasing the compounding frequency increases the corresponding annual rate.  We could consider even more frequent compounding.  In the limit, as compounding becomes continuous, we obtain
+$$\lim_{n \rightarrow \infty}  \left(1 + \frac{0.1268}{n}\right)^{n} - 1  = e^{0.1268} - 1 = 0.1352,$$
+where $e$ is the natural exponential ($2.718\ldots$).  Obviously, continuous compounding is never encountered in practice, but it is a useful "as if" device for some calculations that we will encounter later.
+
+## Principal, payments, and rate
+
+When buying a car or home, we might have one or more of the following questions.
+
+1.  I know how much I need to borrow, what the term of the loan will be, and what the rate will be.  What will my payments be?
+2.  I know what the term of the loan will be and what the rate will be, and I know the payment that I can afford.  How much can I borrow?
+3.  I know what the term of the loan will be, how much I need to borrow, and how much I can afford to pay.  What rate do I need to get?
+
+In this section, we will explain how to answer these questions.  For concreteness, suppose the loan will have monthly payments.  We will work in terms of an annual rate $r$ and calculate the monthly rate as $r/12$ the way banks do.  Analogous calculations can be used to answer the questions for loans with annual payments.
+
+Our guiding principle is the formula for the present value of an annuity:
+$$\text{PV} = y \times \text{AF}$$
+where the annuity factor, with a monthly rate of $r/12$ and a term of $n$ years (so, $12n$ months), is
+$$\text{AF} = \frac{1}{r/12}\left(1 - \frac{1}{(1+r/12)^{12n}}\right).$$
+This formula applies to the given questions with PV equal to the loan amount and $y$ equal to the loan payment.  In other words, the relation between the loan amount and the loan payments is that the present value of the payments equals the loan amount (loan principal).  
+
+The answers to the questions are as follows.  It is a bit more complicated to calculate the required rate than it is to calculate the payment and loan amount.
+
+1.  The loan payment is the loan amount divided by the annuity factor.
+2.  The loan amount is the loan payment multiplied by the annuity factor.
+3.  The required rate is the rate that makes the annuity factor equal to the ratio of the loan amount to the loan payment.
+
+::: callout-tip
+
+Here are ways to calculate a loan payment or loan amount.  
+``` p
+import numpy as np
+n = 30     # number of years
+r = 0.04   # annual rate
+
+AF = (12/r) * (1 - (1+r/12)**(-12*n))
+
+# calculate the loan payment
+amount = 100000
+payment = amount / AF
+
+# calculate the loan amount
+payment = 2000
+amount = payment * AF
+```
+:::
+
+We'll show how to answer the third question below, and we'll also answer a fourth question, which might occasionally arise:
+
+4.  I know what the term of the loan will be, how much I need to borrow, how much I can afford to pay, and what the rate will be.  If my payments aren't enough, and I can get a balloon structure (a final payoff at maturity), how much will the balloon be?
+
+If there is a balloon structure, then the loan amount equals the present value of the non-balloon payments ($\text{payment} \times \text{AF}$) plus the present value of the balloon, which is
+$$\text{balloon} \times \frac{1}{(1+r/12)^{12n}}.$$
+Thus,
+$$\text{balloon} = \left(1+\frac{r}{12}\right)^{12n} \times (\text{amount} - \text{payment} \times AF)$$
+
+::: callout-tip
+
+Here are the answers to all four questions, using functions from numpy-financial.  The sign conventions are that the loan amount is positive (a cash inflow) and loan payments (regular payments and balloon) are negative.
+``` p
+import numpy_financial as npf
+n = 30     # number of years
+
+# question 1
+r = 0.04
+amount = 500000
+payment = npf.pmt(
+    rate=r/12,
+    nper=n*12,
+    pv=amount, 
+    fv=0
+)
+
+# question 2
+r = 0.04
+payment = -2000
+amount = npf.pv(
+    rate=r/12,
+    nper=n*12,
+    pmt=payment,
+    fv=0
+)
+
+# question 3
+amount = 500000
+payment = -2000
+rate = 12*npf.rate(
+    nper=n*12,
+    pv=amount,
+    pmt=payment,
+    fv=0
+)
+
+# question 4
+r = 0.04
+amount = 500000
+payment = -2000
+balloon = npf.fv(
+    rate=r/12,
+    nper=n*12,
+    pmt=payment,
+    pv=amount
+)
+
+```
+:::
+
 
 ## Inflation and real returns
 
