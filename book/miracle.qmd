@@ -404,10 +404,13 @@ Thus, the real return over a period of years equals the nominal return over the 
 
 Over the decade 1971--1980, \$1 invested in the U.S. stock market grew to \$2.40 in nominal terms, as stated earlier.  However, the CPI at the end of the decade was 230\% of its value at the beginning of the decade.  In other words, compounded inflation $(1+i_1) \cdots (1+i_n)$ over the decade was 2.3.  So, the dollar grew to only 2.40 / 2.30 = 1.04 dollars in real terms, meaning that the total real return over the decade was only 4%.  So, it was a middling decade in nominal terms and a very poor decade in real terms.
 
+## Geometric average returns
+
+
 ## Retirement planning
 
 
-## Geometric average returns
+
 
 ::: callout-note
 ## A title for a note
