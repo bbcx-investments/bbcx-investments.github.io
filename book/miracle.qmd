@@ -125,6 +125,8 @@ fig.show()
 
 ::: callout-tip
 
+# Future and present value factors
+
 The numpy arange function is useful for creating sequences (arrays) of future value and present value factors.  
 ``` p
 import numpy as np
@@ -146,6 +148,8 @@ x_m(1+r)^{n-m}.$$
 
 ::: callout-tip
 
+# Future value of multiple cash flows
+
 The total future value can be calculated by summing the product of two arrays as in the following example.  
 ``` p
 import numpy as np
@@ -163,6 +167,8 @@ Now, consider the opposite question.  Suppose we want to spend some amount $y_1$
 $$\frac{y_1}{1+r} + \frac{y_2}{(1+r)^2} + \cdots + \frac{y_m}{(1+r)^m}.$$
 
 ::: callout-tip
+
+# Present value of multiple cash flows
 
 The total present value can also be computed by summing the product of two arrays as in the following example.  
 ``` p
@@ -203,7 +209,9 @@ $$ y \times \text{AF}.$$
 
 ::: callout-tip
 
-Here are three ways to compute the present value of an annuity in python.  You may need to install the numpy_financial library ("pip install numpy-financial").  
+# Calculating annuity values
+
+Here are three ways to compute the present value of an annuity in python.  You may need to install the numpy_financial library ("pip install numpy-financial") for the third.  
 ``` p
 import numpy as np
 n = 10
@@ -285,6 +293,8 @@ The answers to the questions are as follows.  It is a bit more complicated to ca
 
 ::: callout-tip
 
+# Calculating principals and payments
+
 Here are ways to calculate a loan payment or loan amount.  
 ``` p
 import numpy as np
@@ -315,7 +325,9 @@ This is the future value of the present value "shortage;" that is, it is the fut
 
 ::: callout-tip
 
-Here are the answers to all four questions, using functions from numpy-financial.  The sign conventions are that the loan amount is positive (a cash inflow) and loan payments (regular payments and balloon) are negative.  If the balloon calculation turns out to be positive, it means we've overpaid the bank and should get money back.  We can include a balloon when answering the first three questions by setting **fv=-balloon**.
+# Using numpy-financial
+
+Here are the answers to all four questions, using functions from numpy-financial.  The sign conventions are that the loan amount is positive (a cash inflow) and loan payments (regular payments and balloon) are negative.  If the balloon calculation turns out to be positive, it means we've overpaid the bank and should get money back.  We can include a balloon when answering the first three questions by setting, for example, **fv=-100000** when the balloon is $100,000.
 ``` p
 import numpy_financial as npf
 n = 30     # number of years
