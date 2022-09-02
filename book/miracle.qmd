@@ -265,9 +265,9 @@ where $e$ is the natural exponential ($2.718\ldots$).  Obviously, continuous com
 
 When buying a car or home, we might have one or more of the following questions.
 
-1.  I know how much I need to borrow, what the term of the loan will be, and what the rate will be.  What will my payments be?
+1.  I know how much I want to borrow, what the term of the loan will be, and what the rate will be.  What will my payments be?
 2.  I know what the term of the loan will be and what the rate will be, and I know the payment that I can afford.  How much can I borrow?
-3.  I know what the term of the loan will be, how much I need to borrow, and how much I can afford to pay.  What rate do I need to get?
+3.  I know what the term of the loan will be, how much I want to borrow, and how much I can afford to pay.  What rate do I need to get?
 
 In this section, we will explain how to answer these questions.  For concreteness, suppose the loan will have monthly payments.  We will work in terms of an annual rate $r$ and calculate the monthly rate as $r/12$ the way banks do.  Analogous calculations can be used to answer the questions for loans with annual payments.
 
@@ -303,18 +303,19 @@ amount = payment * AF
 ```
 :::
 
-We'll show how to answer the third question below, and we'll also answer a fourth question, which might occasionally arise:
+Let's also answer a fourth question, which might occasionally arise:
 
-4.  I know what the term of the loan will be, how much I need to borrow, how much I can afford to pay, and what the rate will be.  If my payments aren't enough, and I can get a balloon structure (a final payoff at maturity), how much will the balloon be?
+4.  I know what the term of the loan will be, how much I want to borrow, how much I can afford to pay, and what the rate will be.  If my payments aren't enough, and I can get a balloon structure (a final payoff at maturity), how much will the balloon be?
 
 If there is a balloon structure, then the loan amount equals the present value of the non-balloon payments ($\text{payment} \times \text{AF}$) plus the present value of the balloon, which is
 $$\text{balloon} \times \frac{1}{(1+r/12)^{12n}}.$$
 Thus,
 $$\text{balloon} = \left(1+\frac{r}{12}\right)^{12n} \times (\text{amount} - \text{payment} \times AF)$$
+This is the future value of the present value "shortage;" that is, it is the future value of the loan amount in excess of the present value of the monthly payments.  
 
 ::: callout-tip
 
-Here are the answers to all four questions, using functions from numpy-financial.  The sign conventions are that the loan amount is positive (a cash inflow) and loan payments (regular payments and balloon) are negative.
+Here are the answers to all four questions, using functions from numpy-financial.  The sign conventions are that the loan amount is positive (a cash inflow) and loan payments (regular payments and balloon) are negative.  If the balloon calculation turns out to be positive, it means we've overpaid the bank and should get money back.  We can include a balloon when answering the first three questions by setting **fv=-balloon**.
 ``` p
 import numpy_financial as npf
 n = 30     # number of years
