@@ -143,6 +143,26 @@ The return of a portfolio combining $N$ assets is simply the weighted average of
 $$ r_p = \sum_{i=1}^{N} w_i r_i\,, $$ {#eq-n-asset-return}
 where the weights $\{w_i\}_{i=1}^N$ are the fractions of capital invested in each asset.  The expected return of the portfolio is  the weighted sum of the expected returns of each asset:
 $$ E[r_p] = \sum_{i=1}^{N} w_i E[r_i]\,.$$ {#eq-n-asset-expret}
+
+:::  {.callout-tip collapse="true"}
+## Calculating Portfolio Returns in Python^[In Excel, given arrays of expected returns and portfolio weights, the portfolio expected return can be calculated using the SUMPRODUCT command.]
+
+Given an array of returns (either expected or realized returns) and an array of weights, the portfolio return can be calculated using matrix multiplication in numpy.  Note the inputs below are decimal notation.  Multiply by 100 to get percents!  
+``` p
+import numpy as np
+
+# Expected returns
+mns = np.array([0.10, 0.05, 0.07])
+
+# Portfolio weights
+wgts = np.array([0.25, 0.5, 0.25])
+
+#Portfolio expected return
+port_expret = wgts.T @ mns
+```
+:::
+
+
 The riskiness of the portfolio, as measured by the portfolio variance, is:
 $$
 \begin{align}
@@ -171,19 +191,25 @@ we can calculate the portfolio variance as the matrix product
 $$ \text{var}[r_p] = w'Vw \,.$$ {#eq-mmult-portvar}
 
 :::  {.callout-tip collapse="true"}
-## Calculating Portfolio Statistics in Python^[In Excel, given an array of expected returns and portfolio weights, the portfolio expected return can be calculated using the SUMPRODUCT command.  The equivalent Excel command to calculate the portfolio variance  is MMULT(TRANSPOSE(w),MMULT(V,w)) where w is a column of portfolio weights and V is the covariance matrix.]
+## Calculating Portfolio Risk in Python^[In Excel, portfolio variance can be calculated with the command MMULT(TRANSPOSE(w),MMULT(V,w)) where w is a column of portfolio weights and V is the covariance matrix.]
 
-Given a vector of weights, calculating the portfolio variance in python is easy using matrix multiplication in numpy.  Note the inputs below are decimal notation.  Multiply the expected returns, standard deviations, and correlations by 100 to get percents!  
+Given an array of weights, calculating the portfolio variance in python is easy using matrix multiplication in numpy.  Note the inputs below are decimal notation.  Multiply the standard deviations and correlations by 100 to get percents!  Two methods for creating a covariance matrix are demonstrated.  The first demonstrates entry element-by-element, and the second more elegantly (and concisely!) uses matrix multiplication using the array of standard deviations and the correlation matrix.
 ``` p
-import numpy
-# Expected returns
-mns = np.array([0.10, 0.05, 0.07])
+import numpy as np
+
+##### Inputs
 # Standard deviations
 sds = np.array([0.20, 0.12, 0.15])
+
 # Correlations
 corr12 = 0.3
 corr13 = 0.3
 corr23 = 0.3
+
+# Portfolio weights
+wgts = np.array([0.25, 0.5, 0.25])
+
+##### Method 1 to calculate covariance matrix
 # Covariances
 cov12 = corr12 * sds[0] * sds[1]
 cov13 = corr13 * sds[0] * sds[2]
@@ -192,24 +218,23 @@ cov23 = corr23 * sds[1] * sds[2]
 cov = np.array([[sds[0]**2,  cov12,     cov13], \
                 [cov12,      sds[1]**2, cov23], \
                 [cov13,      cov23,     sds[2]**2]])
-# Portfolio weights
-wgts = np.array([0.25, 0.5, 0.25])
 
-#Portfolio expected return
-port_expret = wgts.T @ mns
+##### Method 2 to calculate covariance matrix
+# Correlation matrix
+C  = np.identity(3)
+C[0, 1] = C[1, 0] = corr12
+C[0, 2] = C[2, 0] = corr13
+C[1, 2] = C[2, 1] = corr23
+# Covariance matrix
+cov = np.diag(sds) @ C @ np.diag(sds)
 
+##### Portfolio risk measures
 #Portfolio variance
-port_var = wgts.T @ cov @ wgts
+port_var = wgts @ cov @ wgts
 
 #Portfolio standard deviation
 port_sd  = np.sqrt(port_var)
 ```
-:::
-
-
-::: callout-note
-## Calculating Portfolio Statistics in Excel
-SHOULD WE DO THIS? AN ALTERNATIVE IS TO PUT ALL EXCEL INFORMATION IN AN APPENDIX TO EVERY CHAPTER
 :::
 
 
@@ -647,7 +672,6 @@ The code below relies on a Portfolio python object, which needs to be executed o
 
 ``` p
 import numpy as np
-import plotly.graph_objects as go
 
 # Expected returns
 mns = np.array([0.10, 0.05, 0.07])
@@ -657,14 +681,12 @@ sds = np.array([0.20, 0.12, 0.15])
 corr12 = 0.3
 corr13 = 0.3
 corr23 = 0.3
-# Covariances
-cov12 = corr12 * sds[0] * sds[1]
-cov13 = corr13 * sds[0] * sds[2]
-cov23 = corr23 * sds[1] * sds[2]
 # Covariance matrix
-cov = np.array([[sds[0]**2,  cov12,     cov13], \
-                [cov12,      sds[1]**2, cov23], \
-                [cov13,      cov23,     sds[2]**2]])
+C  = np.identity(3)
+C[0, 1] = C[1, 0] = corr12
+C[0, 2] = C[2, 0] = corr13
+C[1, 2] = C[2, 1] = corr23
+cov = np.diag(sds) @ C @ np.diag(sds)
 
 # Define portfolios class object
 AllowShorting = False
@@ -1392,7 +1414,41 @@ Recall from @eq-cal that the slope of the CAL for a risky asset is the Sharpe ra
 
 ::: {.callout-tip collapse="true"}
 ## Calculating the Tangency Portfolio in Python
-TO DO
+The code below relies on a Portfolio python object, which needs to be executed or imported before using this code.  See @sec-portfolio-class for details.
+``` p
+import numpy as np
+
+# Risk-free rate
+rs = 0.02
+# Expected returns
+mns = np.array([0.10, 0.05, 0.07])
+# Standard deviations
+sds = np.array([0.20, 0.12, 0.15])
+# Correlations
+corr12 = 0.3
+corr13 = 0.3
+corr23 = 0.3
+# Covariance matrix
+C  = np.identity(3)
+C[0, 1] = C[1, 0] = corr12
+C[0, 2] = C[2, 0] = corr13
+C[1, 2] = C[2, 1] = corr23
+cov = np.diag(sds) @ C @ np.diag(sds)
+
+# Define portfolios class object
+AllowShorting = False
+P = portfolio(mns, cov, AllowShorting)
+
+##### Tangency Portfolio
+# Weights
+portTang = P.tangency(rs)
+# Expected return
+mnTang = portTang @ mns
+# Standard deviation
+sdTang = np.sqrt(portTang @ cov @ portTang)
+# Sharpe ratio
+srTang = (mnTang - rs)/sdTang
+```
 :::
 
 The tangency portfolio is thus the optimal combination of risky assets, and all investors should invest somewhere along the tangency portfolio CAL.  This is an example of the **two-fund separation** property of asset allocation.  All investors will choose to allocate capital to the risk-free asset and an optimal risky asset portfolio.  The problem of determining an optimal all-risky asset portfolio is separate from the choice of where to invest on the resulting capital allocation line.  We discuss the latter decision of how much capital to allocate to risky assets relative to the risk-free asset in @sec-preferences.
@@ -2662,8 +2718,7 @@ w^*_{\text{high}} = \begin{cases}
     \frac{E[r_{\text{high}}-r_f^{\text{borrow}}]}{A \cdot \text{var}_{\text{high}}} & \text{if } A < \frac{E[r_{\text{high}}-r_f^{\text{borrow}}]}{ \text{var}_{\text{high}}} \,. \\
 \end{cases}
 \end{equation}
-where $a^*$ is defined as:^[For intermediate risk aversion levels, the optimal weight in the efficient low-risk portfolio solves
-$$ \underset{a}\max E[a\cdot r_{\text{low}} + (1-a)\cdot r_{\text{high}}] - 0.5\cdot A \cdot \text{var}[a\cdot r_{\text{low}} + (1-a)\cdot r_{\text{high}}]\,. $$  The covariance between the efficient low risk and high mean portfolios ($\text{cov}[r_{\text{low}}, r_{\text{high}}$) can be calculated as $w_{\text{low}}' V w_{\text{high}}$.]
+where $a^*$ is defined as:^[For intermediate risk aversion levels, the optimal weight in the efficient low-risk portfolio solves $$ \underset{a}\max E[a\cdot r_{\text{low}} + (1-a)\cdot r_{\text{high}}] - 0.5\cdot A \cdot \text{var}[a\cdot r_{\text{low}} + (1-a)\cdot r_{\text{high}}]\,. $$  The covariance between the efficient low risk and high mean portfolios ($\text{cov}[r_{\text{low}}, r_{\text{high}}$) can be calculated as $w_{\text{low}}' V w_{\text{high}}$.]
 $$ a^* = \frac{E[r_{\text{low}} - r_{\text{high}}] - A (\text{cov}[r_{\text{low}}, r_{\text{high}}]-\text{var}[r_{\text{high}}])}{A (\text{var}[r_{\text{low}}]+\text{var}[r_{\text{high}}]-2\text{cov}[r_{\text{low}}, r_{\text{high}}])}\,.$$ {#eq-frontier-optimal}
 
 
