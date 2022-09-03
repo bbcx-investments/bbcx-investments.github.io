@@ -185,15 +185,20 @@ We can also reach this conclusion without using the formula for the sum of a geo
 
 Now consider an annuity of $y$ per year for $n$ years.  The present value is
 $$\frac{y}{1+r} + \frac{y}{(1+r)^2}  + \cdots + \frac{y}{(1+r)^n}$$
-This annuity is the difference of two perpetuities: a perpetuity that starts in a year and another perpetuity that starts in $n+1$ years.  So, the present value is the difference of two present values: the present value $y/r$ of the first perpetuity minus the present value of the second perpetuity.  The present value of the second perpetuity as of year $n$ (one year before it begins) is $y/r$ and that value discounted to today is 
-$$\frac{1}{(1+r)^n} \times \frac{y}{r}.$$
-Hence, the present value of the annuity is
-$$\frac{y}{r} - \frac{1}{(1+r)^n} \times \frac{y}{r} = \frac{y}{r} \left(1-\frac{1}{(1+r)^n}\right).$$
-
-We call the following the [annuity factor]{style="color: Tomato;"}:
+This can be calculated in terms of what we call the [annuity factor]{style="color: Tomato;"}:
 $$ \text{AF} = \frac{1}{r} \left(1-\frac{1}{(1+r)^n}\right).$$
 The present value of the annuity is
 $$ y \times \text{AF}.$$
+
+::: callout-note
+
+# Deriving the annuity formula
+
+To derive the formula for the annuity present value, observe that the annuity is the difference of two perpetuities: a perpetuity that starts in a year and another perpetuity that starts in $n+1$ years.  So, the present value is the difference of two present values: the present value $y/r$ of the first perpetuity minus the present value of the second perpetuity.  The present value of the second perpetuity as of year $n$ (one year before it begins) is $y/r$ and that value discounted to today is 
+$$\frac{1}{(1+r)^n} \times \frac{y}{r}.$$
+Hence, the present value of the annuity is
+$$\frac{y}{r} - \frac{1}{(1+r)^n} \times \frac{y}{r} = \frac{y}{r} \left(1-\frac{1}{(1+r)^n}\right) = y \times \text{AF}.$$
+:::
 
 ::: callout-tip
 
@@ -226,8 +231,13 @@ If $g \ge r$, meaning that growth in the cash flows is so fast that it offsets o
 $$\frac{y/(1+r)}{1-(1+g)/(1+r)} =  \frac{y}{r-g}.$$
 We can also see this by assuming that we start with $y/(r-g)$.  In the first year, we earn $ry/(r-g)$ from which we can spend $y$ and reinvest $ry/(r-g)-y =gy/(r-g)$, so our account will grow at rate $g$.  This growth is enough to finance a cash flow growing at rate $g$, and this can continue forever.  
 
+::: callout-note
+
+# Valuing growing annuities
+
 If the sequence of growing cash flows lasts for a finite number $n$ of years, then it is a growing annuity, and its value is the difference of the values of two growing perpetuities.  Similar to the case of a level annuity, we can compute the value of a growing annuity as
 $$\frac{y}{r-g} - \frac{1}{(1+r)^n} \times \frac{y}{r-g} = \frac{y}{r-g}\left(1 - \frac{1}{(1+r)^n}\right).$$
+:::
 
 ## Monthly rates, etc.
 
@@ -509,18 +519,14 @@ fig.show()
 ```
 
 ::: callout-tip
-## Ending balance and future values
+## Calculating the ending balance in terms of future values
 We can compute the ending balance as a sum of future values: the future value of the initial balance plus the future values of the deposits minus the future values of the withdrawals.  
 
 ```p
 import numpy as np
-m = 360
-n = 720
-r = 0.005
-B0 = 100000
-g = 0.001
-D1 = 1000
-W = 10000
+m, n = 360, 720
+g, r = 0.001, 0.005
+B0, D1, W = 100000, 1000, 10000
 
 # array of deposits
 D = D1 * (1+g)**np.arange(m)
