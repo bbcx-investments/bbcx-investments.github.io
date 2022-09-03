@@ -8,7 +8,6 @@ If an investment account earns a steady rate of return and funds are not withdra
 #| label: fig-miracle-exponential
 #| fig-cap: "Growth of an Investment Account"
 
-
 import plotly.graph_objects as go
 import numpy as np
 
@@ -27,18 +26,14 @@ trace2 = go.Scatter(
 )
 
 fig = go.Figure()
-fig.layout.template = "none"
 fig.add_trace(trace1)
 fig.add_trace(trace2)
-fig.update_traces(
-    hovertemplate="""
-    Year %{x}<br>
-    $%{y:.2f}<extra></extra>
-    """
-)
-fig.layout.xaxis["title"] = "Year"
-fig.layout.yaxis["title"] = "Account Balance"
+string = "year %{x}<br>balance = $%{y:.2f}"
+fig.update_traces(hovertemplate=string)
 fig.update_layout(
+    template="none",
+    xaxis_title="Year",
+    yaxis_title="Account Balance",
     yaxis_tickprefix="$", 
     yaxis_tickformat=",.0f",
     legend=dict(
@@ -81,7 +76,6 @@ The values in  @fig-miracle-exponential are future value factors at 4% and 8%, f
 #| label: fig-miracle-pvfactors
 #| fig-cap: "Present Value Factors"
 
-
 import plotly.graph_objects as go
 import numpy as np
 
@@ -91,27 +85,21 @@ trace1= go.Scatter(
     mode="lines",
     name="8%"
 )
-
 trace2 = go.Scatter(
     x=np.arange(31), 
     y=1.04**(-np.arange(31)),
     mode="lines",
     name="4%"
 )
-
 fig = go.Figure()
-fig.layout.template = "none"
 fig.add_trace(trace1)
 fig.add_trace(trace2)
-fig.update_traces(
-    hovertemplate="""
-    Year %{x}<br>
-    $%{y:.2f}<extra></extra>
-    """
-)
-fig.layout.xaxis["title"] = "Year"
-fig.layout.yaxis["title"] = "Present Value Factor"
+string = "year %{x}<br>PV factor = %{y:.1%}"
+fig.update_traces(hovertemplate=string)
 fig.update_layout(
+    template="none",
+    xaxis_title="Year",
+    yaxis_title="PV Factor",
     yaxis_tickformat=".0%",
     legend=dict(
         yanchor="top", 
@@ -414,11 +402,11 @@ The actual returns of the U.S. market over the decade 1971--1980 were
 
 * 1971 = 16.17\%
 * 1972 = 16.89\%
-* 1973 = -19.25%
-* 1974 = -27.75%
+* 1973 = --19.25\%
+* 1974 = --27.75\%
 * 1975 = 38.24%
 * 1976 = 26.99%
-* 1977 = -3.14%
+* 1977 = --3.14%
 * 1978 = 8.21%
 * 1979 = 23.47%
 * 1980 = 33.37%
@@ -436,7 +424,7 @@ For a simpler example of the difference between the two averages, suppose an ass
 $$(1+r)^2 = (1 - 0.5)(1 + 0.5) = 0.75,$$
 which is equivalent to
 $$r = \sqrt{0.75} - 1 = - 0.134.$$
-Losing 13.4% two years in a year will put us 25% down.  In general, the geometric average is computed as
+Losing 13.4% two years in a row will put us 25% down.  In general, the geometric average is computed as
 $$r = [(1+r_1) \cdots (1+r_n)]^{1/n}.$$
 To continue the example, to get back to even after losing 50\%, clearly an asset needs to double, meaning a 100% return.  The geometric average would be zero, and the arithmetic average would be 25%.  The large difference between the two is due to the extreme variability in this example.
 
@@ -450,25 +438,112 @@ This is a little cumbersome to say, so in finance we simply say that $r$ is the 
 $$n \log (1+r) = \log (1+r_1) + \cdots \log (1+r_n)$$
 or, equivalently,
 $$\log (1+r) = \frac{\log (1+r_1) + \cdots + \log (1+r_n)}{n}.$$
-Thus, "geometric average" means "average in logs."  These logarithms of one-plus-returns are called [continuously compounded returns]{style="color: Tomato"}.  Recall that if \$1 is invested for a year at rate $z$ with continuous compounding, then it grows to $e^z$, where $e$ is the natural exponential.  So, by investing \$1 for a year at rate $\log (1+r)$ with continuous compounding , at the end of the year we have $e^{\log (1+r)} = 1+r$.  Therefore, continuous compounding at rate $\log (1+r)$ is the same as earning $r$.  The upshot is that "geometric average" means a normal (arithmetic) average for continuously compounded returns.  Returning to the earlier example, suppose an asset drops by 50\% and then has a 100\% return, getting back to even.  The continuously compounded returns are $\log (1-0.5) = \log 0.5$ and $\log (1+1) = \log 2$, and it is indeed true that $\log 0.5 + \log 2 = 0$, so the average continuously compounded return represents the true experience of the asset -- it broke even.
+Thus, "geometric average" means "average in logs."  These logarithms of one-plus-returns are called [continuously compounded returns]{style="color: Tomato"}.  Recall that if \$1 is invested for a year at rate $z$ with continuous compounding, then it grows to $e^z$ dollars, where $e$ is the natural exponential.  So, by investing \$1 for a year at rate $\log (1+r)$ with continuous compounding , at the end of the year we have $e^{\log (1+r)} = 1+r$.  Therefore, continuous compounding at rate $\log (1+r)$ is the same as earning $r$.  The upshot is that "geometric average" means a normal (arithmetic) average for continuously compounded returns.  Returning to the earlier example, suppose an asset drops by 50\% and then has a 100\% return, getting back to even.  The continuously compounded returns are $\log (1-0.5) = \log 0.5$ and $\log (1+1) = \log 2$, and it is indeed true that $\log 0.5 + \log 2 = 0$, so the average continuously compounded return represents the true experience of the asset -- it broke even.
 :::
 
 ## Retirement planning
 
-Let's put some things together to address an important problem: planning for retirement.  We may already have some funds in an investment account, and we plan to make additional deposits monthly.  At some point, we will start making withdrawals monthly.  All the while, we suppose the funds in the account earn some rate of return.  For simplicity, we'll assume here that the return is the same each month.  We'll later look at simulating random returns.  We'll also ignore taxes here, deferring that discussion to a later chapter.
+Let's put some things together to address an important problem: planning for retirement.  We may already have some funds in an investment account, and we plan to make additional deposits monthly.  At some point, we'll start making withdrawals monthly.  All the while,  the funds in the account earn some rate of return.  For simplicity, we'll assume here that the return is the same each month.  We'll later look at simulating random returns.  We'll also ignore taxes here, deferring that discussion to a later chapter.
 
-Let $r$ denote the monthly rate of return.  It should be something like a half percent ($r=0.005$).  We'll interpret this as a real rate of return and take our future deposits and withdrawals to be in today's dollars.  
+We'll use a real monthly rate of return.  Denote it by $r$.  It should be something like a half percent ($r=0.005$) or a third of a percent.  We'll take the future deposits and withdrawals to be in today's dollars.  
 
 Let $B_0$ denote the funds in the account today.  At the end of a month, we'll make our first deposit $D_1$.  Our account will grow during the month due to the investment return $rB_0$ and the deposit, so our balance at the end of the first month will be
 $$B_1 = (1+r)B_0 + D_1.$$
-This continues monthly as
+The date subscripts correspond to month-ends: $B_1$ is the balance at the end of month 1, etc.
+The account continues to grow monthly as
 $$B_i = (1+r)B_{i-1} + D_i$$
 until the date of our last deposit.  Call this date $m$, so there are $m$ months of deposits.  In other words, we plan to work for $m$ more months and then retire.
 
-To finance our spending during the first month
+To finance our spending during the first month of retirement (month $m+1$), we'll make a withdrawal at the beginning of the month, which is again date $m$ (beginning of month $m+1$ = end of month $m$).  So, we make both a deposit and a withdrawal at date $m$ (of course, we would really only make the net deposit or withdrawal), producing
+$$B_m = (1+r)B_{m-1} + D_m - W_m.$$
+Subsequently, we make only withdrawals, so
+$$B_i = (1+r)B_{i-1} - W_i$$
+until the last month.  Call this month $n$, so there are $n$ total months.  We make a withdrawal at the beginning of month $n$, which is date $n-1$, producing
+$$B_{n-1} = (1+r)B_{n-2} - W_{n-1},$$
+and if there is anything remaining in the account at that time it earns a final return, producing a "bequest" of
+$$B_n = (1+r)B_{n-1}.$$
 
+We probably expect our income to grow in real terms during our working years, so let's assume the deposits grow in real terms at some constant rate $g$.  Thus, we need to input $D_1$ and then calculate $D_2 = (1+g)D_1$, $D_3 = (1+g)D_2$, etc.  It's not clear whether where our withdrawals should grow in real terms over time or decline, so let's assume they are a constant amount $W$.
+Thus, the inputs are $m$, $n$, $r$, $B_0$, $g$, $D_1$, and $W$.  @fig-retirement presents an example with $m=360$, $n=720$, $r=0.005$, $B_0 = \text{100,000}$, $g=0.001$, $D_1 = \text{1,000}$, and $W = \text{10,000}$.  To select the inputs for an interactive figure, see [https://bbcx-investments.com](https://bbcx-investments.com).
 
+```{python}
+#| label: fig-retirement
+#| fig-cap: "Retirement Account"
 
+import numpy as np
+import plotly.graph_objects as go
+
+m = 360
+n = 720
+r = 0.005
+B0 = 100000
+g = 0.001
+D1 = 1000
+W = 10000
+D = D1 * (1 + g) ** np.arange(m)
+
+B = np.zeros(n + 1)
+B[0] = B0
+for i in range(1, m):
+    B[i] = (1 + r) * B[i - 1] + D[i - 1]
+B[m] = (1 + r) * B[m - 1] + D[m - 1] - W
+for i in range(m + 1, n):
+    B[i] = (1 + r) * B[i - 1] - W
+B[n] = (1 + r) * B[n - 1]
+
+string = "month %{x}<br>balance=$%{y:,.0f}"
+trace = go.Scatter(
+    x=np.arange(n+1),
+    y=B,
+    mode="lines",
+    hovertemplate=string
+)
+fig = go.Figure(trace)
+fig.update_layout(
+    template="none",
+    xaxis_title="Month",
+    yaxis_title="Account Balance",
+    yaxis_tickprefix="$", yaxis_tickformat=",.0f"
+)
+fig.show()
+```
+
+::: callout-tip
+## Ending balance and future values
+We can compute the ending balance as a sum of future values: the future value of the initial balance plus the future values of the deposits minus the future values of the withdrawals.  
+
+```p
+import numpy as np
+m = 360
+n = 720
+r = 0.005
+B0 = 100000
+g = 0.001
+D1 = 1000
+W = 10000
+
+# array of deposits
+D = D1 * (1+g)**np.arange(m)
+
+# future value of initial balance
+FVB = B0 * (1+r)**n
+
+# future values of deposits
+FVD = D * (1+r)**np.arange(n-1, n-m-1, -1)
+
+# future values of withdrawals
+FVW = W * (1+r)**np.arange(n-m, 0, -1)
+
+# account balance at end
+Bn = FVB + np.sum(FVD) - np.sum(FVW)
+```
+
+This formulation is convenient if we want to solve for an input that makes the plan feasible, given other inputs.  For example, we can solve for the feasible withdrawal as follows:
+
+```p
+W = (FVB + np.sum(FVD)) / (1+r)**np.arange(n-m, 0, -1)
+```
+:::
 
 
 ::: callout-note
