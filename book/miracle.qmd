@@ -441,7 +441,7 @@ $$r = [(1+r_1) \cdots (1+r_n)]^{1/n}.$$
 To continue the example, to get back to even after losing 50\%, clearly an asset needs to double, meaning a 100% return.  The geometric average would be zero, and the arithmetic average would be 25%.  The large difference between the two is due to the extreme variability in this example.
 
 ::: callout-note
-## Geometric averages and continuously compounded returns
+## Geometric average and continuously compounded returns
 
 The term "geometric average" is not unique to finance, but it is used a little differently in finance than elsewhere.  Using the term in its non-finance meaning, the relationship
  $$(1+r)^n = (1+r_1) \cdots (1+r_n)$$

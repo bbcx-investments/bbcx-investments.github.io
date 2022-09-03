@@ -121,7 +121,8 @@ If return $i$ and $j$ both tend to have return realizations either above or belo
 $$ \text{corr}[r_i,r_j] = \rho_{ij} = \frac{\text{cov}[r_i,r_j]}{\text{sd}[r_i]\cdot\text{sd}[r_j]}\,.$$ {#eq-corr-defn}
 Correlations range between -1 (perfectly negatively correlated) and 1 (perfectly correlated).  Covariances, on the other hand, can take any values.
 
-### Two-Asset Portfolios
+### Two-Asset Portfolios {-}
+
 The return of a two-asset portfolio is the weighted sum of the returns of the underlying assets:
 $$ r_p = w_1 r_1 + w_2 r_2\,, $$ {#eq-2asset-return}
 where $w_1$ and $w_2$ are the portfolio weights.  Unless otherwise stated, we will assume that portfolios are fully invested; that is, that the sum of the weights equal 1.  What is the expected return and riskiness of the portfolio of the two assets?  The expected return is simply the weighted average of each assets expected return:
