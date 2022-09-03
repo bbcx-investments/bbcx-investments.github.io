@@ -265,9 +265,16 @@ The annual rate achieved by compounding is higher the more frequently a bank com
 $$\left(1 + \frac{0.1268}{12}\right)^{12} - 1 = 0.1344$$
 and with daily compounding we have
 $$\left(1 + \frac{0.1268}{365}\right)^{365} - 1 = 0.1351.$$
-Thus, increasing the compounding frequency increases the corresponding annual rate.  We could consider even more frequent compounding.  In the limit, as compounding becomes continuous, we obtain
+Thus, increasing the compounding frequency increases the corresponding annual rate. 
+
+::: callout-note
+## Continuously compounded returns
+
+ We could consider even more frequent compounding.  In the limit, as compounding becomes continuous, we obtain
 $$\lim_{n \rightarrow \infty}  \left(1 + \frac{0.1268}{n}\right)^{n} - 1  = e^{0.1268} - 1 = 0.1352,$$
 where $e$ is the natural exponential ($2.718\ldots$).  Obviously, continuous compounding is never encountered in practice, but it is a useful "as if" device for some calculations that we will encounter later.
+
+:::
 
 ## Principal, payments, and rate
 
@@ -390,9 +397,6 @@ We can express the calculation in the previous paragraph in more generality as
 $$\text{real return} = \frac{\text{nominal return} - \text{inflation rate}}{1 + \text{inflation rate}},$$
 where the nominal return is the return before adjustment for inflation (20\% in our example) and all returns and rates are in decimal form.  We also call the real return the [return in constant dollars]{style="color: Tomato"}.
 
-
-
-
 We can compound real returns the same way we compounded returns earlier.  Let $r$ denote the real return, $i$ denote the inflation rate, and $z$ denote the nominal return (all in decimal form).  Adding 1 to both sides of the equation for the real return gives
 $$1+r = \frac{z-i}{1+i} + 1 = \frac{1+z}{1+i}.$$
 To calculate what $1 grows to in constant dollars over a period of $n$ years, we calculate 
@@ -446,7 +450,7 @@ This is a little cumbersome to say, so in finance we simply say that $r$ is the 
 $$n \log (1+r) = \log (1+r_1) + \cdots \log (1+r_n)$$
 or, equivalently,
 $$\log (1+r) = \frac{\log (1+r_1) + \cdots + \log (1+r_n)}{n}.$$
-Thus, "geometric average" means "average in logs."  These logarithms of one-plus-returns are called continuously compounded returns.  Recall that if \$1 is invested for a year with continuous compounding, then it grows to $e^z$, where $e$ is the natural exponential.  So, by investing \$1 for a year at rate $\log (1+r)$ with continuous compounding , at the end of the year we have $e^{\log (1+r)} = 1+r$.  Therefore, continuous compounding at rate $\log (1+r)$ is the same as earning $r$.  The upshot is that "geometric average" means a normal (arithmetic) average for continuously compounded returns.  Returning to the earlier example, suppose an asset drops by 50\% and then has a 100\% return, getting back to even.  The continuously compounded returns are $\log (1-0.5) = \log 0.5$ and $\log (1+1) = \log 2$, and it is indeed true that $\log 0.5 + \log 2 = 0$, so the average continuously compounded return represents the true experience of the asset -- it broke even.
+Thus, "geometric average" means "average in logs."  These logarithms of one-plus-returns are called continuously compounded returns.  Recall that if \$1 is invested for a year at rate $z$ with continuous compounding, then it grows to $e^z$, where $e$ is the natural exponential.  So, by investing \$1 for a year at rate $\log (1+r)$ with continuous compounding , at the end of the year we have $e^{\log (1+r)} = 1+r$.  Therefore, continuous compounding at rate $\log (1+r)$ is the same as earning $r$.  The upshot is that "geometric average" means a normal (arithmetic) average for continuously compounded returns.  Returning to the earlier example, suppose an asset drops by 50\% and then has a 100\% return, getting back to even.  The continuously compounded returns are $\log (1-0.5) = \log 0.5$ and $\log (1+1) = \log 2$, and it is indeed true that $\log 0.5 + \log 2 = 0$, so the average continuously compounded return represents the true experience of the asset -- it broke even.
 :::
 
 ## Retirement planning
