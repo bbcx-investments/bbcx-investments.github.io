@@ -428,7 +428,7 @@ $$(1+r_{\text{1971}}) \cdots (1+r_{\text{1980}}) = 2.40 = 1.092^{10}.$$
 However, we should have been more precise in our language.  The correct thing to say is that the [geometric average]{style="color: Tomato"} return in the decade was 9.2%.  The general definition of the geometric average of a sequence of returns $r_1, \ldots, r_n$ is that it is the number $r$ such that
 $$(1+r_1) \cdots (1+r_n) = (1+r)^n.$$
 In other words, $1 grows to the same amount in an account that earns the returns $r_1, \ldots, r_n$ as it does when earning $r$ every year. 
-When there is a risk of confusion, we will call the usual average (0.01132 for 1971--1980) the [arithmetic average]{style="color: Tomato"} return.  Both averages have their uses, as we will see in subsequent chapters.
+When there is a risk of confusion, we will call the usual average (0.1132 for 1971--1980) the [arithmetic average]{style="color: Tomato"} return.  Both averages have their uses, as we will see in subsequent chapters.
 
 If there is any variability in the returns from period to period, then the geometric average is smaller than the arithmetic average, and the difference between the two is larger when returns are more variable.  The substantial variability in the 1970's produced the more than 2\% difference between the two for that decade.  
 
@@ -454,6 +454,19 @@ Thus, "geometric average" means "average in logs."  These logarithms of one-plus
 :::
 
 ## Retirement planning
+
+Let's put some things together to address an important problem: planning for retirement.  We may already have some funds in an investment account, and we plan to make additional deposits monthly.  At some point, we will start making withdrawals monthly.  All the while, we suppose the funds in the account earn some rate of return.  For simplicity, we'll assume here that the return is the same each month.  We'll later look at simulating random returns.  We'll also ignore taxes here, deferring that discussion to a later chapter.
+
+Let $r$ denote the monthly rate of return.  It should be something like a half percent ($r=0.005$).  We'll interpret this as a real rate of return and take our future deposits and withdrawals to be in today's dollars.  
+
+Let $B_0$ denote the funds in the account today.  At the end of a month, we'll make our first deposit $D_1$.  Our account will grow during the month due to the investment return $rB_0$ and the deposit, so our balance at the end of the first month will be
+$$B_1 = (1+r)B_0 + D_1.$$
+This continues monthly as
+$$B_i = (1+r)B_{i-1} + D_i$$
+until the date of our last deposit.  Call this date $m$, so there are $m$ months of deposits.  In other words, we plan to work for $m$ more months and then retire.
+
+To finance our spending during the first month
+
 
 
 
