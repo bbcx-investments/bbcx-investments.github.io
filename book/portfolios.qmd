@@ -1,4 +1,4 @@
-# Risk and Return of Portfolios
+# Diversification and optimal portfolios
 ```{python}
 #| echo: false
 #| execute: true

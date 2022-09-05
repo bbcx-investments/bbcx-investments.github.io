@@ -136,7 +136,7 @@ x_m(1+r)^{n-m}.$$
 
 ::: callout-tip
 
-# Future value of multiple cash flows
+# Calculating future values as a sum of array products
 
 The total future value can be calculated by summing the product of two arrays as in the following example.  
 ``` p
@@ -156,7 +156,7 @@ $$\frac{y_1}{1+r} + \frac{y_2}{(1+r)^2} + \cdots + \frac{y_m}{(1+r)^m}.$$
 
 ::: callout-tip
 
-# Present value of multiple cash flows
+# Calculating present values as a sum of array products
 
 The total present value can also be computed by summing the product of two arrays as in the following example.  
 ``` p
@@ -194,7 +194,7 @@ $$ y \times \text{AF}.$$
 
 # Deriving the annuity formula
 
-To derive the formula for the annuity present value, observe that the annuity is the difference of two perpetuities: a perpetuity that starts in a year and another perpetuity that starts in $n+1$ years.  So, the present value is the difference of two present values: the present value $y/r$ of the first perpetuity minus the present value of the second perpetuity.  The present value of the second perpetuity as of year $n$ (one year before it begins) is $y/r$ and that value discounted to today is 
+To derive the formula for the present value of an annuity, observe that an annuity is the difference of two perpetuities: a perpetuity that starts in a year and another perpetuity that starts in $n+1$ years.  So, the present value is the difference of two present values: the present value $y/r$ of the first perpetuity minus the present value of the second perpetuity.  The present value of the second perpetuity as of year $n$ (one year before it begins) is $y/r$ and that value discounted to today is 
 $$\frac{1}{(1+r)^n} \times \frac{y}{r}.$$
 Hence, the present value of the annuity is
 $$\frac{y}{r} - \frac{1}{(1+r)^n} \times \frac{y}{r} = \frac{y}{r} \left(1-\frac{1}{(1+r)^n}\right) = y \times \text{AF}.$$
@@ -235,7 +235,7 @@ We can also see this by assuming that we start with $y/(r-g)$.  In the first yea
 
 # Valuing growing annuities
 
-If the sequence of growing cash flows lasts for a finite number $n$ of years, then it is a growing annuity, and its value is the difference of the values of two growing perpetuities.  Similar to the case of a level annuity, we can compute the value of a growing annuity as
+If a sequence of growing cash flows lasts for a finite number $n$ of years, then it is a growing annuity, and its value is the difference of the values of two growing perpetuities.  Similar to the case of a level annuity, we can compute the value of a growing annuity as
 $$\frac{y}{r-g} - \frac{1}{(1+r)^n} \times \frac{y}{r-g} = \frac{y}{r-g}\left(1 - \frac{1}{(1+r)^n}\right).$$
 :::
 
@@ -340,45 +340,24 @@ n = 30     # number of years
 # question 1
 r = 0.04
 amount = 500000
-payment = npf.pmt(
-    rate=r/12,
-    nper=n*12,
-    pv=amount, 
-    fv=0
-)
-
+payment = npf.pmt(rate=r/12, nper=n*12, pv=amount, fv=0)
+ 
 # question 2
 r = 0.04
 payment = -2000
-amount = npf.pv(
-    rate=r/12,
-    nper=n*12,
-    pmt=payment,
-    fv=0
-)
-
+amount = npf.pv(rate=r/12, nper=n*12, pmt=payment, fv=0)
+ 
 # question 3
 amount = 500000
 payment = -2000
-rate = 12*npf.rate(
-    nper=n*12,
-    pv=amount,
-    pmt=payment,
-    fv=0
-)
-
+rate = 12*npf.rate(nper=n*12, pv=amount, pmt=payment, fv=0)
+ 
 # question 4
 r = 0.04
 amount = 500000
 payment = -2000
-balloon = npf.fv(
-    rate=r/12,
-    nper=n*12,
-    pmt=payment,
-    pv=amount
-)
-
-```
+balloon = npf.fv(rate=r/12, nper=n*12, pmt=payment, pv=amount)
+ ```
 :::
 
 
@@ -386,7 +365,7 @@ balloon = npf.fv(
 
 In the decade 1971--1980, the U.S. stock market returned an average of 9.2% per year.  A dollar invested at the first of January in 1971 would have grown to $2.40 by the end of December in 1980.  As decades go, this is quite far from the worst for the U.S. stock market.^[Of the nine decades, 1931-1940, ..., 2011-2020, it ranks fifth.]  However, the 1970's were a time of high inflation.  What was the market performance in real terms?  To be more precise, if we had invested $1 at the begining of January, 1971, by how much would our real buying power have grown by the end of December, 1980?  In other words, what was our return in constant dollars?  We will see here how to answer these questions.
 
-The standard measurement of the inflation rate is the percent change in a price index.  In the U.S., the standard price index used for this calculation is the Consumer Price Index -- All Urban calculated by the Bureau of Labor Statistics.  It represents the cost of a basket of goods sampled in 87 urban areas across the U.S.  To have 7% inflation in a year means that the basket of goods costs 7% more at the end of the year than at the beginning, or in other words that
+The standard measure of the inflation rate is the percent change in a price index.  In the U.S., the standard price index used for this calculation is the Consumer Price Index -- All Urban calculated by the Bureau of Labor Statistics.  It represents the cost of a basket of goods sampled in 87 urban areas across the U.S.  To have 7% inflation in a year means that the basket of goods costs 7% more at the end of the year than at the beginning, or in other words that
 $$\frac{\text{CPI at end of year}}{\text{CPI at beginning of year}} = 1.07.$$
 
 Consider an item that costs $100 today.  Suppose there is 7\% inflation in the coming year, and the item costs $107 at the end of the year.  Suppose also that our portfolio earns 20\% in the year.  To calculate our real return, consider each $100 that we have at the start of the year.  Each $100 could buy one item.  In a year's time, the $100 grows to $120, and the item costs $107, so we could buy one and have $13 left over, which would buy 13/107 units.  This 13/107 is the growth in our buying power relative to the start of the year, so our [real return]{style="color: Tomato"} is 13/107.  
@@ -423,8 +402,8 @@ The actual returns of the U.S. market over the decade 1971--1980 were
 
 The average of these ten numbers is 11.32%.  So, why did we say in the previous section that the market averaged 9.2% in the decade?  The reason is that, if we had been invested throughout the decade, our return would have been exactly the same as if we earned 9.2\% per year; that is,
 $$(1+r_{\text{1971}}) \cdots (1+r_{\text{1980}}) = 2.40 = 1.092^{10}.$$
-However, we should have been more precise in our language.  The correct thing to say is that the [geometric average]{style="color: Tomato"} return in the decade was 9.2%.  The general definition of the geometric average of a sequence of returns $r_1, \ldots, r_n$ is that it is the number $r$ such that
-$$(1+r_1) \cdots (1+r_n) = (1+r)^n.$$
+However, we should be more precise in our language.  The correct thing to say is that the [geometric average]{style="color: Tomato"} return in the decade was 9.2%.  The general definition of the geometric average of a sequence of returns $r_1, \ldots, r_n$ is that it is the number $r$ such that
+$$(1+r)^n = (1+r_1) \cdots (1+r_n).$$
 In other words, $1 grows to the same amount in an account that earns the returns $r_1, \ldots, r_n$ as it does when earning $r$ every year. 
 When there is a risk of confusion, we will call the usual average (0.1132 for 1971--1980) the [arithmetic average]{style="color: Tomato"} return.  Both averages have their uses, as we will see in subsequent chapters.
 
@@ -474,13 +453,13 @@ and if there is anything remaining in the account at that time it earns a final 
 $$B_n = (1+r)B_{n-1}.$$
 
 We probably expect our income to grow in real terms during our working years, so let's assume the deposits grow in real terms at some constant rate $g$.  Thus, we need to input $D_1$ and then calculate $D_2 = (1+g)D_1$, $D_3 = (1+g)D_2$, etc.  It's not clear whether where our withdrawals should grow in real terms over time or decline, so let's assume they are a constant amount $W$.
-Thus, the inputs are $m$, $n$, $r$, $B_0$, $g$, $D_1$, and $W$.  @fig-retirement presents an example with $m=360$, $n=720$, $r=0.005$, $B_0 = \text{100,000}$, $g=0.001$, $D_1 = \text{1,000}$, and $W = \text{10,000}$.  To select the inputs for an interactive figure, see [https://bbcx-investments.com](https://bbcx-investments.com).
+Thus, the inputs are $m$, $n$, $r$, $B_0$, $g$, $D_1$, and $W$.  @fig-retirement presents an example.  See [https://bbcx-investments.com](https://bbcx-investments.com) for an interactive figure with user inputs.
 
 ```{python}
 #| label: fig-retirement
-#| fig-cap: "Retirement Account"
+#| fig-cap: "A retirement account with m=360 month of deposits, n= 720 total months, a monthly rate of return of r= 0.5%, an initial balance of B_0 =  $100,000, a deposit growth rate of g=0.1%, an initial deposit of D_1 =  $1,000, and monthly withdrawals equal to W = $10,000."
 
-import numpy as np
+import numpy as np 
 import plotly.graph_objects as go
 
 m = 360
@@ -519,8 +498,8 @@ fig.show()
 ```
 
 ::: callout-tip
-## Calculating the ending balance in terms of future values
-We can compute the ending balance as a sum of future values: the future value of the initial balance plus the future values of the deposits minus the future values of the withdrawals.  
+## Calculating the ending balance as a sum of future values
+We can compute the ending balance as the future value of the initial balance plus the future values of the deposits minus the future values of the withdrawals.  
 
 ```p
 import numpy as np
