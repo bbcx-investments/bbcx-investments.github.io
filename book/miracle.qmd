@@ -309,12 +309,12 @@ r = 0.04   # annual rate
 AF = (12/r) * (1 - (1+r/12)**(-12*n))
 
 # calculate the loan payment
-amount = 100000
-payment = amount / AF
+principal = 100000
+payment = principal / AF
 
 # calculate the loan amount
 payment = 2000
-amount = payment * AF
+principal = payment * AF
 ```
 :::
 
@@ -338,24 +338,19 @@ import numpy_financial as npf
 n = 30     # number of years
 
 # question 1
-r = 0.04
-principal = 500000
+r, principal = 0.04, 500000
 payment = npf.pmt(rate=r/12, nper=n*12, pv=principal, fv=0)
  
 # question 2
-r = 0.04
-payment = -2000
+r, payment = 0.04, -2000
 principal = npf.pv(rate=r/12, nper=n*12, pmt=payment, fv=0)
  
 # question 3
-principal = 500000
-payment = -2000
+principal, payment = 500000, -2000
 rate = 12*npf.rate(nper=n*12, pv=principal, pmt=payment, fv=0)
  
 # question 4
-r = 0.04
-principal = 500000
-payment = -2000
+r, principal, payment = 0.04, 500000, -2000
 balloon = npf.fv(rate=r/12, nper=n*12, pmt=payment, pv=amount)
  ```
 :::
