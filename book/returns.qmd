@@ -1,4 +1,4 @@
-# Asset returns
+# Asset Returns
 
 A chapter about returns.  There will be some more text here.
 
