@@ -4,6 +4,8 @@
 
 If an investment account earns a steady rate of return and funds are not withdrawn from the account, then the account balance will grow exponentially.  This is sometimes called the "miracle of compound interest."  @fig-miracle-exponential shows the growth of an investment account earning 8% per year, which is what the U.S. stock market earned in real terms over the thirty year period 1992-2021.  Each dollar grows to roughly $10 over a 30 year period at an 8% annual return.  The exponential nature of the growth can be seen from the figure.  Hover over the plot to see the exact values.
 
+[![](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/bbcx-investments/textbook_code.git/HEAD?labpath=Chapter_1_1.ipynb)
+
 ```{python}
 #| label: fig-miracle-exponential
 #| fig-cap: "Growth of an Investment Account"
