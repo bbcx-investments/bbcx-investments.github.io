@@ -1,4 +1,4 @@
-# Diversification and optimal portfolios
+# Diversification and Optimal Portfolios
 ```{python}
 #| echo: false
 #| execute: true
