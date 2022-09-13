@@ -9,12 +9,7 @@ book:
   chapters:
     - index.qmd
     - miracle.qmd
-    - funds.qmd
-    - returns.qmd
-    - portfolios.qmd
-    - fixed-income.qmd
-    - references.qmd
-
+    
 format:
   html:
     theme: cosmo
