@@ -1,3 +1,9 @@
+/.quarto/
+/.vscode/
+/docs/
+/*_files/
+_quarto.yml
+
 *.html
 
 # Byte-compiled / optimized / DLL files
