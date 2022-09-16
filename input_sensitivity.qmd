@@ -7,7 +7,7 @@ Optimal risky portfolios can be quite sensitive to the inputs, which consist of 
 
 Let's return to the example of investing in US equity, developed international, and emerging market funds from the portfolios chapter.  We will fix the input parameters for all but the US equity portfolio and see what happens to the tangency portfolio weights as we vary our assumptions about the US equity portfolio.
 
-### Expected returns
+### Expected returns {-}
 
 Portfolio optimization is quite sensitive to expected returns.  This is rather unfortunate because financial economists and practitioners are not particularly great at forecasting expected returns.  @fig-sensitivity-expret shows how the tangency portfolio weights changes as a function of different inputs for the US equity expected return.  With a drop in the expected return input of only about 0.5%, the allocation to US equity in the optimal risky portfolio goes to zero!  If the expected return input is 5%, the optimal portfolio has short exposure equal to about 50% of total capital.  Higher expected returns inputs result in greater allocations to the US equity portfolio.  If the expected return input is 7%, about 80% of the optimal portfolio is invested in US equities.
 
@@ -100,7 +100,7 @@ fig.show()
 
 ```
 
-### Standard Deviations
+### Standard Deviations {-}
 
 @fig-sensitivity-sd shows the sensitivity of the US market allocation in the tangency portfolio for different standard deviation inputs.  For values in the region of the historical average volatility of 15%, higher standard deviation inputs result in lower allocations to US equities.
 
@@ -146,7 +146,7 @@ fig.show()
 ```
 
 
-### Correlations
+### Correlations {-}
 
 @fig-sensitivity-corr shows the sensitivity of the US market's weight in the tangency portfolio for different inputs of the correlation between the US equity fund and the developed international equity fund.  Lower correlations imply greater diversification benefits, so more capital is allocated to US equities for lower correlation levels, all else equal.
 
@@ -206,7 +206,7 @@ fig.show()
 ```
 
 
-### Error Maximization
+### Error Maximization {-}
 
 The sensitivity of the tangency portfolio to each of these inputs presents a practical problem for investors seeking to implement optimal portfolios in a quantitative sense.  Portfolio optimization is sometimes referred to as error maximization because the tangency portfolio weights may reflect errors in the inputs rather than optimal diversification and risk-reward trade-offs.
 
@@ -218,7 +218,7 @@ A simple way to estimate expected return, standard deviations, and correlations 
 
 To understand the estimation issues that arise in practice, we can simulate the performance of various optimization strategies for choosing portfolios of US, developed international, and emerging market equity funds.  We will simulate from an assumed distribution corresponding to the inputs we have been using so far and then use this simulated "historical" data to estimate inputs to our portfolio optimization problem each year.  We assume an investment horizon of 50 years.  Each year, we'll use the last 30 years of data to estimate the inputs and rebalance our portfolio to the optimal portfolio based on the new input estimates.  As a benchmark, we'll use a simple equal-weighted portfolio of the three funds.  For this example, an equal-weighted portfolio is fairly close to the "perfect information" tangency portfolio of 27.5% in US equities, 33% in developed international, and 39.5% in emerging markets.  Note that an equal-weighted portfolio is the optimal risky portfolio if we assume that (i) all expected returns are the same (ii) all standard deviations are the same, and (iii) all correlations across assets are the same.  Thus, the equal-weighted portfolio is the optimal portfolio if we "give up" on estimating differences in inputs across assets.
 
-### Estimating Expected Returns, Standard Deviations, and Correlations
+### Estimating Expected Returns, Standard Deviations, and Correlations {-}
 
 We run 500 simulations of the exercise above.  The empirical Sharpe ratios of the equal-weighted strategy and the full historical estimation strategy are plotted in @fig-input-est-1, along with the 45-degree line.  The equal-weighted strategy outperformed the full estimation strategy in terms of realized Sharpe ratios for any data point falling below the 45-degree line.  This occurs in just over three-quarters of the simulations.  Trying to estimate the nine inputs each period and find the optimal portfolio generally performed worse than simply equally-weighting the three funds.  @fig-input-est-histogram1 plots the histogram of the difference in simulated Sharpe ratios of the equal-weighted portfolio minus that of the full historical estimation strategy.  On average across the simulations, the Sharpe ratio of the EW strategy is 0.058 higher than the Sharpe ratio of the full historical estimation strategy.
 
@@ -236,6 +236,9 @@ import pandas as pd
 ##### Inputs
 # Number of simulations
 num_sims = 500
+
+# Risk aversion
+raver = 2
 
 # Risk-free rate
 r = 0.02
@@ -287,7 +290,7 @@ def tangency(means, cov, rf, short_lb):
     wgts_tangency = minimize(f, w0, bounds=bnds, constraints=cons).x
     return wgts_tangency
 
-wgts_true = tangency(means,cov,r,short_lb = -3.0)
+
 
 def gmv(cov, short_lb): 
     '''
@@ -314,34 +317,41 @@ def gmv(cov, short_lb):
     wgts_gmv = np.array(sol["x"]).flatten() if sol["status"] == "optimal" else np.array(n * [np.nan])
     return wgts_gmv
 
-wgts_gmv = gmv(cov,short_lb=None)
+# wgts_gmv = gmv(cov,short_lb=None)
+
 
 # Simulate data
 def simulation(means, cov, short_lb, seed):
-	rets = mvn.rvs(means, cov, size=60+T, random_state = seed)
+	rets = mvn.rvs(means, cov, size=window+T, random_state = seed)
 	df = pd.DataFrame(data=rets, columns=['r0','r1','r2'])
 	df.columns
-	df['mn0']=df['r0'].rolling(60).mean()
-	df['mn1']=df['r1'].rolling(60).mean()
-	df['mn2']=df['r2'].rolling(60).mean()
-	df['sd0']=df['r0'].rolling(60).std()
-	df['sd1']=df['r1'].rolling(60).std()
-	df['sd2']=df['r2'].rolling(60).std()
+	df['mn0']=df['r0'].rolling(window).mean()
+	df['mn1']=df['r1'].rolling(window).mean()
+	df['mn2']=df['r2'].rolling(window).mean()
+	df['sd0']=df['r0'].rolling(window).std()
+	df['sd1']=df['r1'].rolling(window).std()
+	df['sd2']=df['r2'].rolling(window).std()
 
-	corrs = df[['r0','r1','r2']].rolling(60, min_periods=60).corr()
+	corrs = df[['r0','r1','r2']].rolling(window, min_periods=window).corr()
 	df['c01']=corrs.loc[(slice(None),'r0'),'r1'].values
 	df['c02']=corrs.loc[(slice(None),'r0'),'r2'].values
 	df['c12']=corrs.loc[(slice(None),'r1'),'r2'].values
+    
+	wgts_true = tangency(means,cov,r,short_lb)
+	wgt_cal_true = (wgts_true @ means - r) / (raver * (wgts_true @ cov @ wgts_true))
+
 
 	model_list = ['true', 'ew', 'est_all', 'est_cov', 'est_sds']
 	for model in model_list:
-		df['portret_'+model] = np.nan 
+		df['portret_'+model] = np.nan  # portret is the realized portfolio return of the 100% risky asset portfolio
 		if model not in ['true','ew']:
 			df['wgt0_'+model] = np.nan
 			df['wgt1_'+model] = np.nan
 			df['wgt2_'+model] = np.nan
+		df['wgt_cal_'+model] =np.nan
+		df['raver_portret_'+model] =np.nan #raver_portret_ is the realized return of the CAL choice of the raver investor
 
-	for i in np.arange(60,60+T):
+	for i in np.arange(window,window+T):
 		# Full estimation inputs at each point in time
 		means = df[['mn0','mn1','mn2']].iloc[i-1].values
 		sds   = df[['sd0','sd1','sd2']].iloc[i-1].values
@@ -359,20 +369,20 @@ def simulation(means, cov, short_lb, seed):
 		# Theoretical optimal weights
 		model = 'true'
 		df.loc[i,'portret_'+model]= df.loc[i,['r0','r1','r2']].values @ wgts_true
+		df.loc[i,'raver_portret_'+model] = r + wgt_cal_true * (df.loc[i,'portret_'+model] -r)
 
-		# Equal-weighted portfolio
-		model = 'ew'
-		wgts_ew = (1/n)*np.ones(n)
-		df.loc[i,'portret_'+model]= df.loc[i,['r0','r1','r2']].values @ wgts_ew
-		
-		
 		# Full estimation tangency portfolio
 		model = 'est_all'
 		w0, w1, w2 = tangency(means,cov,r,short_lb)
 		df.loc[i,'wgt0_' + model] = w0
 		df.loc[i,'wgt1_' + model] = w1
 		df.loc[i,'wgt2_' + model] = w2
-		df.loc[i,'portret_'+model] = df.loc[i,['r0','r1','r2']].values @ df.loc[i,['wgt0_'+model,'wgt1_'+model,'wgt2_'+model]].values
+		# df.loc[i,'portret_'+model] = df.loc[i,['r0','r1','r2']].values @ df.loc[i,['wgt0_'+model,'wgt1_'+model,'wgt2_'+model]].values
+		wgts = np.array([w0, w1, w2])
+		df.loc[i,'portret_'+model] = df.loc[i,['r0','r1','r2']].values @ wgts
+		df.loc[i,'wgt_cal_'+model] = (wgts @ means - r) / (raver * (wgts @ cov @ wgts))
+		df.loc[i,'wgt_cal_'+model] = max(0,df.loc[i,'wgt_cal_'+model])
+		df.loc[i,'raver_portret_'+model] = r + df.loc[i,'wgt_cal_'+model]  * (df.loc[i,'portret_'+model] -r)
 
 		# Estimate only covariance matrix
 		model = 'est_cov'
@@ -380,7 +390,13 @@ def simulation(means, cov, short_lb, seed):
 		df.loc[i,'wgt0_' + model] = w0
 		df.loc[i,'wgt1_' + model] = w1
 		df.loc[i,'wgt2_' + model] = w2
-		df.loc[i,'portret_'+model] = df.loc[i,['r0','r1','r2']].values @ df.loc[i,['wgt0_'+model,'wgt1_'+model,'wgt2_'+model]].values
+		# df.loc[i,'portret_'+model] = df.loc[i,['r0','r1','r2']].values @ df.loc[i,['wgt0_'+model,'wgt1_'+model,'wgt2_'+model]].values
+		wgts = np.array([w0, w1, w2])
+		df.loc[i,'portret_'+model] = df.loc[i,['r0','r1','r2']].values @ wgts
+		df.loc[i,'wgt_cal_'+model] = (means.mean() - r) / (raver * (wgts @ cov @ wgts))
+		df.loc[i,'wgt_cal_'+model] = max(0,df.loc[i,'wgt_cal_'+model])
+		df.loc[i,'raver_portret_'+model] = r + df.loc[i,'wgt_cal_'+model]  * (df.loc[i,'portret_'+model] -r)
+
 
 		# Estimate only standard deviations in covariance matrix
 		model = 'est_sds'
@@ -391,21 +407,38 @@ def simulation(means, cov, short_lb, seed):
 		df.loc[i,'wgt0_' + model] = w0
 		df.loc[i,'wgt1_' + model] = w1
 		df.loc[i,'wgt2_' + model] = w2
-		df.loc[i,'portret_'+model] = df.loc[i,['r0','r1','r2']].values @ df.loc[i,['wgt0_'+model,'wgt1_'+model,'wgt2_'+model]].values
+		# df.loc[i,'portret_'+model] = df.loc[i,['r0','r1','r2']].values @ df.loc[i,['wgt0_'+model,'wgt1_'+model,'wgt2_'+model]].values
+		wgts = np.array([w0, w1, w2])
+		df.loc[i,'wgt_cal_'+model] = (means.mean() - r) / (raver * (wgts @ cov @ wgts))		
+		df.loc[i,'wgt_cal_'+model] = max(0,df.loc[i,'wgt_cal_'+model])
+		df.loc[i,'portret_'+model] = df.loc[i,['r0','r1','r2']].values @ wgts
+		df.loc[i,'raver_portret_'+model] = r + df.loc[i,'wgt_cal_'+model]  * (df.loc[i,'portret_'+model] -r)    
 
-	portret_list = ['portret_' +  model for model in model_list]
+		# Equal-weighted portfolio
+		model = 'ew'
+		cov[0, 0] = cov[1, 1] = cov[2, 2] = (sds.mean())**2
+		wgts = (1/n)*np.ones(n)
+		# df.loc[i,'portret_'+model]= df.loc[i,['r0','r1','r2']].values @ wgts_ew
+		df.loc[i,'portret_'+model] = df.loc[i,['r0','r1','r2']].values @ wgts
+		df.loc[i,'wgt_cal_'+model] = (means.mean() - r) / (raver * (wgts @ cov @ wgts))
+		df.loc[i,'wgt_cal_'+model] = max(0,df.loc[i,'wgt_cal_'+model])
+		df.loc[i,'raver_portret_'+model] = r + df.loc[i,'wgt_cal_'+model]  * (df.loc[i,'portret_'+model] -r)   
+
+
+
+	portret_list = ['raver_portret_' +  model for model in model_list]
 	stats = df[portret_list].describe()
 
 	sr_df = pd.DataFrame(dtype=float, columns = ['sr'], index = model_list)
 	for model in model_list:
-		sr_df.loc[model,'sr'] = (stats.loc['mean','portret_' +  model] - r)/stats.loc['std','portret_' +  model]
+		sr_df.loc[model,'sr'] = (stats.loc['mean','raver_portret_' +  model] - r)/stats.loc['std','raver_portret_' +  model]
+		
 	return sr_df
-
 
 sim_results = pd.DataFrame(dtype=float, columns=['true', 'ew', 'est_all', 'est_cov', 'est_sds'], index=range(num_sims))
 for s in range(num_sims):
     # print('Simulation number: ' + str(s))
-    sim_results.iloc[s] = simulation(means, cov, short_lb=-3.0, seed=s).T
+    sim_results.iloc[s] = simulation(means, cov, short_lb=None, seed=s).T
 
 def figplot(xvar, yvar):
     label_dict = {'true': 'theoretical optimal weights', 
@@ -488,10 +521,8 @@ histplot('ew','est_all')
 ```
 
 
-### Estimating Standard Deviations and Correlations Only
+### Estimating Standard Deviations and Correlations Only {-}
 One option is to just give up on using historical data to estimate expected returns and assume the expected returns are the same across all the assets.  Under this assumption, the optimal risky asset is the global minimum variance portfolio.  @fig-input-est-2 shows the Sharpe ratios of following a GMV strategy each year calculated using historical estimates of standard deviations and correlations.  The benchmark along the horizontal axis is again the equal-weighted strategy.  Portfolio optimization fares better if we do not try to estimate expected returns.  The fraction of simulations in which the equal-weighted strategy beats the GMV strategy using the full covariance matrix estimate is again about three-quarters of the simulations.@fig-input-est-histogram2 plots the histogram of the difference in simulated Sharpe ratios of the equal-weighted portfolio minus that of the GMV strategy.  On average across the simulations, the Sharpe ratio of the EW strategy is 0.048 higher than the Sharpe ratio of the GMV strategy.  Thus, the GMV portfolio performs a bit better relative to an equal-weighted portfolio than trying to estimate the covariance matrix **and** expected returns.  
-
-
 
 ```{python}
 #| label: fig-input-est-2
@@ -510,7 +541,7 @@ histplot('ew','est_cov')
 
 ```
 
-### Estimating Standard Deviations Only
+### Estimating Standard Deviations Only {-}
 
 The advantage of the equal-weighted strategy falls further if we also give up on trying to estimate correlations.  @fig-input-est-3 shows the Sharpe ratios of following a GMV strategy using a covariance matrix with historical estimates of variances but covariances set equal to zero.  This strategy is known as risk parity.  The equal-weighted strategy outperforms this strategy in almost two-thirds of the simulations, but the average difference in Sharpe ratios is economically small.  On average across the simulations, the Sharpe ratio of the EW strategy is only 0.003 higher than the Sharpe ratio of the risk parity strategy.  @fig-input-est-histogram3 plots the histogram of the difference in simulated Sharpe ratios of the equal-weighted portfolio minus that of the risk parity strategy.  Note that there is much less variation in the differences in these strategies than in the GMV or tangency portfolio cases above.  
 
