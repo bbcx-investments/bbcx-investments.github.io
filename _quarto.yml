@@ -9,7 +9,10 @@ book:
   chapters:
     - index.qmd
     - miracle.qmd
+    - portfolios.qmd
+    - input_sensitivity.qmd
     
+
 format:
   html:
     theme: cosmo

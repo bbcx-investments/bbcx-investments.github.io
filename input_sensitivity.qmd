@@ -1,0 +1,565 @@
+
+# Portfolio Optimization Sensitivity to Inputs
+
+Optimal risky portfolios can be quite sensitive to the inputs, which consist of expected returns, standard deviations, and correlations across assets.  An example is provided in the first section below.  In practice, one must estimate these inputs.  Expected returns are notoriously hard to estimate using historical data, which we discuss in detail in SECTION LINK, so we often resort to models for inputs here or assume expected returns are equal across assets.  Asset volatilities and correlations can be forecasted more sucessfully.  Forecasting correlations in portfolios with many assets is complicated by the fact that the number of correlations we need to estimate rises quadratically with the number of assets.
+
+## Sensitivity of weights
+
+Let's return to the example of investing in US equity, developed international, and emerging market funds from the portfolios chapter.  We will fix the input parameters for all but the US equity portfolio and see what happens to the tangency portfolio weights as we vary our assumptions about the US equity portfolio.
+
+### Expected returns {-}
+
+Portfolio optimization is quite sensitive to expected returns.  This is rather unfortunate because financial economists and practitioners are not particularly great at forecasting expected returns.  @fig-sensitivity-expret shows how the tangency portfolio weights changes as a function of different inputs for the US equity expected return.  With a drop in the expected return input of only about 0.5%, the allocation to US equity in the optimal risky portfolio goes to zero!  If the expected return input is 5%, the optimal portfolio has short exposure equal to about 50% of total capital.  Higher expected returns inputs result in greater allocations to the US equity portfolio.  If the expected return input is 7%, about 80% of the optimal portfolio is invested in US equities.
+
+```{python}
+#| label: fig-sensitivity-expret
+#| fig-cap: Sensitivity of tangency weights to expected return input
+import numpy as np
+from cvxopt import matrix
+from cvxopt.solvers import qp as Solver, options as SolverOptions
+from scipy.optimize import minimize_scalar
+from scipy.optimize import minimize
+import plotly.graph_objects as go
+##### Inputs
+# Risk-free rate
+r = 0.02
+# Expected returns
+means = np.array([0.06, 0.065, 0.08])
+# Standard deviations
+sds = np.array([0.15, 0.165, 0.21])
+# Correlations
+corr12 = 0.75
+corr13 = 0.75
+corr23 = 0.75
+# Covariance matrix
+C  = np.identity(3)
+C[0, 1] = C[1, 0] = corr12
+C[0, 2] = C[2, 0] = corr13
+C[1, 2] = C[2, 1] = corr23
+cov = np.diag(sds) @ C @ np.diag(sds)
+
+def tangency(means, cov, rf, Shorts):
+    n = len(means)
+    def f(w):
+        mn = w @ means
+        sd = np.sqrt(w.T @ cov @ w)
+        return -(mn - rf) / sd
+    # Initial guess (equal-weighted)
+    w0 = (1/n)*np.ones(n)
+    # Constraint: fully-invested portfolio
+    A = np.ones(n)
+    b = 1
+    cons = [{"type": "eq", "fun": lambda x: A @ x - b}]
+    if Shorts==True:
+        # No short-sale constraint
+        bnds = [(None, None) for i in range(n)] 
+    else:
+        # With short-sale constraint
+        bnds = [(0, None) for i in range(n)] 
+    # Optimization
+    wgts_tangency = minimize(f, w0, bounds=bnds, constraints=cons).x
+    return wgts_tangency
+
+wgts_true = tangency(means,cov,r,Shorts=True)
+
+# Tangency portfolios for a range of assumed asset 1 expected returns
+n = len(means)
+num_grid=100
+asset1_means = np.linspace(0.04,0.10,num_grid)
+wgts = np.zeros((num_grid,n))
+
+for i,m in enumerate(asset1_means):
+    wgts[i] = tangency(np.array([m, means[1], means[2]]),cov,r,Shorts=True)
+wgt_asset1 = wgts[:,0]
+cd = np.empty(shape=(num_grid, n-1,1), dtype=float)
+cd[:, 0] = wgts[:,1].reshape(-1, 1)
+cd[:, 1] = wgts[:,2].reshape(-1, 1)
+string = "Asset 1 Expected Return Input = %{x:0.2%}<br>"
+string +="Tangency Portfolio Weights:<br>"
+string += "  Asset 1: %{y:0.1%}<br>"
+string += "  Asset 2: %{customdata[0]:.1%}<br>"
+string += "  Asset 3: %{customdata[1]:.1%}<br>"
+string += "<extra></extra>"
+trace = go.Scatter(x=asset1_means,y=wgt_asset1,mode='lines', name="Tangency Weight",
+    customdata=cd, hovertemplate=string,
+)
+
+# Tangency portfolio at actual input
+trace_true = go.Scatter(x=[means[0]],y=[wgts_true[0]],mode='markers', name="Tangency Weight at Actual Input",
+    customdata = np.array([[wgts_true[1],wgts_true[2]]]), hovertemplate=string,
+)
+fig = go.Figure()
+fig.add_trace(trace)
+fig.add_trace(trace_true)
+fig.layout.xaxis["title"] = "Asset 1 Expected Return Input"
+fig.layout.yaxis["title"] = "Asset 1 Tangency Portfolio Weight"
+fig.update_yaxes(tickformat=".1%")
+fig.update_xaxes(tickformat=".1%")
+fig.update_layout(legend=dict(yanchor="top", y =0.99, xanchor="left", x=0.01))
+fig.show()
+
+```
+
+### Standard Deviations {-}
+
+@fig-sensitivity-sd shows the sensitivity of the US market allocation in the tangency portfolio for different standard deviation inputs.  For values in the region of the historical average volatility of 15%, higher standard deviation inputs result in lower allocations to US equities.
+
+```{python}
+#| label: fig-sensitivity-sd
+#| fig-cap: Sensitivity of tangency weights to standard deviation input
+##### Variance input of asset 1:
+# Tangency portfolios for a range of assumed asset 1 standard deviations
+asset1_sds = np.linspace(0.05,0.25,num_grid)
+wgts = np.zeros((num_grid,n))
+
+for i,s in enumerate(asset1_sds):
+    sds_new = np.array([s, sds[1], sds[2]])
+    wgts[i] = tangency(means,np.diag(sds_new) @ C @ np.diag(sds_new),r,Shorts=True)
+wgt_asset1 = wgts[:,0]
+cd = np.empty(shape=(num_grid, n-1,1), dtype=float)
+cd[:, 0] = wgts[:,1].reshape(-1, 1)
+cd[:, 1] = wgts[:,2].reshape(-1, 1)
+string = "Asset 1 Standard Deviation Input = %{x}<br>"
+string +="Tangency Portfolio Weights:<br>"
+string += "  Asset 1: %{y:0.1%}<br>"
+string += "  Asset 2: %{customdata[0]:.1%}<br>"
+string += "  Asset 3: %{customdata[1]:.1%}<br>"
+string += "<extra></extra>"
+trace = go.Scatter(x=asset1_sds,y=wgt_asset1,mode='lines', name="Tangency Weight",
+    customdata=cd, hovertemplate=string,
+)
+
+# Tangency portfolio at actual input
+trace_true = go.Scatter(x=[sds[0]],y=[wgts_true[0]],mode='markers', name="Tangency Weight at Actual Input",
+    customdata = np.array([[wgts_true[1],wgts_true[2]]]), hovertemplate=string,
+)
+fig = go.Figure()
+fig.add_trace(trace)
+fig.add_trace(trace_true)
+fig.layout.xaxis["title"] = "Asset 1 Standard Deviation Input"
+fig.layout.yaxis["title"] = "Asset 1 Tangency Portfolio Weight"
+fig.update_yaxes(tickformat=".1%")
+fig.update_xaxes(tickformat=".1%")
+fig.update_layout(legend=dict(yanchor="top", y =0.99, xanchor="left", x=0.6))
+fig.show()
+
+```
+
+
+### Correlations {-}
+
+@fig-sensitivity-corr shows the sensitivity of the US market's weight in the tangency portfolio for different inputs of the correlation between the US equity fund and the developed international equity fund.  Lower correlations imply greater diversification benefits, so more capital is allocated to US equities for lower correlation levels, all else equal.
+
+```{python}
+#| label: fig-sensitivity-corr
+#| fig-cap: Sensitivity of tangency weights to standard deviation input
+##### Correlation of assets 1 and 2:
+# Tangency portfolios for a range of assumed asset 1 standard deviations
+corr12_grid = np.linspace(0.15,0.95,num_grid)
+wgts = np.empty((num_grid,n))
+
+def is_pos_def(x):
+    if np.all(np.linalg.eigvals(x) > 0):
+        return 'True'
+    else:
+        return 'False'
+
+for i,c in enumerate(corr12_grid):
+    # Covariance matrix
+    C  = np.identity(3)
+    C[0, 1] = C[1, 0] = c
+    C[0, 2] = C[2, 0] = corr13
+    C[1, 2] = C[2, 1] = corr23
+    # Check feasible correlations
+    if is_pos_def(C):
+        wgts[i] = tangency(means,np.diag(sds) @ C @ np.diag(sds),r,Shorts=True)
+    else:
+        print("not positive definite" + str(c*100))
+wgt_asset1 = wgts[:,0]
+cd = np.empty(shape=(num_grid, n-1,1), dtype=float)
+cd[:, 0] = wgts[:,1].reshape(-1, 1)
+cd[:, 1] = wgts[:,2].reshape(-1, 1)
+string = "Input: Correlation of Assets 1 and 2 = %{x}<br>"
+string +="Tangency Portfolio Weights:<br>"
+string += "  Asset 1: %{y:0.1%}<br>"
+string += "  Asset 2: %{customdata[0]:.1%}<br>"
+string += "  Asset 3: %{customdata[1]:.1%}<br>"
+string += "<extra></extra>"
+trace = go.Scatter(x=corr12_grid,y=wgt_asset1,mode='lines', name="Tangency Weight",
+    customdata=cd, hovertemplate=string,
+)
+
+# Tangency portfolio at actual input
+trace_true = go.Scatter(x=[corr12],y=[wgts_true[0]],mode='markers', name="Tangency Weight at Actual Input",
+    customdata = np.array([[wgts_true[1],wgts_true[2]]]), hovertemplate=string,
+)
+fig = go.Figure()
+fig.add_trace(trace)
+fig.add_trace(trace_true)
+fig.layout.xaxis["title"] = "Correlation of Assets 1 and 2"
+fig.layout.yaxis["title"] = "Asset 1 Tangency Portfolio Weight"
+fig.update_yaxes(tickformat=".1%")
+fig.update_xaxes(tickformat=".1%")
+fig.update_layout(legend=dict(yanchor="top", y =0.99, xanchor="left", x=0.6))
+fig.show()
+
+```
+
+
+### Error Maximization {-}
+
+The sensitivity of the tangency portfolio to each of these inputs presents a practical problem for investors seeking to implement optimal portfolios in a quantitative sense.  Portfolio optimization is sometimes referred to as error maximization because the tangency portfolio weights may reflect errors in the inputs rather than optimal diversification and risk-reward trade-offs.
+
+When the estimated expected return for an asset is too high relative to its true (but unknown) value, the resulting tangency portfolio will put too much weight on that asset, relative to the unknown *true* tangency portfolio.  Similarly, the tangency portfolio weight will be too low for an asset with an over-estimated variance relative to the tangency portfolio calculated using the true (but unknown) variance.  Finally, optimal portfolios will overallocate capital to assets with underestimated correlations and underallocate capital to assets with overestimated correlations.  The error maximization problem becomes more acute for portfolios with many assets simply because the increase in the number of correlations to be estimated increases the likelihood of substantial errors.
+
+## Managing the Input List
+
+A simple way to estimate expected return, standard deviations, and correlations is to use historical data.  Specifically, the historical arithmetic average return is an estimate of an asset's expected return.  The historical standard deviation is an estimate of the volatility of the asset's return.  Historical correlations across assets can be estimated using the historical return series of each pair of assets.
+
+To understand the estimation issues that arise in practice, we can simulate the performance of various optimization strategies for choosing portfolios of US, developed international, and emerging market equity funds.  We will simulate from an assumed distribution corresponding to the inputs we have been using so far and then use this simulated "historical" data to estimate inputs to our portfolio optimization problem each year.  We assume an investment horizon of 50 years.  Each year, we'll use the last 30 years of data to estimate the inputs and rebalance our portfolio to the optimal portfolio based on the new input estimates.  As a benchmark, we'll use a simple equal-weighted portfolio of the three funds.  For this example, an equal-weighted portfolio is fairly close to the "perfect information" tangency portfolio of 27.5% in US equities, 33% in developed international, and 39.5% in emerging markets.  Note that an equal-weighted portfolio is the optimal risky portfolio if we assume that (i) all expected returns are the same (ii) all standard deviations are the same, and (iii) all correlations across assets are the same.  Thus, the equal-weighted portfolio is the optimal portfolio if we "give up" on estimating differences in inputs across assets.
+
+### Estimating Expected Returns, Standard Deviations, and Correlations {-}
+
+We run 500 simulations of the exercise above.  The empirical Sharpe ratios of the equal-weighted strategy and the full historical estimation strategy are plotted in @fig-input-est-1, along with the 45-degree line.  The equal-weighted strategy outperformed the full estimation strategy in terms of realized Sharpe ratios for any data point falling below the 45-degree line.  This occurs in just over three-quarters of the simulations.  Trying to estimate the nine inputs each period and find the optimal portfolio generally performed worse than simply equally-weighting the three funds.  @fig-input-est-histogram1 plots the histogram of the difference in simulated Sharpe ratios of the equal-weighted portfolio minus that of the full historical estimation strategy.  On average across the simulations, the Sharpe ratio of the EW strategy is 0.058 higher than the Sharpe ratio of the full historical estimation strategy.
+
+```{python}
+#| label: fig-input-est-1
+#| fig-cap: Simulated performance of estimated tangency portfolio versus equal-weighted portfolio
+import numpy as np
+from cvxopt import matrix
+from cvxopt.solvers import qp as Solver, options as SolverOptions
+from scipy.optimize import minimize_scalar
+from scipy.optimize import minimize
+import plotly.graph_objects as go
+from scipy.stats import multivariate_normal as mvn
+import pandas as pd
+##### Inputs
+# Number of simulations
+num_sims = 500
+
+# Risk aversion
+raver = 2
+
+# Risk-free rate
+r = 0.02
+# Expected returns
+means = np.array([0.06, 0.065, 0.08])
+# Standard deviations
+sds = np.array([0.15, 0.165, 0.21])
+
+# Correlations
+corr12 = 0.75
+corr13 = 0.75
+corr23 = 0.75
+# Covariance matrix
+C  = np.identity(3)
+C[0, 1] = C[1, 0] = corr12
+C[0, 2] = C[2, 0] = corr13
+C[1, 2] = C[2, 1] = corr23
+cov = np.diag(sds) @ C @ np.diag(sds)
+
+# Window length (and initial period)
+window = 30
+
+# Length of out-of-sample period
+T = 50
+
+n = len(means)
+
+def tangency(means, cov, rf, short_lb):
+    '''
+    short_lb: lower bound on position weights
+    examples: 0  = no short-selling
+              -1 = no more than -100% in a given asset
+              None=no restrictions on short-selling
+    '''
+
+    n = len(means)
+    def f(w):
+        mn = w @ means
+        sd = np.sqrt(w.T @ cov @ w)
+        return -(mn - rf) / sd
+    # Initial guess (equal-weighted)
+    w0 = (1/n)*np.ones(n)
+    # Constraint: fully-invested portfolio
+    A = np.ones(n)
+    b = 1
+    cons = [{"type": "eq", "fun": lambda x: A @ x - b}]
+    bnds = [(short_lb, None) for i in range(n)] 
+    # Optimization
+    wgts_tangency = minimize(f, w0, bounds=bnds, constraints=cons).x
+    return wgts_tangency
+
+
+
+def gmv(cov, short_lb): 
+    '''
+    short_lb: lower bound on position weights
+    examples: 0  = no short-selling
+              -1 = no more than -100% in a given asset
+              None=no restrictions on short-selling
+    '''    
+    n = len(cov)
+    Q = matrix(cov, tc="d")
+    p = matrix(np.zeros(n), (n, 1), tc="d")
+    if short_lb==None:
+        # No position limits
+        G = matrix(np.zeros((n,n)), tc="d")
+        h = matrix(np.zeros(n), (n, 1), tc="d")
+    else:
+        # Constraint: short-sales not allowed
+        G = matrix(-np.identity(n), tc="d")
+        h = matrix(-short_lb * np.ones(n), (n, 1), tc="d")
+    # Fully-invested constraint
+    A = matrix(np.ones(n), (1, n), tc="d")
+    b = matrix([1], (1, 1), tc="d")
+    sol = Solver(Q, p, G, h, A, b, options={'show_progress': False})
+    wgts_gmv = np.array(sol["x"]).flatten() if sol["status"] == "optimal" else np.array(n * [np.nan])
+    return wgts_gmv
+
+# wgts_gmv = gmv(cov,short_lb=None)
+
+
+# Simulate data
+def simulation(means, cov, short_lb, seed):
+	rets = mvn.rvs(means, cov, size=window+T, random_state = seed)
+	df = pd.DataFrame(data=rets, columns=['r0','r1','r2'])
+	df.columns
+	df['mn0']=df['r0'].rolling(window).mean()
+	df['mn1']=df['r1'].rolling(window).mean()
+	df['mn2']=df['r2'].rolling(window).mean()
+	df['sd0']=df['r0'].rolling(window).std()
+	df['sd1']=df['r1'].rolling(window).std()
+	df['sd2']=df['r2'].rolling(window).std()
+
+	corrs = df[['r0','r1','r2']].rolling(window, min_periods=window).corr()
+	df['c01']=corrs.loc[(slice(None),'r0'),'r1'].values
+	df['c02']=corrs.loc[(slice(None),'r0'),'r2'].values
+	df['c12']=corrs.loc[(slice(None),'r1'),'r2'].values
+    
+	wgts_true = tangency(means,cov,r,short_lb)
+	wgt_cal_true = (wgts_true @ means - r) / (raver * (wgts_true @ cov @ wgts_true))
+
+
+	model_list = ['true', 'ew', 'est_all', 'est_cov', 'est_sds']
+	for model in model_list:
+		df['portret_'+model] = np.nan  # portret is the realized portfolio return of the 100% risky asset portfolio
+		if model not in ['true','ew']:
+			df['wgt0_'+model] = np.nan
+			df['wgt1_'+model] = np.nan
+			df['wgt2_'+model] = np.nan
+		df['wgt_cal_'+model] =np.nan
+		df['raver_portret_'+model] =np.nan #raver_portret_ is the realized return of the CAL choice of the raver investor
+
+	for i in np.arange(window,window+T):
+		# Full estimation inputs at each point in time
+		means = df[['mn0','mn1','mn2']].iloc[i-1].values
+		sds   = df[['sd0','sd1','sd2']].iloc[i-1].values
+		corr01 = df.loc[i-1,'c01']
+		corr02 = df.loc[i-1,'c02']
+		corr12 = df.loc[i-1,'c12']
+		C  = np.identity(3)
+		C[0, 1] = C[1, 0] = corr01
+		C[0, 2] = C[2, 0] = corr02
+		C[1, 2] = C[2, 1] = corr12
+		cov = np.diag(sds) @ C @ np.diag(sds)
+
+		##### Note: all portfolio weights considered to be beginning of period weights
+		##### (so multiply by contemporaneous realized returns)
+		# Theoretical optimal weights
+		model = 'true'
+		df.loc[i,'portret_'+model]= df.loc[i,['r0','r1','r2']].values @ wgts_true
+		df.loc[i,'raver_portret_'+model] = r + wgt_cal_true * (df.loc[i,'portret_'+model] -r)
+
+		# Full estimation tangency portfolio
+		model = 'est_all'
+		w0, w1, w2 = tangency(means,cov,r,short_lb)
+		df.loc[i,'wgt0_' + model] = w0
+		df.loc[i,'wgt1_' + model] = w1
+		df.loc[i,'wgt2_' + model] = w2
+		# df.loc[i,'portret_'+model] = df.loc[i,['r0','r1','r2']].values @ df.loc[i,['wgt0_'+model,'wgt1_'+model,'wgt2_'+model]].values
+		wgts = np.array([w0, w1, w2])
+		df.loc[i,'portret_'+model] = df.loc[i,['r0','r1','r2']].values @ wgts
+		df.loc[i,'wgt_cal_'+model] = (wgts @ means - r) / (raver * (wgts @ cov @ wgts))
+		df.loc[i,'wgt_cal_'+model] = max(0,df.loc[i,'wgt_cal_'+model])
+		df.loc[i,'raver_portret_'+model] = r + df.loc[i,'wgt_cal_'+model]  * (df.loc[i,'portret_'+model] -r)
+
+		# Estimate only covariance matrix
+		model = 'est_cov'
+		w0, w1, w2 = gmv(cov,short_lb)
+		df.loc[i,'wgt0_' + model] = w0
+		df.loc[i,'wgt1_' + model] = w1
+		df.loc[i,'wgt2_' + model] = w2
+		# df.loc[i,'portret_'+model] = df.loc[i,['r0','r1','r2']].values @ df.loc[i,['wgt0_'+model,'wgt1_'+model,'wgt2_'+model]].values
+		wgts = np.array([w0, w1, w2])
+		df.loc[i,'portret_'+model] = df.loc[i,['r0','r1','r2']].values @ wgts
+		df.loc[i,'wgt_cal_'+model] = (means.mean() - r) / (raver * (wgts @ cov @ wgts))
+		df.loc[i,'wgt_cal_'+model] = max(0,df.loc[i,'wgt_cal_'+model])
+		df.loc[i,'raver_portret_'+model] = r + df.loc[i,'wgt_cal_'+model]  * (df.loc[i,'portret_'+model] -r)
+
+
+		# Estimate only standard deviations in covariance matrix
+		model = 'est_sds'
+		cov[0, 1] = cov[1, 0] = 0.0
+		cov[0, 2] = cov[2, 0] = 0.0
+		cov[1, 2] = cov[2, 1] = 0.0
+		w0, w1, w2 = gmv(cov,short_lb)
+		df.loc[i,'wgt0_' + model] = w0
+		df.loc[i,'wgt1_' + model] = w1
+		df.loc[i,'wgt2_' + model] = w2
+		# df.loc[i,'portret_'+model] = df.loc[i,['r0','r1','r2']].values @ df.loc[i,['wgt0_'+model,'wgt1_'+model,'wgt2_'+model]].values
+		wgts = np.array([w0, w1, w2])
+		df.loc[i,'wgt_cal_'+model] = (means.mean() - r) / (raver * (wgts @ cov @ wgts))		
+		df.loc[i,'wgt_cal_'+model] = max(0,df.loc[i,'wgt_cal_'+model])
+		df.loc[i,'portret_'+model] = df.loc[i,['r0','r1','r2']].values @ wgts
+		df.loc[i,'raver_portret_'+model] = r + df.loc[i,'wgt_cal_'+model]  * (df.loc[i,'portret_'+model] -r)    
+
+		# Equal-weighted portfolio
+		model = 'ew'
+		cov[0, 0] = cov[1, 1] = cov[2, 2] = (sds.mean())**2
+		wgts = (1/n)*np.ones(n)
+		# df.loc[i,'portret_'+model]= df.loc[i,['r0','r1','r2']].values @ wgts_ew
+		df.loc[i,'portret_'+model] = df.loc[i,['r0','r1','r2']].values @ wgts
+		df.loc[i,'wgt_cal_'+model] = (means.mean() - r) / (raver * (wgts @ cov @ wgts))
+		df.loc[i,'wgt_cal_'+model] = max(0,df.loc[i,'wgt_cal_'+model])
+		df.loc[i,'raver_portret_'+model] = r + df.loc[i,'wgt_cal_'+model]  * (df.loc[i,'portret_'+model] -r)   
+
+
+
+	portret_list = ['raver_portret_' +  model for model in model_list]
+	stats = df[portret_list].describe()
+
+	sr_df = pd.DataFrame(dtype=float, columns = ['sr'], index = model_list)
+	for model in model_list:
+		sr_df.loc[model,'sr'] = (stats.loc['mean','raver_portret_' +  model] - r)/stats.loc['std','raver_portret_' +  model]
+		
+	return sr_df
+
+sim_results = pd.DataFrame(dtype=float, columns=['true', 'ew', 'est_all', 'est_cov', 'est_sds'], index=range(num_sims))
+for s in range(num_sims):
+    # print('Simulation number: ' + str(s))
+    sim_results.iloc[s] = simulation(means, cov, short_lb=None, seed=s).T
+
+def figplot(xvar, yvar):
+    label_dict = {'true': 'theoretical optimal weights', 
+                'ew': 'equal weights',
+                'est_all': 'estimate all inputs',
+                'est_cov': 'estimate covariance matrix only',
+                'est_sds': 'estimate standard deviations only'}
+
+
+    # Plot simulated Sharpe ratios
+    string ="Sharpe Ratios:<br>"
+    string += "  "+ label_dict[xvar] + ": %{x:0.3}<br>"
+    string += "  "+ label_dict[yvar] + ": %{y:0.3}<br>"
+    string += "<extra></extra>"
+
+    trace = go.Scatter(x=sim_results[xvar],y=sim_results[yvar],mode='markers', name='A simulated outcome', hovertemplate=string)
+    max_sr = sim_results.max().max()
+
+    # Plot 45 degree line
+    frac_x_beats_y = (sim_results[xvar] > sim_results[yvar]).mean()
+
+    string ="Below this line: " + f'({frac_x_beats_y:.0%} of simulations)<br>' + ""
+    string +="   `"+label_dict[xvar] + "` outperformed `" +label_dict[yvar] + "` " + "<br>"
+    string +="Above this line: " + f'({1-frac_x_beats_y:.0%} of simulations)<br>' + "" 
+    string +="   `"+label_dict[yvar] + "` outperformed `" +label_dict[xvar] + "`<br>"    
+    string += "<extra></extra>"   
+    trace_45 = go.Scatter(x=np.linspace(0,max_sr,100),y=np.linspace(0,max_sr,100),mode='lines', name='45-degree line', hovertemplate=string)
+    fig = go.Figure()
+    fig.add_trace(trace)
+    fig.add_trace(trace_45)
+    fig.layout.xaxis["title"] = "SR: " + label_dict[xvar]
+    fig.layout.yaxis["title"] = "SR: " + label_dict[yvar]
+    fig.update_yaxes(tickformat=".2")
+    fig.update_xaxes(tickformat=".2")
+    fig.update_layout(legend=dict(yanchor="top", y =0.99, xanchor="left", x=0.01))
+    fig.update_xaxes(range=[0, 1.05 * max_sr])
+    fig.update_yaxes(range=[0, 1.05 * max_sr])
+    fig.show()
+def histplot(xvar, yvar):
+    label_dict = {'true': 'theoretical optimal weights', 
+                'ew': 'equal weights',
+                'est_all': 'estimate all inputs',
+                'est_cov': 'estimate covariance matrix only',
+                'est_sds': 'estimate standard deviations only'}
+
+    # Plot differences in Sharpe ratios
+    avg_diff = (sim_results[xvar] - sim_results[yvar]).mean()
+    frac_x_beats_y = (sim_results[xvar] > sim_results[yvar]).mean()
+    string = "This bin contains %{y:0.3}% of simulations <br>"
+    string +="Average difference in SRs across all simulations: " + f'{avg_diff:.3f} <br>'
+    string +="'" + label_dict[xvar] + "' outperforms '" + label_dict[yvar] + "' in " +  f'{frac_x_beats_y:.0%} of all simulations<br>' + "" 
+    string += "<extra></extra>"   
+    trace=go.Histogram(x=(sim_results[xvar] - sim_results[yvar]), hovertemplate = string )
+
+    max_sr = sim_results.max().max()
+
+    fig = go.Figure()
+    fig.add_trace(trace)
+    fig.layout.xaxis["title"] = "Difference in SRs: '" + label_dict[xvar] + "' minus '" + label_dict[yvar] + "'"
+    fig.layout.yaxis["title"] = "Percent of Simulations"
+    fig.update_yaxes(tickformat=".2")
+    fig.update_layout(legend=dict(yanchor="top", y =0.99, xanchor="left", x=0.01))
+    fig.update_xaxes(range=[-0.6*max_sr, 0.6*max_sr])
+    # fig.update_yaxes(range=[0, 1.05 * sim_results.max().max()])
+    fig.update_traces(marker_line_width=1,marker_line_color="black", histnorm='percent')    
+    fig.show()
+
+figplot('ew','est_all')
+```
+
+
+
+
+```{python}
+#| label: fig-input-est-histogram1
+#| fig-cap: Differences in Sharpe Ratios of estimated tangency portfolio and equal-weighted portfolio
+#| echo: false
+histplot('ew','est_all')
+
+```
+
+
+### Estimating Standard Deviations and Correlations Only {-}
+One option is to just give up on using historical data to estimate expected returns and assume the expected returns are the same across all the assets.  Under this assumption, the optimal risky asset is the global minimum variance portfolio.  @fig-input-est-2 shows the Sharpe ratios of following a GMV strategy each year calculated using historical estimates of standard deviations and correlations.  The benchmark along the horizontal axis is again the equal-weighted strategy.  Portfolio optimization fares better if we do not try to estimate expected returns.  The fraction of simulations in which the equal-weighted strategy beats the GMV strategy using the full covariance matrix estimate is again about three-quarters of the simulations.@fig-input-est-histogram2 plots the histogram of the difference in simulated Sharpe ratios of the equal-weighted portfolio minus that of the GMV strategy.  On average across the simulations, the Sharpe ratio of the EW strategy is 0.048 higher than the Sharpe ratio of the GMV strategy.  Thus, the GMV portfolio performs a bit better relative to an equal-weighted portfolio than trying to estimate the covariance matrix **and** expected returns.  
+
+```{python}
+#| label: fig-input-est-2
+#| fig-cap: Simulated performance of estimated GMV portfolio versus equal-weighted portfolio
+#| echo: false
+figplot('ew','est_cov')
+
+```
+
+
+```{python}
+#| label: fig-input-est-histogram2
+#| fig-cap: Differences in Sharpe Ratios of estimated GMV portfolio and equal-weighted portfolio
+#| echo: false
+histplot('ew','est_cov')
+
+```
+
+### Estimating Standard Deviations Only {-}
+
+The advantage of the equal-weighted strategy falls further if we also give up on trying to estimate correlations.  @fig-input-est-3 shows the Sharpe ratios of following a GMV strategy using a covariance matrix with historical estimates of variances but covariances set equal to zero.  This strategy is known as risk parity.  The equal-weighted strategy outperforms this strategy in almost two-thirds of the simulations, but the average difference in Sharpe ratios is economically small.  On average across the simulations, the Sharpe ratio of the EW strategy is only 0.003 higher than the Sharpe ratio of the risk parity strategy.  @fig-input-est-histogram3 plots the histogram of the difference in simulated Sharpe ratios of the equal-weighted portfolio minus that of the risk parity strategy.  Note that there is much less variation in the differences in these strategies than in the GMV or tangency portfolio cases above.  
+
+```{python}
+#| label: fig-input-est-3
+#| fig-cap: Simulated performance of risk parity portfolio versus equal-weighted portfolio
+#| echo: false
+figplot('ew','est_sds')
+
+```
+
+
+```{python}
+#| label: fig-input-est-histogram3
+#| fig-cap: Differences in Sharpe Ratios of risk parity portfolio and equal-weighted portfolio
+#| echo: false
+histplot('ew','est_sds')
+
+```
+
+
