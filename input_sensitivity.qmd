@@ -84,8 +84,8 @@ trace = go.Scatter(x=asset1_means,y=wgt_asset1,mode='lines', name="Tangency Weig
     customdata=cd, hovertemplate=string,
 )
 
-# Tangency portfolio at actual input
-trace_true = go.Scatter(x=[means[0]],y=[wgts_true[0]],mode='markers', name="Tangency Weight at Actual Input",
+# Tangency portfolio at assume input
+trace_true = go.Scatter(x=[means[0]],y=[wgts_true[0]],mode='markers', name="Tangency Weight at Assumed Input",
     customdata = np.array([[wgts_true[1],wgts_true[2]]]), hovertemplate=string,
 )
 fig = go.Figure()
@@ -129,8 +129,8 @@ trace = go.Scatter(x=asset1_sds,y=wgt_asset1,mode='lines', name="Tangency Weight
     customdata=cd, hovertemplate=string,
 )
 
-# Tangency portfolio at actual input
-trace_true = go.Scatter(x=[sds[0]],y=[wgts_true[0]],mode='markers', name="Tangency Weight at Actual Input",
+# Tangency portfolio at assumed input
+trace_true = go.Scatter(x=[sds[0]],y=[wgts_true[0]],mode='markers', name="Tangency Weight at Assumed Input",
     customdata = np.array([[wgts_true[1],wgts_true[2]]]), hovertemplate=string,
 )
 fig = go.Figure()
@@ -140,7 +140,7 @@ fig.layout.xaxis["title"] = "Asset 1 Standard Deviation Input"
 fig.layout.yaxis["title"] = "Asset 1 Tangency Portfolio Weight"
 fig.update_yaxes(tickformat=".1%")
 fig.update_xaxes(tickformat=".1%")
-fig.update_layout(legend=dict(yanchor="top", y =0.99, xanchor="left", x=0.6))
+fig.update_layout(legend=dict(yanchor="top", y =0.99, xanchor="left", x=0.55))
 fig.show()
 
 ```
@@ -189,8 +189,8 @@ trace = go.Scatter(x=corr12_grid,y=wgt_asset1,mode='lines', name="Tangency Weigh
     customdata=cd, hovertemplate=string,
 )
 
-# Tangency portfolio at actual input
-trace_true = go.Scatter(x=[corr12],y=[wgts_true[0]],mode='markers', name="Tangency Weight at Actual Input",
+# Tangency portfolio at assumed input
+trace_true = go.Scatter(x=[corr12],y=[wgts_true[0]],mode='markers', name="Tangency Weight at Assumed Input",
     customdata = np.array([[wgts_true[1],wgts_true[2]]]), hovertemplate=string,
 )
 fig = go.Figure()
@@ -200,7 +200,7 @@ fig.layout.xaxis["title"] = "Correlation of Assets 1 and 2"
 fig.layout.yaxis["title"] = "Asset 1 Tangency Portfolio Weight"
 fig.update_yaxes(tickformat=".1%")
 fig.update_xaxes(tickformat=".1%")
-fig.update_layout(legend=dict(yanchor="top", y =0.99, xanchor="left", x=0.6))
+fig.update_layout(legend=dict(yanchor="top", y =0.99, xanchor="left", x=0.55))
 fig.show()
 
 ```
@@ -522,7 +522,7 @@ histplot('ew','est_all')
 
 
 ### Estimating Standard Deviations and Correlations Only {-}
-One option is to just give up on using historical data to estimate expected returns and assume the expected returns are the same across all the assets.  Under this assumption, the optimal risky asset is the global minimum variance portfolio.  @fig-input-est-2 shows the Sharpe ratios of following a GMV strategy each year calculated using historical estimates of standard deviations and correlations.  The benchmark along the horizontal axis is again the equal-weighted strategy.  Portfolio optimization fares better if we do not try to estimate expected returns.  The fraction of simulations in which the equal-weighted strategy beats the GMV strategy using the full covariance matrix estimate is again about three-quarters of the simulations.@fig-input-est-histogram2 plots the histogram of the difference in simulated Sharpe ratios of the equal-weighted portfolio minus that of the GMV strategy.  On average across the simulations, the Sharpe ratio of the EW strategy is 0.048 higher than the Sharpe ratio of the GMV strategy.  Thus, the GMV portfolio performs a bit better relative to an equal-weighted portfolio than trying to estimate the covariance matrix **and** expected returns.  
+One option is to just give up on using historical data to estimate expected returns and assume the expected returns are the same across all the assets.  Under this assumption, the optimal risky asset is the global minimum variance portfolio.  @fig-input-est-2 shows the Sharpe ratios of following a GMV strategy each year calculated using historical estimates of standard deviations and correlations.  The benchmark along the horizontal axis is again the equal-weighted strategy.  Portfolio optimization fares better if we do not try to estimate expected returns.  The fraction of simulations in which the equal-weighted strategy beats the GMV strategy using the full covariance matrix estimate is again about three-quarters of the simulations.  @fig-input-est-histogram2 plots the histogram of the difference in simulated Sharpe ratios of the equal-weighted portfolio minus that of the GMV strategy.  On average across the simulations, the Sharpe ratio of the EW strategy is 0.048 higher than the Sharpe ratio of the GMV strategy.  Thus, the GMV portfolio performs a bit better relative to an equal-weighted portfolio than trying to estimate the covariance matrix **and** expected returns.  
 
 ```{python}
 #| label: fig-input-est-2
@@ -562,4 +562,228 @@ histplot('ew','est_sds')
 
 ```
 
+
+
+
+## Empirical Performance
+
+We now examine how well we would have done forming optimal portfolios historically with the S&P 500, Treasury bonds, corporate bonds, and gold.  As in the previous section, we consider strategies differing in the extent to which they rely on estimates of expected returns, standard deviations, and correlations.  We use rolling windows of 20 years to estimate each input using historical data.  The data starts in 1968, so our first out-of-sample return is in 1988.  We rebalance the portfolio annually.  We optimally locate along the capital allocation line for each strategy's optimal portfolio, assuming a risk aversion of 5.^[This is a somewhat high risk aversion.  With lower risk aversion choices, some strategies have single year return realizations below -100%.]
+
+@fig-stockbondsgold-sharpe shows the realized Sharpe ratio for each strategy.  The tangency portfolio strategy underperformed each of the other strategies, including the equal-weighted $1/N$ strategy.  The noisiness in estimating expected returns does not lead to better investment results compared to any of the strategies that assume expected returns are equal across the assets.
+
+The risk parity strategy performs the best in terms of Sharpe ratio in the thirty or so years of implementing each strategy, followed by the equal-weighted and GMV strategies.  For this set of assets and sample, estimating differences in volatility across assets was beneficial to performance.  However, estimating correlations in addition to volatilities led to worse outcomes in terms of Sharpe ratios.  In fact, the GMV strategy underperformed both risk parity and the equal-weighted $1/N$ strategies.
+
+
+
+```{python}
+#| echo: false
+import quandl
+quandl.ApiConfig.api_key = "f-5zoU2G4zzHaUtkJ7BY"
+```
+
+
+```{python}
+#| label: fig-stockbondsgold-sharpe
+#| fig-cap: Sharpe ratios of various strategies historically
+
+import numpy as np
+from cvxopt import matrix
+from cvxopt.solvers import qp as Solver, options as SolverOptions
+from scipy.optimize import minimize_scalar
+from scipy.optimize import minimize
+import plotly.graph_objects as go
+from scipy.stats import multivariate_normal as mvn
+import pandas as pd
+
+# Pull the data (from sbb.py and gold.py from website codebase)
+# Stocks, bonds, bills
+nominal = pd.read_csv('https://www.dropbox.com/s/hgwte6swx57jqcv/nominal_sbb.csv?dl=1', index_col=['Year'])
+
+# Gold
+d = quandl.get("LBMA/GOLD")['USD (AM)']
+gold = d.resample('Y').last().iloc[:-1]
+gold.index = [x.year for x in gold.index]
+gold.loc[1967] = d.iloc[0]
+gold = gold.sort_index().pct_change().dropna()
+gold.name = 'Gold'
+ 
+
+df = pd.concat((nominal, gold), axis=1).dropna()
+assets = ['TBills','S&P 500', 'Gold', 'Corporates', 'Treasuries']
+df = df[assets]
+
+##### Inputs
+# Window length (and initial period)
+window = 20
+n = len(assets)-1
+raver = 5
+short_lb = None
+T = len(df)-window
+
+
+
+# Rolling input estimation
+risky = assets[1:]
+df.columns = ['rf']+['r'+str(i) for i in range(n)]
+asset_list = [str(i) for i in range(n)]
+for asset in asset_list:
+    df['mn' + asset]=df['r'+asset].rolling(window).mean()
+    df['sd' + asset]=df['r'+asset].rolling(window).std()
+
+ret_list = ['r' + asset for asset in asset_list]
+corrs = df[ret_list].rolling(window, min_periods=window).corr()
+
+corr_list = []
+for j, asset in enumerate(asset_list):
+    for k in range(j+1,n):
+        df['c'+asset+str(k)]=corrs.loc[(slice(None),'r'+asset),'r'+str(k)].values
+df['year'] = df.index
+df = df.reset_index()
+
+
+# Prepare columns for the rolling optimization output
+model_list = ['ew', 'est_all', 'est_cov', 'est_sds']
+for model in model_list:
+    df['portret_'+model] = np.nan      #portret is the realized portfolio return of the 100% risky asset portfolio
+    if model not in ['ew']:
+        for asset in asset_list:
+            df['wgt' + asset + '_' +model] = np.nan
+    df['wgt_cal_'+model] =np.nan
+    df['raver_portret_'+model] =np.nan #raver_portret_ is the realized return of the CAL choice of the raver investor
+
+mn_list = ['mn'+asset for asset in asset_list]
+sd_list = ['sd'+asset for asset in asset_list] 
+
+# Choose optimal portfolios each time period
+for i in np.arange(window,window+T):
+    # Full estimation inputs at each point in time
+    means = df[mn_list].iloc[i-1].values
+    sds   = df[sd_list].iloc[i-1].values
+    C  = np.identity(n)
+    for j, asset in enumerate(asset_list):
+        for k in range(j+1,n):
+            C[j, k] = C[k, j] =    df.loc[i-1,'c'+asset+str(k)]  
+    cov = np.diag(sds) @ C @ np.diag(sds)
+
+    r = df.loc[i,'rf']
+    ##### Note: all portfolio weights considered to be beginning of period weights
+    ##### (so multiply by contemporaneous realized returns)
+    # Full estimation tangency portfolio
+    model = 'est_all'
+    wgts = tangency(means,cov,r,short_lb)
+    for j, asset in enumerate(asset_list):
+        df.loc[i,'wgt'+asset+'_' + model] = wgts[j]
+    df.loc[i,'portret_'+model] = df.loc[i,ret_list].values @ wgts
+    df.loc[i,'wgt_cal_'+model] = (wgts @ means - r) / (raver * (wgts @ cov @ wgts))
+    df.loc[i,'wgt_cal_'+model] = max(0,df.loc[i,'wgt_cal_'+model])
+    df.loc[i,'raver_portret_'+model] = r + df.loc[i,'wgt_cal_'+model]  * (df.loc[i,'portret_'+model] -r)
+
+    # Estimate only covariance matrix
+    model = 'est_cov'
+    wgts = gmv(cov,short_lb)
+    for j, asset in enumerate(asset_list):
+        df.loc[i,'wgt'+asset+'_' + model] = wgts[j]
+    df.loc[i,'portret_'+model] = df.loc[i,ret_list].values @ wgts
+    df.loc[i,'wgt_cal_'+model] = (means.mean() - r) / (raver * (wgts @ cov @ wgts))
+    df.loc[i,'wgt_cal_'+model] = max(0,df.loc[i,'wgt_cal_'+model])
+    df.loc[i,'raver_portret_'+model] = r + df.loc[i,'wgt_cal_'+model]  * (df.loc[i,'portret_'+model] -r)
+
+
+    # Estimate only standard deviations in covariance matrix
+    model = 'est_sds'
+    for j, asset in enumerate(asset_list):
+        for k in range(j+1,n):
+            cov[j, k] = cov[k, j] = 0.0
+    wgts = gmv(cov,short_lb)
+    for j, asset in enumerate(asset_list):
+        df.loc[i,'wgt'+asset+'_' + model] = wgts[j]
+    df.loc[i,'portret_'+model] = df.loc[i,ret_list].values @ wgts
+    df.loc[i,'wgt_cal_'+model] = (means.mean() - r) / (raver * (wgts @ cov @ wgts))		
+    df.loc[i,'wgt_cal_'+model] = max(0,df.loc[i,'wgt_cal_'+model])
+    df.loc[i,'raver_portret_'+model] = r + df.loc[i,'wgt_cal_'+model]  * (df.loc[i,'portret_'+model] -r)    
+
+    # Equal-weighted portfolio
+    model = 'ew'
+    for j, asset in enumerate(asset_list):
+        cov[j,j] = (sds.mean())**2
+    wgts = (1/n)*np.ones(n)
+    df.loc[i,'portret_'+model] = df.loc[i,ret_list].values @ wgts
+    df.loc[i,'wgt_cal_'+model] = (means.mean() - r) / (raver * (wgts @ cov @ wgts))
+    df.loc[i,'wgt_cal_'+model] = max(0,df.loc[i,'wgt_cal_'+model])
+    df.loc[i,'raver_portret_'+model] = r + df.loc[i,'wgt_cal_'+model]  * (df.loc[i,'portret_'+model] -r)   
+
+# Summarize sharpe ratio, avg ret, sd(ret) for each model
+portret_list = ['raver_portret_' +  model for model in ['est_all', 'est_cov', 'est_sds','ew']]
+stats = df[portret_list].describe()
+sr_df = pd.DataFrame(dtype=float, columns = ['sr','avg_ret','sd_ret'], index = ['est_all', 'est_cov', 'est_sds','ew'])
+r = df[np.isnan(df['raver_portret_ew'])==False].rf.mean()
+for model in ['est_all', 'est_cov', 'est_sds','ew']:
+    sr_df.loc[model,'sr'] = (stats.loc['mean','raver_portret_' +  model] - r)/stats.loc['std','raver_portret_' +  model]
+    sr_df.loc[model,'avg_ret'] = stats.loc['mean','raver_portret_' +  model]
+    sr_df.loc[model,'sd_ret'] = stats.loc['std','raver_portret_' +  model]
+
+label_dict = {'true': 'theoretical optimal weights', 
+            'ew': 'equal weights',
+            'est_all': 'estimate all inputs',
+            'est_cov': 'estimate covariance matrix only',
+            'est_sds': 'estimate standard deviations only'}
+
+xaxis_label_dict = {'true': 'theoretical optimal weights', 
+            'ew': 'Equal Weights',
+            'est_all': 'Tangency',
+            'est_cov': 'GMV',
+            'est_sds': 'Risk Parity'}
+sr_df = sr_df.reset_index()
+sr_df['label'] = sr_df['index'].apply(lambda x: label_dict[x])
+sr_df['xaxis_label'] = sr_df['index'].apply(lambda x: xaxis_label_dict[x])
+
+
+# Plot sharpe ratios
+string ="Strategy: %{customdata[0]} <br>"
+string += "Sharpe ratio: %{y:0.3f}<br>"
+string += "Average return: %{customdata[1]:0.1%}<br>"
+string += "SD(return): %{customdata[2]:0.1%}<br>"
+string += "<extra></extra>"
+
+fig = go.Figure()
+fig.add_trace(go.Bar(x=sr_df['xaxis_label'], y=sr_df['sr'], customdata=sr_df[['label','avg_ret','sd_ret']], hovertemplate=string))
+fig.layout.yaxis["title"] = "Sharpe ratio"
+fig.layout.xaxis["title"] = "Strategy"
+fig.show()
+
+```
+
+@fig-stockbondsgold-timeseries plots the realized returns for each strategy.  The hoverdata contains the optimal risky portfolio weights as well as the fraction of capital allocated to the risky portfolio.  The tangency and GMV strategies produce the most volatile return series.  However, as seen in @fig-stockbondsgold-sharpe, they do not produce average returns high enough to make up for this additional risk to generate Sharpe ratios as high as the risk parity or equal-weighted $1/N$ strategies.  Attempting to estimate expected returns and correlations for these assets would not have paid off.
+
+```{python}
+#| label: fig-stockbondsgold-timeseries
+#| fig-cap: Returns and weights of various strategies historically
+# Plot the time-series of returns and portfolio weights.
+for asset in asset_list:
+    df['wgt'+asset + '_ew'] = 1/n
+       
+fig = go.Figure()
+for model in ['est_all', 'est_cov', 'est_sds', 'ew']:
+    string =  "Strategy: " + label_dict[model] +" <br>"
+    string += "Year: %{x:4.0f}<br>"
+    string += "Return: %{y:0.1%}<br>"
+    string += "Weight in Risky Portfolio: %{customdata[0]: 0.1%} <br>"
+    string += "Risky Portfolio Weights:<br>"
+    string += "  "+ risky[0] +": %{customdata[1]: 0.1%} <br>"
+    string += "  "+ risky[1] +": %{customdata[2]: 0.1%} <br>"
+    string += "  "+ risky[2] +": %{customdata[3]: 0.1%} <br>"
+    string += "  "+ risky[3] +": %{customdata[4]: 0.1%} <br>"
+    string += "<extra></extra>"
+
+    wgt_list = ['wgt_cal_'+ model] + ['wgt'+asset + "_" + model for asset in asset_list]
+    trace=go.Scatter(x=df['year'], y=df['raver_portret_'+model], customdata=df[wgt_list], hovertemplate=string, name = xaxis_label_dict[model])
+    fig.add_trace(trace)
+fig.layout.yaxis["title"] = "Return"
+fig.layout.xaxis["title"] = "Year"
+fig.update_yaxes(tickformat=".0%")
+fig.update_layout(legend=dict(yanchor="top", y =0.99, xanchor="left", x=0.01))
+fig.update_xaxes(range=[df['year'].iloc[window], df.year.max()])
+fig.show()
+
+```
 
