@@ -1,10 +1,8 @@
 /.quarto/
 /.vscode/
-/docs/
-/*_files/
 _quarto.yml
-
-*.html
+/docs/CNAME
+.nojekyll
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
