@@ -3,6 +3,8 @@
 _quarto.yml
 /docs/CNAME
 .nojekyll
+*.js 
+/docs/**
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
