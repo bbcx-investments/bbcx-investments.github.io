@@ -1,4 +1,3 @@
-/.quarto/
 /.vscode/
 /docs/CNAME
 .nojekyll
@@ -133,3 +132,5 @@ dmypy.json
 
 # Pyre type checker
 .pyre/
+
+/.quarto/
