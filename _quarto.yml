@@ -15,9 +15,7 @@ book:
 
 format:
   html:
-    theme: 
-      light: cosmo
-      dark: superhero
+    theme: cosmo
     code-fold: true
 
 
