@@ -1,6 +1,6 @@
 # Preface {.unnumbered}
 
-Testing here.  This is a draft of a piece of a planned book about investments.  This work in progress is posted as teaching notes for our various courses at the Jones Graduate School of Business at Rice University.  We plan for the book to grow to be of wider use.
+Testing here again.  This is a draft of a piece of a planned book about investments.  This work in progress is posted as teaching notes for our various courses at the Jones Graduate School of Business at Rice University.  We plan for the book to grow to be of wider use.
 
 The book is one part of a three-pronged effort to aid investments education.  A second piece is an interactive website [bbcx-investments.com](http://bbcx-investments.com/) that presents figures and tables derived from live data and from user inputs to illustrate investments concepts.  The third piece is a collection of Jupyter notebooks containing python code for performing investments-related calculations.  Notebooks linked from the pages of the website open in Google Colab to demonstrate the calculations on the website.  Notebooks containing the code in this book are hosted on MyBinder.org.
 
