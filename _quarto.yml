@@ -13,7 +13,7 @@ book:
     - portfolios.qmd
     - portfolios_frictions.qmd
     - input_sensitivity.qmd
-    
+    - fixed-income.qmd
 
 format:
   html:
