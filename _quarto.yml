@@ -9,7 +9,9 @@ book:
   chapters:
     - index.qmd
     - miracle.qmd
+    - diversification.qmd
     - portfolios.qmd
+    - portfolios_frictions.qmd
     - input_sensitivity.qmd
     
 
@@ -18,4 +20,7 @@ format:
     theme: cosmo
     code-fold: true
 
+execute:
+  cache: true
+  freeze: auto
 

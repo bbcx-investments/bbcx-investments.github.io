@@ -1,5 +1,5 @@
 
-# Portfolio Optimization Sensitivity to Inputs
+# Optimal Portfolios: Sensitivity to Inputs
 
 Optimal risky portfolios can be quite sensitive to the inputs, which consist of expected returns, standard deviations, and correlations across assets.  An example is provided in the first section below.  In practice, one must estimate these inputs.  Expected returns are notoriously hard to estimate using historical data, which we discuss in detail in SECTION LINK, so we often resort to models for inputs here or assume expected returns are equal across assets.  Asset volatilities and correlations can be forecasted more sucessfully.  Forecasting correlations in portfolios with many assets is complicated by the fact that the number of correlations we need to estimate rises quadratically with the number of assets.
 
