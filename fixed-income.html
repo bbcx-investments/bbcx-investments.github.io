@@ -114,7 +114,7 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <p>We will use semi-annual compounding for most of this chapter. Let N be number of semi-annual periods, <span class="math inline">\(C_{N}\)</span> is the price of a zero-coupon bond with N semi-annual periods to maturity, <span class="math inline">\(r_{N}\)</span> is the N period spot rate.</p>
 <p>Then we have:</p>
 <p><span class="math display">\[ Q_{N}= \frac{100}{(1+\frac{r_{N}}{2})^N}  \]</span></p>
-<p><span class="math inline">\(r_{N}\)</span> is the rate at which we should be using to discount cashflows from period N. If we know a collection of spot rate <span class="math inline">\(r_{1}\)</span>, <span class="math inline">\(r_{2}\)</span>…<span class="math inline">\(r_{N}\)</span>, then we can price a bond with any cashflows.</p>
+<p><span class="math inline">\(r_{N}\)</span> is the rate at which we should be using to discount cashflows from period N. If we know a collection of spot rate <span class="math inline">\(r_{1}\)</span>, <span class="math inline">\(r_{2}\)</span>…<span class="math inline">\(r_{N}\)</span>, then we can price a bond with any cashflows by simply discounting each cashflow with the corresponding spot rate.</p>
 <div class="cell" data-execution_count="1">
 <div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> pandas_datareader <span class="im">import</span> DataReader <span class="im">as</span> pdr</span>
 <span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> matplotlib.pyplot <span class="im">as</span> plt</span>
@@ -124,7 +124,7 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>plt.title(<span class="st">'US Treasury 30 year yield'</span>)</span>
 <span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>plt.show()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-display">
-<p><img src="fixed-income_files/figure-html/cell-2-output-1.png" width="566" height="424"></p>
+<p><img src="fixed-income_files/figure-html/cell-2-output-1.png" class="img-fluid"></p>
 </div>
 </div>
 </section>
