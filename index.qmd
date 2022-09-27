@@ -1,4 +1,4 @@
-# Preface {.unnumber}
+# Preface {.unnumbered}
 
 This is a draft of a piece of a planned book about investments.  This work in progress is posted as teaching notes for our various courses at the Jones Graduate School of Business at Rice University.  We plan for the book to grow to be of wider use.
 
