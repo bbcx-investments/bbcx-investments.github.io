@@ -1,0 +1,1005 @@
+# Miracle of Diversification {#sec-diversification}
+```{python}
+#| echo: false
+#| execute: true
+import numpy as np
+from cvxopt import matrix
+from cvxopt.solvers import qp as Solver, options as SolverOptions
+from scipy.optimize import minimize_scalar
+
+SolverOptions["show_progress"] = False
+
+class portfolio:
+    def __init__(self, means, cov, Shorts):
+        self.means = np.array(means)
+        self.cov = np.array(cov)
+        self.Shorts = Shorts
+        self.n = len(means)
+        if Shorts:
+            w = np.linalg.solve(cov, np.ones(self.n))
+            self.GMV = w / np.sum(w)
+            w = np.linalg.solve(cov, means)
+            self.piMu = w / np.sum(w)
+        else:
+            n = self.n
+            Q = matrix(cov, tc="d")
+            p = matrix(np.zeros(n), (n, 1), tc="d")
+            G = matrix(-np.identity(n), tc="d")
+            h = matrix(np.zeros(n), (n, 1), tc="d")
+            A = matrix(np.ones(n), (1, n), tc="d")
+            b = matrix([1], (1, 1), tc="d")
+            sol = Solver(Q, p, G, h, A, b)
+            self.GMV = np.array(sol["x"]).flatten() if sol["status"] == "optimal" else np.array(n * [np.nan])
+
+    def frontier(self, m):
+        if self.Shorts:
+            gmv = self.GMV
+            piMu = self.piMu
+            m1 = gmv @ self.means
+            m2 = piMu @ self.means
+            a = (m - m2) / (m1 - m2)
+            return a * gmv + (1 - a) * piMu
+        else:
+            n = self.n
+            Q = matrix(self.cov, tc="d")
+            p = matrix(np.zeros(n), (n, 1), tc="d")
+            G = matrix(-np.identity(n), tc="d")
+            h = matrix(np.zeros(n), (n, 1), tc="d")
+            A = matrix(np.vstack((np.ones(n), self.means)), (2, n), tc="d")
+            b = matrix([1, m], (2, 1), tc="d")
+            sol = Solver(Q, p, G, h, A, b)
+            return np.array(sol["x"]).flatten() if sol["status"] == "optimal" else np.array(n * [np.nan])
+
+    def tangency(self, r):
+        if self.Shorts:
+            w = np.linalg.solve(self.cov, self.means - r)
+            return w / np.sum(w)
+        else:
+            def f(m):
+                w = self.frontier(m)
+                mn = w @ self.means
+                sd = np.sqrt(w.T @ self.cov @ w)
+                return - (mn - r) / sd
+            m = minimize_scalar(f, bounds=[max(r, np.min(self.means)), max(r, np.max(self.means))], method="bounded").x
+            return self.frontier(m)
+
+    def optimal(self, raver, rs=None, rb=None):
+        n = self.n
+        if self.Shorts:
+            if (rs or rs==0) and (rb or rb==0):
+                Q = np.zeros((n + 2, n + 2))
+                Q[2:, 2:] = raver * self.cov
+                Q = matrix(Q, tc="d")
+                p = np.array([-rs, rb] + list(-self.means))
+                p = matrix(p, (n + 2, 1), tc="d")
+                G = np.zeros((2, n + 2))
+                G[0, 0] = G[1, 1] = -1
+                G = matrix(G, (2, n+2), tc="d")
+                h = matrix([0, 0], (2, 1), tc="d")
+                A = matrix([1, -1] + n*[1], (1, n+2), tc="d")
+                b = matrix([1], (1, 1), tc="d")
+                sol = Solver(Q, p, G, h, A, b)
+                return np.array(sol["x"]).flatten()[2:] if sol["status"] == "optimal" else None
+            else:
+                w = np.linalg.solve(self.cov, self.means)
+                a = np.sum(w)
+                return (a/raver)*self.piMu + (1-a/raver)*self.GMV
+        else:
+           if (rs or rs==0) and (rb or rb==0):
+                Q = np.zeros((n + 2, n + 2))
+                Q[2:, 2:] = raver * self.cov
+                Q = matrix(Q, tc="d")
+                p = np.array([-rs, rb] + list(-self.means))
+                p = matrix(p, (n+2, 1), tc="d")
+                G = matrix(-np.identity(n + 2), tc="d")
+                h = matrix(np.zeros(n+2), (n+2, 1), tc="d")
+                A = matrix([1, -1] + n * [1], (1, n+2), tc="d")
+                b = matrix([1], (1, 1), tc="d")
+                sol = Solver(Q, p, G, h, A, b)
+                return np.array(sol["x"]).flatten()[2:] if sol["status"] == "optimal" else None
+           else:
+                Q = matrix(raver * self.cov, tc="d")
+                p = matrix(-self.means, (n, 1), tc="d")
+                G = matrix(-np.identity(n), tc="d")
+                h = matrix(np.zeros(n), (n, 1), tc="d")
+                A = matrix(np.ones(n), (1, n), tc="d")
+                b = matrix([1], (1, 1), tc="d")
+                sol = Solver(Q, p, G, h, A, b)
+                return np.array(sol["x"]).flatten() if sol["status"] == "optimal" else None
+```
+
+Porfolios are combinations of underlying assets.  In this chapter, we will focus primarily on portfolio risk when multiple assets are combined in a portfolio.  Diversification is a foundational, and somewhat miraculous, concept in forming portfolios.  By combining assets together, we may be able to build a portfolio that has less risk than even the least risky asset we use as a building block!  We will discuss the benefits of diversification repeatedly throughout this and future chapters. 
+
+
+In the sections below, we first discuss diversification in the context of portfolios of two, three, or many risky assets.  Then we consider a set of portfolios of risky assets that provide the maximum level of diversification for a given expected return.  
+
+## Portfolios of Two Risky Assets
+
+Consider forming a portfolio of two risky assets.  To fix ideas, let's consider these to be a US stock market fund and an international stock market fund.  Unless otherwise stated, we will assume that portfolios are fully invested; that is, that the sum of the weights equal 1.  If we invest all of our capital in some combination of these two assets, what are the expected returns and standard deviations of all the potential portfolios? Assume for now that we cannot short sell either asset; that is, the fraction invested in each must be non-negative.
+
+The return of a two-asset portfolio is the weighted sum of the returns of the underlying assets:
+$$ r_p = w  r_{\text{US}} + (1-w) r_{\text{intl}} \,, $$ {#eq-2asset-return}
+where $w$ is the portfolio weight in the US stock fund.  The expected return of the portfolio is:
+$$ E[r_p] = w \cdot  E[r_{\text{US}}] + (1-w) E[r_{\text{intl}}]\,.$$ {#eq-2asset-expreturn}
+
+
+We will characterize the riskiness of portfolios using either variance or standard deviation.  The portfolio return variance is a measure of dispersion or riskiness in the return distribution for the portfolio.  It is defined as the expected (squared) magnitude of deviations in the portfolio return from its expected value:
+$$ \text{var}[r_p] = E\big[(r_p-E[r_p])^2\big].$$ {#eq-2asset-variance-exp}
+As shown in the callout box, we can write the portfolio variance in terms of the individual asset variances and their covariance:
+$$ w^2 \text{var}[r_{\text{US}}] + (1-w)^2 \text{var}[r_{\text{intl}}] + 2 w (1-w) \text{cov}[r_{\text{US}},r_{\text{intl}}]. $$ {#eq-2asset-variance}
+
+::: {.callout-note collapse="true"}
+
+# Deriving two-asset portfolio variance
+
+To derive @eq-2asset-variance, first rewrite the portfolio return and expected return on the right-hand side of @eq-2asset-variance-exp using @eq-2asset-return and @eq-2asset-expreturn and group terms. Portfolio variance thus equals
+$$ E\big[\left( w (r_{\text{US}} - E[r_{\text{US}}])+ (1-w) (r_{\text{intl}}-E[r_{\text{intl}}])\right)^2\big]. $$
+Expanding the squared sum, we see that portfolio variance equals:
+\begin{align*}
+   &w^2 E\big[(r_{\text{US}}- E[r_{\text{US}}])^2\big] \\
+ &+ (1-w)^2 E\big[(r_{\text{intl}}-E[r_{\text{intl}}])^2\big] \\
+ &+ 2 w (1-w) E\big[(r_{\text{US}} - E[r_{\text{US}}])(r_{\text{intl}}-E[r_{\text{intl}}])\big]. 
+\end{align*}
+We arrive at @eq-2asset-variance by substituting in the definitions of variances of each asset and their covariance.
+:::
+
+Alternatively, we can express portfolio variance in terms of the individual asset risks and their correlation $\rho$:
+$$ w^2 \text{var}[r_{\text{US}}] + (1-w)^2 \text{var}[r_{\text{intl}]} + 2 w (1-w) \rho \cdot \text{sd}[r_{\text{US}}]\text{sd}[r_{\text{intl}}] , $$ {#eq-2asset-variance-corr}
+where we used the fact that the covariance of two assets equals their correlation multiplied by the product of their standard deviations.  The correlation between US stocks and stocks from developed international economies was about 75% over the last thirty years.  @fig-two-asset plots the possible portfolios of the US and international stock funds.  Investing in the US stock market fund alone is dominated by a combination of the two funds.  It is possible to form a portfolio with less risk than investing 100% in the US fund.  This is diversification in action.  Moreover, these portfolios all have higher expected returns than does investing in the US fund alone.
+
+```{python}
+#| label: fig-two-asset
+#| fig-cap: Portfolios of two risky assets
+import numpy as np
+import pandas as pd
+import plotly.graph_objects as go
+
+#Based on French data library return series
+# Asset 1: US Equity
+# Asset 2: Developed International
+# Asset 1: Emerging Market
+mn1= 6
+mn2= 6.5
+sd1= 15
+sd2= 16.5 
+corr12 = 75 
+
+
+def data(mn1, mn2, sd1, sd2, c):
+    c = c / 100
+    mns = [mn1, mn2]
+    sds = [sd1, sd2]
+    grid = np.linspace(0, 1, 101)
+    ports = [np.array([w, 1 - w]) for w in grid]
+    means = [p.T @ np.array(mns) for p in ports]
+    df = pd.DataFrame(means)
+    df.columns = ["mean"]
+    cov = np.array(
+        [[sds[0] ** 2, sds[0] * sds[1] * c], [sds[0] * sds[1] * c, sds[1] ** 2]]
+    ).reshape(2, 2)
+    df["stdev"] = [np.sqrt(p.T @ cov @ p) for p in ports]
+    df["wt1"] = grid
+    df["wt2"] = 1 - df.wt1
+    for col in ["mean", "stdev"]:
+        df[col] = df[col] / 100
+    return df
+
+
+def figtbl(mn1, mn2, sd1, sd2, c,asset1_name, asset2_name):
+
+    df = data(mn1, mn2, sd1, sd2, c)
+    string0 = "Correlation = " +str(np.round(c,1)) + "%"
+    trace0 = go.Scatter(
+        x=df["stdev"],
+        y=df["mean"],
+        mode="lines",
+        text=100 * df["wt1"],
+        customdata=100 * df["wt2"],
+        hovertemplate=string0 + "<br>"+asset1_name + ": %{text:.0f}%<br>"+asset2_name + ": %{customdata:.0f}%<extra></extra>",
+        name="Frontier: " + asset1_name + " + " + asset2_name, 
+        line=dict(color="red"), 
+    )
+
+    # Plot the two assets
+    df = df[df.wt1.isin([0, 1])]
+    df["text"] = np.where(df.wt1 == 1, asset1_name, asset2_name)
+    trace1 = go.Scatter(
+        x=df[df.wt1==1]["stdev"],
+        y=df[df.wt1==1]["mean"],
+        mode="markers",
+        text=df[df.wt1==1]["text"],
+        hovertemplate="%{text}<extra></extra>",
+        marker=dict(size=15, color="black"),
+        name=asset1_name
+    )
+    trace2 = go.Scatter(
+        x=df[df.wt1==0]["stdev"],
+        y=df[df.wt1==0]["mean"],
+        mode="markers",
+        text=df[df.wt1==0]["text"],
+        hovertemplate="%{text}<extra></extra>",
+        marker=dict(size=15, color="blue"),
+        name=asset2_name
+    )
+
+
+    fig = go.Figure()
+    fig.add_trace(trace0)
+    fig.add_trace(trace1)
+    fig.add_trace(trace2)
+    fig.layout.xaxis["title"] = "Standard Deviation"
+    fig.layout.yaxis["title"] = "Expected Return"
+    fig.update_xaxes(range=[0.85 * df["stdev"].min(), 1.15 * df["stdev"].max()])
+    fig.update_yaxes(range=[0.85 * df["mean"].min(), 1.15 * df["mean"].max()])
+    fig.update_yaxes(tickformat=".1%")
+    fig.update_xaxes(tickformat=".1%")
+    fig.update_layout(legend=dict(yanchor="top", y=0.99, xanchor="left", x=0.01))
+    fig.show()
+figtbl(mn1,mn2,sd1,sd2,corr12,"US Equity", "Developed Intl")
+```
+
+Diversification benefits are greater when the assets are less correlated.  This can be seen from visual inspection of @eq-2asset-variance-corr.  The portfolio variance is lower for lower levels of the correlation between two assets.  If two assets were perfectly negatively correlated, it would be possible to create a risk-free security; that is, we could diversify all risk from the portfolio.  An interactive page with user inputs showing these effects is at the [BBCX Investments Library](https://bbcx-investments.com/portfolios/two-assets).  
+
+
+## Adding Another Risky Asset
+
+Could we do better?  Let's consider adding another risky asset into the mix.  In addition to US and developed international stocks, assume we also have access to an emerging market equity fund.  The emerging market fund has higher expected return, but also higher risk than the other two funds.  It also has a correlation of about 75% with each of the other two funds.  
+
+
+:::  {.callout-tip collapse="true"}
+## Calculating Portfolio Returns
+
+The return of a portfolio combining $N$ assets is simply the weighted average of the underlying asset returns:
+$$ r_p = \sum_{i=1}^{N} w_i r_i\,, $$ {#eq-n-asset-return}
+where the weights $\{w_i\}_{i=1}^N$ are the fractions of capital invested in each asset.  The expected return of the portfolio is the weighted sum of the expected returns of each asset:
+$$ E[r_p] = \sum_{i=1}^{N} w_i E[r_i]\,.$$ {#eq-n-asset-expret}
+Given an array of returns (either expected or realized returns) and an array of weights, the portfolio return can be calculated using matrix multiplication in numpy.  Note the inputs below are decimal notation.  Multiply by 100 to get percents. 
+``` p
+import numpy as np
+
+# Expected returns
+mns = np.array([0.10, 0.05, 0.07])
+
+# Portfolio weights
+wgts = np.array([0.25, 0.5, 0.25])
+
+#Portfolio expected return
+port_expret = wgts @ mns
+```
+:::
+
+
+::: {.callout-note collapse="true"}
+
+# 3-Asset Variance
+Following the same steps to derive @eq-2asset-variance, the portfolio variance of a three asset portfolio is:
+\begin{align*}
+   &w_1^2 \text{var}[r_1] + w_2^2 \text{var}[r_2] + w_3^2 \text{var}[r_3] \\
+   &+ 2 w_1 w_2  \text{cov}[r_1, r_2] \\
+   &+ 2 w_1 w_3  \text{cov}[r_1, r_3] \\
+   &+ 2 w_2 w_3  \text{cov}[r_2, r_3], \\
+\end{align*} 
+where $w_i$ is the portfolio weight in asset $i$.
+:::
+
+@fig-three-asset shows the investment opportunity set of investing in portfolios of these three funds.  Each of the blue dots represent a different possible combination of the three portfolios.  The lines connecting pairs of the assets show all possible portfolios of investing just in those two assets.  The diversification benefits of adding a third asset to any of the pairs of assets can be seen by the fact that many of the blue three-asset portfolios lie to the left of the two-asset frontiers.  That is, adding a third asset can produce a portfolio with the same expected return but lower portfolio risk than can be achieved with just two assets.  
+
+```{python}
+#| label: fig-three-asset
+#| fig-cap: Portfolios of three risky assets
+import pandas as pd
+import numpy as np
+from scipy.stats import uniform
+import plotly.graph_objects as go
+
+#Based on French return series
+# Asset 1: US Equity
+# Asset 2: Developed International
+# Asset 1: Emerging Market
+mn1= 6
+mn2= 6.5
+mn3= 8
+sd1= 15
+sd2= 16.5 
+sd3= 21
+corr12 = 75 
+corr13 = 75 
+corr23 = 75 
+
+def random_wts(num):
+    w = uniform.rvs(0, 1, num)
+    return w / w.sum()
+
+ports = [random_wts(3) for i in range(3000)]
+ports1 = [(0, x, 1 - x) for x in np.linspace(0, 1, 21)]
+ports2 = [(x, 0, 1 - x) for x in np.linspace(0, 1, 21)]
+ports3 = [(x, 1 - x, 0) for x in np.linspace(0, 1, 21)]
+ports = ports + ports1 + ports2 + ports3
+
+ports23 = ports1
+ports13 = ports2
+ports12 = ports3
+
+def is_pos_def(x):
+    if np.all(np.linalg.eigvals(x) > 0):
+        return 'True'
+    else:
+        return 'False'
+
+def data(mn1, mn2, mn3, sd1, sd2, sd3, c12, c13, c23):
+    mns = pd.Series(np.array([mn1, mn2, mn3]), index=["stock1", "stock2", "stock3"])
+    sds = np.array([sd1, sd2, sd3])
+    C = np.diag([1.0, 1.0, 1.0])
+    C[0, 1] = c12 / 100
+    C[0, 2] = c13 / 100
+    C[1, 0] = c12 / 100
+    C[1, 2] = c23 / 100
+    C[2, 0] = c13 / 100
+    C[2, 1] = c23 / 100
+    D = np.diag(sds / 100)
+    C = D @ C @ D
+    
+    # Random investment opportunity set (3-asset)
+    df = pd.DataFrame(
+        dtype=float,
+        index=range(len(ports)),
+        columns=["mean", "stdev", "wt1", "wt2", "wt3"],
+    )
+    df["mean"] = [p @ mns / 100 for p in ports]
+    df["stdev"] = [np.sqrt(p @ C @ p) for p in ports]
+    df["wt1"] = [100 * p[0] for p in ports]
+    df["wt2"] = [100 * p[1] for p in ports]
+    df["wt3"] = [100 * p[2] for p in ports]
+    df = df.sort_values(by="mean")
+    
+    # Dataframes of 2-asset portfolios
+    df12 = pd.DataFrame(dtype=float,index=range(len(ports12)),\
+                    columns=['mean','stdev','wt1','wt2','wt3'])
+    df12['mean'] = [p @ mns/100 for p in ports12]
+    df12['stdev'] = [np.sqrt(p @ C @ p) for p in ports12]
+    df12['wt1'] = [100*p[0] for p in ports12]
+    df12['wt2'] = [100*p[1] for p in ports12]
+    df12['wt3'] = [100*p[2] for p in ports12]
+    df12 = df12.sort_values(by='mean')
+
+    df13 = pd.DataFrame(dtype=float,index=range(len(ports13)),\
+                    columns=['mean','stdev','wt1','wt2','wt3'])
+    df13['mean'] = [p @ mns/100 for p in ports13]
+    df13['stdev'] = [np.sqrt(p @ C @ p) for p in ports13]
+    df13['wt1'] = [100*p[0] for p in ports13]
+    df13['wt2'] = [100*p[1] for p in ports13]
+    df13['wt3'] = [100*p[2] for p in ports13]
+    df13 = df13.sort_values(by='mean')
+
+    df23 = pd.DataFrame(dtype=float,index=range(len(ports23)),\
+                    columns=['mean','stdev','wt1','wt2','wt3'])
+    df23['mean'] = [p @ mns/100 for p in ports23]
+    df23['stdev'] = [np.sqrt(p @ C @ p) for p in ports23]
+    df23['wt1'] = [100*p[0] for p in ports23]
+    df23['wt2'] = [100*p[1] for p in ports23]
+    df23['wt3'] = [100*p[2] for p in ports23]
+    df23 = df23.sort_values(by='mean')   
+    return df, mns / 100, sds / 100, C, df12, df13, df23
+
+
+def figtbl(mn1, mn2, mn3, sd1, sd2, sd3, c12, c13, c23, asset1_name, asset2_name, asset3_name):
+    df, mns, sds, C, df12, df13, df23 = data(mn1, mn2, mn3, sd1, sd2, sd3, c12, c13, c23)
+    cd = np.empty(shape=(df.shape[0], 3, 1), dtype=float)
+    cd[:, 0] = np.array(df.wt1).reshape(-1, 1)
+    cd[:, 1] = np.array(df.wt2).reshape(-1, 1)
+    cd[:, 2] = np.array(df.wt3).reshape(-1, 1)
+    string =  asset1_name +": %{customdata[0]:.0f}%<br>"
+    string += asset2_name +": %{customdata[1]:.0f}%<br>"
+    string += asset3_name +": %{customdata[2]:.0f}%<br>"
+    string += "<extra></extra>"
+    trace1 = go.Scatter(
+        x=df["stdev"], y=df["mean"], mode="markers", customdata=cd, hovertemplate=string, name="Random Portfolios"
+    )
+    trace2 = go.Scatter(
+        x=sds,
+        y=mns,
+        mode="markers",
+        text=[asset1_name,asset2_name,asset3_name],
+        hovertemplate="%{text}<extra></extra>",
+        marker=dict(size=15, color="red"),
+        name="Underlying Assets"
+    )
+    
+    #--------------
+    # 2-asset frontiers
+    #--------------
+    #12
+    cd12 = np.empty(shape=(df12.shape[0],3,1), dtype=float)
+    cd12[:,0] = np.array(df12.wt1).reshape(-1,1)
+    cd12[:,1] = np.array(df12.wt2).reshape(-1,1)
+    cd12[:,2] = np.array(df12.wt3).reshape(-1,1)
+    string12 = asset1_name +": %{customdata[0]:.0f}%<br>"
+    string12+= asset2_name +": %{customdata[1]:.0f}%<br>"
+    string12+= asset3_name +": %{customdata[2]:.0f}%<br>"
+    string12+= '<extra></extra>'
+    trace12 = go.Scatter(x=df12['stdev'],y=df12['mean'],mode='lines',customdata=cd12,hovertemplate=string12, line=dict(color="red"), 
+        name = "Frontier: " + asset1_name + " + " + asset2_name)
+
+    #23
+    cd23 = np.empty(shape=(df23.shape[0],3,1), dtype=float)
+    cd23[:,0] = np.array(df23.wt1).reshape(-1,1)
+    cd23[:,1] = np.array(df23.wt2).reshape(-1,1)
+    cd23[:,2] = np.array(df23.wt3).reshape(-1,1)
+    string23 = asset1_name +": %{customdata[0]:.0f}%<br>"
+    string23+= asset2_name +": %{customdata[1]:.0f}%<br>"
+    string23+= asset3_name +": %{customdata[2]:.0f}%<br>"
+    string23+= '<extra></extra>'
+    trace23 = go.Scatter(x=df23['stdev'],y=df23['mean'],mode='lines',customdata=cd23,hovertemplate=string23, line=dict(color="black"), 
+        name = "Frontier: " + asset2_name + " + "  + asset3_name)
+
+    #13
+    cd13 = np.empty(shape=(df13.shape[0],3,1), dtype=float)
+    cd13[:,0] = np.array(df13.wt1).reshape(-1,1)
+    cd13[:,1] = np.array(df13.wt2).reshape(-1,1)
+    cd13[:,2] = np.array(df13.wt3).reshape(-1,1)
+    string13 = asset1_name +": %{customdata[0]:.0f}%<br>"
+    string13+= asset2_name +": %{customdata[1]:.0f}%<br>"
+    string13+= asset3_name +": %{customdata[2]:.0f}%<br>"
+    string13+= '<extra></extra>'
+    trace13 = go.Scatter(x=df13['stdev'],y=df13['mean'],mode='lines',customdata=cd13,hovertemplate=string13, line=dict(color="orange"), 
+        name = "Frontier: " + asset1_name + " + " + asset3_name)
+
+    fig = go.Figure()
+    fig.add_trace(trace1)
+    fig.add_trace(trace2)
+    fig.add_trace(trace12)
+    fig.add_trace(trace23)
+    fig.add_trace(trace13)
+    fig.layout.xaxis["title"] = "Standard Deviation"
+    fig.layout.yaxis["title"] = "Expected Return"
+    fig.update_xaxes(range=[0.85 * df["stdev"].min(), 1.15 * df["stdev"].max()])
+    fig.update_yaxes(range=[0.85 * df["mean"].min(),  1.15 * df["mean"].max()])    
+    fig.update_yaxes(tickformat=".1%")
+    fig.update_xaxes(tickformat=".1%")
+    fig.update_layout(legend=dict(yanchor="top", y=0.99, xanchor="left", x=0.01))
+    fig.show()
+    # return largefig(fig), is_pos_def(C)
+figtbl(mn1, mn2, mn3, sd1, sd2, sd3, corr12, corr13, corr23, "US Equity", "Developed Intl", "Emerging Mkt")
+```
+
+For example, consider an investor targeting a 6.5% return, the assumed expected return of the domestic international portfolio.  If the investor is restricted to hold only a single asset, they must hold the domestic international fund with risk of over 16% per year.  If an investor can hold two assets, they could lower the amount of risk by holding a portfolio of the US stock fund and the emerging market fund and reduce the portfolio risk to below 16% per year.  An additional diversification benefit is possible if the investor holds all three assets; an even lower standard deviation can be achieved for the same expected return.
+
+
+
+## Portfolios with Many Assets
+
+Adding more securities to a portfolio results in additional diversification benefits, but the marginal benefit of an additional security decreases with the total number of securities in the portfolio.  We discussed above that the diversification benefit in a two-asset case depends on the correlation between the two security returns.  For portfolios of many assets, the portfolio variance depends more on the average correlation across securities than it does on the riskiness of the securities themselves.
+
+The riskiness of an $N$-asset portfolio, as measured by the portfolio variance, is:
+$$ \text{var}[r_p] = \sum_{i=1}^{N} w_i^2 \text{var}[r_i] + 2 \sum_{i=1}^{N} \sum_{j>i} w_i w_j \text{cov}[r_i,r_j]\,, $$ {#eq-n-asset-variance}
+which can be derived in the same way as the two-asset variance in @eq-2asset-variance, albeit with more algebra.  Calculating each term in the last line of @eq-n-asset-variance and adding them up can quickly become tedious.  Given a covariance matrix $V$:
+\begin{equation*}
+    V = 
+    \begin{bmatrix}
+        \text{var}[r_1]     & \text{cov}[r_1,r_2] & \dots  & \text{cov}[r_1,r_N] \\
+        \text{cov}[r_2,r_1] & \text{var}[r_2]     & \dots  & \text{cov}[r_2,r_N] \\
+        \vdots              & \vdots              & \ddots &  \vdots \\
+        \text{cov}[r_N,r_1] & \text{cov}[r_N,r_2] & \dots  & \text{var}[r_N] \\
+    \end{bmatrix}
+\end{equation*}
+and a vector of portfolio weights 
+$$w'=[w_1\, w_2\,...\,w_N]\,,$$
+we can calculate the portfolio variance as the matrix product
+$$ \text{var}[r_p] = w'Vw \,.$$ {#eq-mmult-portvar}
+
+:::  {.callout-tip collapse="true"}
+## Calculating Portfolio Risk
+
+Given an array of weights, calculating the portfolio variance in python is easy using matrix multiplication in numpy.  Note the inputs below are decimal notation.  Multiply the standard deviations and correlations by 100 to get percents.  Two methods for creating a covariance matrix are demonstrated.  The first demonstrates entry element-by-element, and the second more elegantly (and concisely) uses matrix multiplication using the array of standard deviations and the correlation matrix.
+``` p
+import numpy as np
+
+##### Inputs
+# Standard deviations
+sds = np.array([0.20, 0.12, 0.15])
+
+# Correlations
+corr12 = 0.3
+corr13 = 0.3
+corr23 = 0.3
+
+# Portfolio weights
+wgts = np.array([0.25, 0.5, 0.25])
+
+##### Method 1 to calculate covariance matrix
+# Covariances
+cov12 = corr12 * sds[0] * sds[1]
+cov13 = corr13 * sds[0] * sds[2]
+cov23 = corr23 * sds[1] * sds[2]
+# Covariance matrix
+cov = np.array([[sds[0]**2,  cov12,     cov13], \
+                [cov12,      sds[1]**2, cov23], \
+                [cov13,      cov23,     sds[2]**2]])
+
+##### Method 2 to calculate covariance matrix
+# Correlation matrix
+C  = np.identity(3)
+C[0, 1] = C[1, 0] = corr12
+C[0, 2] = C[2, 0] = corr13
+C[1, 2] = C[2, 1] = corr23
+# Covariance matrix
+cov = np.diag(sds) @ C @ np.diag(sds)
+
+##### Portfolio risk measures
+#Portfolio variance
+port_var = wgts @ cov @ wgts
+
+#Portfolio standard deviation
+port_sd  = np.sqrt(port_var)
+```
+:::
+
+
+Average correlation across assets is important for the possible diversification benefits in large portfolios.  This is due to the sheer number of terms in the portfolio variance calculation @eq-n-asset-variance involving correlations (through the covariance terms).  We can visualize each term of the portfolio variance in matrix form.  For instance, the three-asset version of @eq-n-asset-variance in matrix form is:
+
+<table style="border:1px solid black; margin-left:auto;margin-right:auto;">
+  <!-- Row 1 -->
+  <tr> 
+    <td style="text-align:center; background-color:gray">$w_1^2 \text{var}[r_1]$</td>
+    <td style="text-align:center; background-color:lightblue">$w_1 w_2 \text{cov}[r_1,r_2]$</td>
+    <td style="text-align:center; background-color:lightcoral">$w_1 w_3 \text{cov}[r_1,r_3]$</td>
+  </tr>
+  <!-- Row 2 -->
+  <tr>
+    <td style="text-align:center; background-color:lightblue">$w_2 w_1 \text{cov}[r_2,r_1]$</td>
+    <td style="text-align:center; background-color:gray">$w_2^2 \text{var}[r_2]$</td>
+    <td style="text-align:center; background-color:#d9f2d9">$w_2 w_3 \text{cov}[r_2,r_3]$</td>
+  </tr>
+  <!-- Row 3 -->
+  <tr>
+    <td style="text-align:center; background-color:lightcoral">$w_3 w_1 \text{cov}[r_3,r_1]$</td>
+    <td style="text-align:center; background-color:#d9f2d9">$w_3 w_2 \text{cov}[r_3,r_2]$</td>
+    <td style="text-align:center; background-color:gray">$w_3^2 \text{var}[r_3]$</td>
+  </tr>
+</table>
+
+For the three-asset portfolio, there are 3 variance terms and 3 distinct covariance terms.  For a five-asset portfolio, the tabular representation of @eq-n-asset-variance is:
+<table style="border:1px solid black; margin-left:auto;margin-right:auto;">
+  <!-- Row 1 -->
+  <tr> 
+    <td style="text-align:center; background-color:gray">$w_1^2 \text{var}[r_1]$</td>
+    <td style="text-align:center; background-color:lightblue">$w_1 w_2 \text{cov}[r_1,r_2]$</td>
+    <td style="text-align:center; background-color:lightcoral">$w_1 w_3 \text{cov}[r_1,r_3]$</td>
+    <td style="text-align:center; background-color:lightgray">$w_1 w_4 \text{cov}[r_1,r_4]$</td>
+    <td style="text-align:center; background-color:darkseagreen">$w_1 w_5 \text{cov}[r_1,r_5]$</td>
+  </tr>
+  <!-- Row 2 -->
+  <tr>
+    <td style="text-align:center; background-color:lightblue">$w_2 w_1 \text{cov}[r_2,r_1]$</td>
+    <td style="text-align:center; background-color:gray">$w_2^2 \text{var}[r_2]$</td>
+    <td style="text-align:center; background-color:#d9f2d9">$w_2 w_3 \text{cov}[r_2,r_3]$</td>
+    <td style="text-align:center; background-color:khaki3">$w_2 w_4 \text{cov}[r_2,r_4]$</td>
+    <td style="text-align:center; background-color:lavender">$w_2 w_5 \text{cov}[r_2,r_5]$</td>      
+  </tr>
+  <!-- Row 3 -->
+  <tr>
+    <td style="text-align:center; background-color:lightcoral">$w_3 w_1 \text{cov}[r_3,r_1]$</td>
+    <td style="text-align:center; background-color:#d9f2d9">$w_3 w_2 \text{cov}[r_3,r_2]$</td>
+    <td style="text-align:center; background-color:gray">$w_3^2 \text{var}[r_3]$</td>
+    <td style="text-align:center; background-color:pink">$w_3 w_4 \text{cov}[r_3,r_4]$</td>
+    <td style="text-align:center; background-color:wheat">$w_3 w_5 \text{cov}[r_3,r_5]$</td>  
+  </tr>
+  <!-- Row 4 -->
+  <tr>
+    <td style="text-align:center; background-color:lightgray">$w_4 w_1 \text{cov}[r_4,r_1]$</td>
+    <td style="text-align:center; background-color:khaki3">$w_4 w_2 \text{cov}[r_4,r_2]$</td>
+    <td style="text-align:center; background-color:pink">$w_4 w_3 \text{cov}[r_4,r_3]$</td>
+    <td style="text-align:center; background-color:gray">$w_4^2 \text{var}[r_4]$</td>
+    <td style="text-align:center; background-color:thistle">$w_4 w_5 \text{cov}[r_4,r_5]$</td>  
+  </tr>
+  <!-- Row 5 -->
+  <tr>
+    <td style="text-align:center; background-color:darkseagreen">$w_5 w_1 \text{cov}[r_5,r_1]$</td>
+    <td style="text-align:center; background-color:lavender">$w_5 w_2 \text{cov}[r_5,r_2]$</td>
+    <td style="text-align:center; background-color:wheat">$w_5 w_3 \text{cov}[r_5,r_3]$</td>
+    <td style="text-align:center; background-color:thistle">$w_5 w_4 \text{cov}[r_5,r_4]$</td>
+    <td style="text-align:center; background-color:gray">$w_5^2 \text{var}[r_5]$</td>  
+  </tr>    
+</table>
+For the five-asset portfolio, there are 5 variance terms (along the diagonal) and 10 =((25-5)/2) distinct covariance terms.  For an $N$ asset portfolio, there will be $N$ variance terms and $\frac{N^2-N}{2}$ distinct covariance terms.  For portfolios with many assets, the number of covariance terms will quickly dwarf the number of variance terms.
+
+To see how correlation across assets can dominate the riskiness of individual securities in portfolios with many assets, consider an equally-weighted ($w_i=1/N$ for all assets) portfolio where all assets have the same variance $(\sigma^2_{\text{all}})$ and all pairs of assets have the same covariance $(\overline{\text{cov}})$.  The variance of this equal-weighted portfolio is the sum of the $N$ variance terms and $N^2-N$ covariance terms:
+$$  N\cdot \left(\frac{1}{N}\right)^2 \sigma^2_{\text{all}} + (N^2-N)\cdot \left(\frac{1}{N}\right)^2 \overline{\text{cov}}\,. $$
+Simplifying, the portfolio variance is:
+$$ \left(\frac{1}{N}\right) \sigma^2_{\text{all}} + \left(1-\frac{1}{N}\right) \overline{\text{cov}}\,. $$
+As the number of assets $N$ gets very large, the portfolio variance approaches the common covariance across assets:
+$$ \text{var}(r_p) \underset{N\rightarrow \infty}{\longrightarrow} 0\cdot\sigma^2_{\text{all}}+(1-0)\overline{\text{cov}}=\overline{\text{cov}}\,.$$ {#eq-diversification-limit}
+
+@fig-diversification plots the portfolio variance for this equally-weighted portfolio as a function of the number of assets for three correlation values.  The figure demonstrates three insights.  First, as discussed previously, the diversification benefit is greater for lower levels of correlation across assets (that is, lower $\overline{\text{cov}}$ here).  Second, the marginal benefit of adding additional securities to a portfolio decreases with the number of securities.  A large fraction of the overall risk reduction is due to the first 10 to 20 securities added to the portfolio.  Third, there is a limit to risk reduction, and this limit is governed by the amount of common comovement across assets in the portfolio.  $\sigma_{\text{all}}$ is assumed to be 40%, so @eq-diversification-limit tells us that the portfolio standard deviation approaches values of 12.6%, 20%, and 28.3%, respectively, for correlations of 10%, 25%, and 50% as the number of portfolio assets gets large.^[These limits are calculated using $\text{sd}[r_p]=\sqrt{\overline{\text{cov}}}=\sqrt{\overline{\text{corr}}\sigma^2_{\text{all}}}$.] @fig-diversification shows that for portfolios of 200 assets, the portfolio standard deviation is already quite close to these limiting standard deviations.
+
+``` {python}
+#| label: fig-diversification
+#| fig-cap: Portfolios of three risky assets
+import pandas as pd
+import numpy as np
+import plotly.graph_objects as go
+
+std  = 40
+corr0 = 10
+corr1 = 25
+corr2 = 50
+
+# Range of x-axis
+Num = 200
+
+def data(std, cor):
+    var = std ** 2
+    cov = var * cor
+    stdevs = [np.sqrt(var / n + (n - 1) * cov / n) for n in range(1, Num + 1)]
+    df = pd.DataFrame(stdevs)
+    df.columns = ["Standard Deviation"]
+    df["Number of Assets"] = [i for i in range(1, Num + 1)]
+    return df
+def figtbl(std, cor0, cor1, cor2):
+    # The inputs are in percents
+    std /= 100
+    cor0 /= 100
+    cor1 /= 100
+    cor2 /= 100
+
+    # Correlation 0
+    df = data(std, cor0)
+    trace0 = go.Scatter(
+        x=df["Number of Assets"],
+        y=df["Standard Deviation"],
+        mode="lines",
+        hovertemplate="Correlation=" + f'{100*cor0:.0f}%' + "<br>Number of Assets = %{x}<br>Standard Deviation = %{y:0.2%} <extra></extra>",
+        name = "Correlation=" + f'{100*cor0:.0f}%'
+    )
+
+    # Correlation 1
+    df = data(std, cor1)
+    trace1 = go.Scatter(
+        x=df["Number of Assets"],
+        y=df["Standard Deviation"],
+        mode="lines",
+        hovertemplate="Correlation=" + f'{100*cor1:.0f}%' + "<br>Number of Assets = %{x}<br>Standard Deviation = %{y:0.2%} <extra></extra>",
+        name = "Correlation=" + f'{100*cor1:.0f}%'
+    )   
+    # Correlation 2
+    df = data(std, cor2)
+    trace2 = go.Scatter(
+        x=df["Number of Assets"],
+        y=df["Standard Deviation"],
+        mode="lines",
+        hovertemplate="Correlation=" + f'{100*cor2:.0f}%' + "<br>Number of Assets = %{x}<br>Standard Deviation = %{y:0.2%} <extra></extra>",
+        name = "Correlation=" + f'{100*cor2:.0f}%'
+    )      
+
+    fig = go.Figure()
+    fig.add_trace(trace0)
+    fig.add_trace(trace1)
+    fig.add_trace(trace2)
+    fig.update_yaxes(tickformat=",.0%", rangemode="tozero")
+    fig.layout.xaxis["title"] = "Number of Assets"
+    fig.layout.yaxis["title"] = "Standard Deviation"
+    fig.update_layout(legend=dict(yanchor="top", y =0.99, xanchor="left", x=0.74))
+    fig.show()
+    
+figtbl(std, corr0, corr1, corr2)
+```
+
+
+
+
+
+
+
+
+## Short-Sales 
+
+So far, we have considered portfolios with nonnegative weights in each of the assets.  Negative portfolio weights correspond to short positions in a portfolio.  Short-selling involves borrowing a security from another owner and selling it.  The short-seller then has a liability to return the security to the security lender;  this liability is equal to the security's market value.  Short-sellers hope to purchase the security later for a lower price.  Thus, they reverse the order of the investing maxim: buy low-sell high.  Short-sellers hope to sell high-buy low.  In practice, there are limitations on short selling: it may not be possible to use the proceeds from a short sale to buy other risky assets, less than full interest may be earned on the proceeds, and a fee must be paid to borrow the asset being shorted. In this section, we ignore those issues. We assume that proceeds from short sales are invested in the other risky assets. 
+
+@fig-two-asset-shorting shows the expected returns and risks of portfolios of the US stock fund and the developed international fund when shorting is allowed.  Comparing to @fig-two-asset above, allowing shorting expands the investment opportunity set to include expected return values below the US equity expected return and above the developed international fund expected return.
+
+```{python}
+#| label: fig-two-asset-shorting
+#| fig-cap: Portfolios of two risky assets with shorting
+import numpy as np
+import pandas as pd
+import plotly.graph_objects as go
+
+#Based on French data library return series
+# Asset 1: US Equity
+# Asset 2: Developed International
+# Asset 1: Emerging Market
+mn1= 6
+mn2= 6.5
+sd1= 15
+sd2= 16.5 
+corr12 = 75 
+
+
+def data(mn1, mn2, sd1, sd2, c):
+    c = c / 100
+    mns = [mn1, mn2]
+    sds = [sd1, sd2]
+    grid = np.linspace(-0.5, 1.5, 201)
+    ports = [np.array([w, 1 - w]) for w in grid]
+    means = [p.T @ np.array(mns) for p in ports]
+    df = pd.DataFrame(means)
+    df.columns = ["mean"]
+    cov = np.array(
+        [[sds[0] ** 2, sds[0] * sds[1] * c], [sds[0] * sds[1] * c, sds[1] ** 2]]
+    ).reshape(2, 2)
+    df["stdev"] = [np.sqrt(p.T @ cov @ p) for p in ports]
+    df["wt1"] = grid
+    df["wt2"] = 1 - df.wt1
+    for col in ["mean", "stdev"]:
+        df[col] = df[col] / 100
+    return df
+
+
+def figtbl(mn1, mn2, sd1, sd2, c,asset1_name, asset2_name):
+
+    df = data(mn1, mn2, sd1, sd2, c)
+    string0 = "Correlation = " +str(np.round(c,1)) + "%"
+    trace0 = go.Scatter(
+        x=df["stdev"],
+        y=df["mean"],
+        mode="lines",
+        text=100 * df["wt1"],
+        customdata=100 * df["wt2"],
+        hovertemplate=string0 + "<br>"+asset1_name + ": %{text:.0f}%<br>"+asset2_name + ": %{customdata:.0f}%<extra></extra>",
+        name="Frontier: " + asset1_name + " + " + asset2_name, 
+        line=dict(color="red"), 
+    )
+
+    # Plot the two assets
+    df = df[df.wt1.isin([0, 1])]
+    df["text"] = np.where(df.wt1 == 1, asset1_name, asset2_name)
+    trace1 = go.Scatter(
+        x=df[df.wt1==1]["stdev"],
+        y=df[df.wt1==1]["mean"],
+        mode="markers",
+        text=df[df.wt1==1]["text"],
+        hovertemplate="%{text}<extra></extra>",
+        marker=dict(size=15, color="black"),
+        name=asset1_name
+    )
+    trace2 = go.Scatter(
+        x=df[df.wt1==0]["stdev"],
+        y=df[df.wt1==0]["mean"],
+        mode="markers",
+        text=df[df.wt1==0]["text"],
+        hovertemplate="%{text}<extra></extra>",
+        marker=dict(size=15, color="blue"),
+        name=asset2_name
+    )
+
+
+    fig = go.Figure()
+    fig.add_trace(trace0)
+    fig.add_trace(trace1)
+    fig.add_trace(trace2)
+    fig.layout.xaxis["title"] = "Standard Deviation"
+    fig.layout.yaxis["title"] = "Expected Return"
+    fig.update_xaxes(range=[0.85 * df["stdev"].min(), 1.15 * df["stdev"].max()])
+    fig.update_yaxes(range=[0.85 * df["mean"].min(), 1.15 * df["mean"].max()])
+    fig.update_yaxes(tickformat=".1%")
+    fig.update_xaxes(tickformat=".1%")
+    fig.update_layout(legend=dict(yanchor="top", y=0.99, xanchor="left", x=0.01))
+    fig.show()
+figtbl(mn1,mn2,sd1,sd2,corr12,"US Equity", "Developed Intl")
+```
+
+
+## The Efficient Frontier 
+
+With more than two risky assets, multiple portfolios can achieve the same expected return, but with different amounts of portfolio risk.  This was seen above in @fig-three-asset.  All else equal, typical investors like expected return and dislike risk, so for a given expected return level, lower levels of portfolio standard deviation are preferred.  For each level of expected return, we can find the portfolio that provides the highest possible diversification, that is, the lowest standard deviation.  The set of these minimum-variance portfolios is called the **frontier**.  The portfolio with the lowest standard deviation across all feasible expected returns is called the **global minimum variance (GMV)** portfolio.  Portfolios that lie on the frontier with expected returns above those of the GMV portfolio are said to be efficient, and this portion of the frontier is called the **efficient frontier**.  For the discussion below, we assume that short-sales are allowed.  We will relax this assumption in a later chapter.
+
+
+Mathematically, the GMV portfolio is the set of portfolio weights that minimizes portfolio variance without conditioning on the portfolio expected return:
+$$ \underset{w_1,w_2,\dots,w_N}{\text{min}} \text{var}[r_p]$$ {#eq-gmv}
+subject to the constraints $\sum_i w_i=1$.
+
+::: {.callout-tip collapse="true"}
+## Calculating the GMV portfolio
+
+If short sales are allowed, the GMV portfolio weights satisfy a system of equations.  The vector of GMV portfolio weights $w$ has the same inner product with each column of the covariance matrix $\text{cov}_i$ ($n-1$ equations):
+$$ \frac{w'\text{cov}_i}{w'\text{cov}_j} = 1\,,$$
+and the portfolio is fully invested:
+$$\sum_i w_i = 1.$$
+
+``` p
+import numpy as np
+
+##### Inputs
+# Standard deviations
+sds = np.array([0.20, 0.12, 0.15])
+# Correlations
+corr12 = 0.3
+corr13 = 0.3
+corr23 = 0.3
+# Covariance matrix
+C  = np.identity(3)
+C[0, 1] = C[1, 0] = corr12
+C[0, 2] = C[2, 0] = corr13
+C[1, 2] = C[2, 1] = corr23
+cov = np.diag(sds) @ C @ np.diag(sds)
+
+##### Global Minimum Variance Portfolio
+n = len(sds)
+w = np.linalg.solve(cov, np.ones(n))
+wgts_gmv = w / np.sum(w)
+
+```
+:::
+
+
+A frontier portfolio with expected return $\mu_{\text{target}}$ is defined by the portfolio weights that solve the following constrained optimization problem:
+$$ \underset{w_1,w_2,\dots,w_N}{\text{min}} \text{var}[r_p]$$ {#eq-frontier}
+subject to constraints: $E[r_p]=\mu_{\text{target}}$ and $\sum_i w_i=1$.  To trace out the frontier, we solve the problem for a range of target expected returns.
+
+::: {.callout-tip collapse="true"}
+## Calculating the Frontier
+
+Any two frontier portfolios can be combined to produce the entire frontier.  The code below uses this two-fund spanning with two frontier portfolios (one of which is the GMV portfolio) to calculate points along the frontier.
+
+``` p
+import numpy as np
+<!-- from cvxopt import matrix -->
+<!-- from cvxopt.solvers import qp as Solver, options as SolverOptions -->
+
+##### Inputs
+# Expected returns
+mns = np.array([0.10, 0.05, 0.07])
+# Standard deviations
+sds = np.array([0.20, 0.12, 0.15])
+# Correlations
+corr12 = 0.3
+corr13 = 0.3
+corr23 = 0.3
+# Covariance matrix
+C  = np.identity(3)
+C[0, 1] = C[1, 0] = corr12
+C[0, 2] = C[2, 0] = corr13
+C[1, 2] = C[2, 1] = corr23
+cov = np.diag(sds) @ C @ np.diag(sds)
+
+##### Frontier Portfolios
+def frontier(means, cov, target):
+    n = len(means)
+    w = np.linalg.solve(cov, np.ones(n))
+    wgts_gmv = w / np.sum(w)
+    w = np.linalg.solve(cov, means)
+    piMu = w / np.sum(w)
+    m1 = wgts_gmv @ means
+    m2 = piMu @ means
+    a = (target - m2) / (m1 - m2)
+    wgts = a * wgts_gmv + (1 - a) * piMu
+    return wgts
+wgts_frontier = [frontier(mns, cov, m) for m in np.linspace(mns.min(), mns.max(),5)]
+```
+:::
+
+
+
+
+
+
+@fig-frontier-gmv shows the frontier (without short sales) formed using the three equity funds.  The GMV portfolio is the portfolio with the lowest standard deviation on the left-hand side of the frontier.  
+
+``` {python}
+#| label: fig-frontier-gmv
+#| fig-cap: The Efficient Frontier and the Global Minimum Variance Portfolio
+import numpy as np
+import plotly.graph_objects as go
+
+#Based on French return series
+# Asset 1: US Equity
+# Asset 2: Developed International
+# Asset 1: Emerging Market
+mn1= 6
+mn2= 6.5
+mn3= 8
+sd1= 15
+sd2= 16.5 
+sd3= 21
+corr12 = 75 
+corr13 = 75 
+corr23 = 75 
+
+def is_pos_def(x):
+    if np.all(np.linalg.eigvals(x) > 0):
+        return 'True'
+    else:
+        return 'False'
+    
+def figtbl(mn1, mn2, mn3, sd1, sd2, sd3, c12, c13, c23, asset_names):
+    mns = np.array((mn1, mn2, mn3)) / 100
+    sds = np.array((sd1, sd2, sd3)) / 100
+    corr = np.identity(3)
+    corr[0,1] = corr[1,0] = c12 / 100
+    corr[0,2] = corr[2,0] = c13 / 100
+    corr[1,2] = corr[2,1] = c23 / 100
+    cov = np.diag(sds) @ corr @ np.diag(sds)
+    N = 3
+
+    def custom(string, ports):
+        cd = np.empty(shape=(len(ports), N, 1), dtype=float)
+        for i in range(N):
+            cd[:, i] = np.array([w[i] for w in ports]).reshape(-1, 1)
+        string += "<br>"
+        for i in range(N):
+            string += asset_names[i]
+            string += ": %{customdata["
+            string += str(i)
+            string += "]:.1%}<br>"
+        string += "<extra></extra>"
+        return string, cd
+
+    P = portfolio(mns, cov, True)
+
+    mingrid = 0.9*np.min(mns)
+    maxgrid = 1.025*np.max(mns)
+    mnsFrontier = np.linspace(mingrid, maxgrid, 50)
+    portsFrontier = [P.frontier(m) for m in mnsFrontier]
+    sdsFrontier = [np.sqrt(w @ cov @ w) for w in portsFrontier]
+
+
+    string, cd = custom('frontier', portsFrontier)
+    # string, cd = custom('frontier w/o short sales', portsFrontier)
+    trace1 = go.Scatter(
+        x=sdsFrontier,
+        y=mnsFrontier,
+        mode="lines",
+        customdata=cd,
+        hovertemplate=string,
+        line=dict(color="blue"),
+        name="3-Fund Frontier"
+    )
+
+    gmv = P.GMV
+
+    string = "GMV portfolio<br>"
+    for i in range(N):
+        string += asset_names[i]+": " + f'{gmv[i]:.1%}' + "<br>"
+    string += "<extra></extra>"
+    trace1a = go.Scatter(
+        x=[np.sqrt(gmv @ cov @ gmv)],
+        y=[gmv @ mns],
+        mode="markers",
+        hovertemplate=string,        
+        marker=dict(size=15, color="blue"),
+        name="Global Minimum Variance Portfolio"
+    )
+
+    trace3 = go.Scatter(
+        x=sds,
+        y=mns,
+        # text=[1, 2, 3],
+        # hovertemplate="Asset %{text}<extra></extra>",
+        text=asset_names,
+        hovertemplate="%{text}<extra></extra>",
+        mode="markers",
+        marker=dict(size=15, color="red"),
+        name="Underlying Assets"
+    )
+ 
+    fig = go.Figure()  
+    for trace in (trace1, trace1a, trace3):
+        fig.add_trace(trace)
+    #trace1=frontier w/o short sales
+    #trace1a=GMV portfolio w/o short sales
+    #trace3=Assets
+        
+        
+    fig.layout.xaxis["title"] = "Standard Deviation"
+    fig.layout.yaxis["title"] = "Expected Return"
+    # fig.update_xaxes(range=[0, 1.25 * np.max(sds)])
+    # fig.update_yaxes(range=[0, 1.25 * np.max(mns)])
+    fig.update_yaxes(tickformat=".1%")
+    fig.update_xaxes(tickformat=".1%")
+    fig.update_layout(legend=dict(yanchor="top", y =0.99, xanchor="left", x=0.01))
+    fig.show()
+    # return largefig(fig), is_pos_def(cov)
+figtbl(mn1, mn2, mn3, sd1, sd2, sd3, corr12, corr13, corr23, ["US Equity", "Developed Intl", "Emerging Mkt"])
+```
+
+
