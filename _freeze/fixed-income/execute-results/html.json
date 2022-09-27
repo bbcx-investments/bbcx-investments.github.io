@@ -1,0 +1,11 @@
+{
+  "hash": "2c9cfde794e56e81cbe00650e57ca64a",
+  "result": {
+    "markdown": "# Fixed Income\n\nA chapter about fixed income\n\n<<<<<<< HEAD\nSome text tested by yh\n=======\n## Basic Concepts\n\n### Spot Rates, Zero-Coupon Rates\n\nA zero-coupon bond is a bond which doesn't pay any coupons. It is issued at a discount and at expiration date, the investor gets the face value (par value) back. Spot rate is the discount rate which makes the present value of a zero-coupon bond to its current market price.\n\nWe will use semi-annual compounding for most of this chapter. Let N be number of semi-annual periods, $C_{N}$ is the price of a zero-coupon bond with N semi-annual periods to maturity, $r_{N}$ is the N period spot rate.\n\nThen we have: \n\n$$ Q_{N}= \\frac{100}{(1+\\frac{r_{N}}{2})^N}  $$ \n\n\n$r_{N}$ is the rate at which we should be using to discount cashflows from period N. If we know a collection of spot rate $r_{1}$, $r_{2}$...$r_{N}$, then we can price a bond with any cashflows by simply discounting each cashflow with the corresponding spot rate.\n\n::: {.cell execution_count=1}\n``` {.python .cell-code}\nfrom pandas_datareader import DataReader as pdr\nimport matplotlib.pyplot as plt\n\ntreasury30=pdr('DGS30', 'fred',start=1980)\nplt.plot(treasury30)\nplt.title('US Treasury 30 year yield')\nplt.show()\n```\n\n::: {.cell-output .cell-output-display}\n![](fixed-income_files/figure-html/cell-2-output-1.png){}\n:::\n:::\n\n\n## New Section\n\n### Forward Rates\n\n### Yield to Maturity\n\n### Term Structure of Interest Rate\n\n## Price Risk\n\n## Bond with Embedded options\n\n## Structured Finance Product\n>>>>>>> 4794731284305c4c7d7cecbc8c1ea443cb2c345a\n\n",
+    "supporting": [
+      "fixed-income_files\\figure-html"
+    ],
+    "filters": [],
+    "includes": {}
+  }
+}
