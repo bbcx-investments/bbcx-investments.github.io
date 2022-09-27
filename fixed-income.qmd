@@ -9,10 +9,14 @@ Some text tested by yh
 
 ### Spot Rates, Zero-Coupon Rates
 
-Try some equations (how to index equation?)
-$$ Q_{N}= \frac{100}{(1+\frac{R_{N}}{2})^N}  $$ 
+A zero-coupon bond is a bond which doesn't pay any coupons. It is issued at a discount and at expiration date, the investor gets the face value (par value) back. Spot rate is the discount rate which makes the present value of a zero-coupon bond to its current market price.
 
-Try some plots
+We will use semi-annual compounding for most of this chapter. Let N be number of semi-annual periods, $C_{N}$ is the price of a zero-coupon bond with N semi-annual periods to maturity, $r_{N}$ is the N period spot rate.
+
+Then we have: 
+$$ Q_{N}= \frac{100}{(1+\frac{r_{N}}{2})^N}  $$ 
+
+$r_{N}$ is the rate at which we should be using to discount cashflows from period N. If we know a collection of spot rate $r_{1}$, $r_{2}$...$r_{N}$, then we can price a bond with any cashflows by simply discounting each cashflow with the corresponding spot rate.
 
 
 ```{python}
