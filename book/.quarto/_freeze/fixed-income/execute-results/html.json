@@ -1,0 +1,11 @@
+{
+  "hash": "67abc62b6977f44d8ad647aa7f2c1fe7",
+  "result": {
+    "markdown": "# Fixed Income\n\nA chapter about fixed income\n\n<<<<<<< HEAD\nSome text tested by yh\n=======\n## Basic Concepts\n\n### Spot Rates, Zero-Coupon Rates\n\nTry some equations (how to index equation?)\n\n$$ Q_{N}= \\frac{100}{(1+\\frac{R_{N}}{2})^N}  $$ \n\n\nTry some plots\n\n::: {.cell execution_count=1}\n``` {.python .cell-code}\nfrom pandas_datareader import DataReader as pdr\nimport matplotlib.pyplot as plt\n\ntreasury30=pdr('DGS30', 'fred',start=1980)\nplt.plot(treasury30)\nplt.title('US Treasury 30 year yield')\nplt.show()\n```\n\n::: {.cell-output .cell-output-display}\n![](fixed-income_files/figure-html/cell-2-output-1.png){}\n:::\n:::\n\n\n### Forward Rates\n\n### Yield to Maturity\n\n### Term Structure of Interest Rate\n\n## Price Risk\n\n## Bond with Embedded options\n\n## Structured Finance Product\n>>>>>>> 4794731284305c4c7d7cecbc8c1ea443cb2c345a\n\n",
+    "supporting": [
+      "fixed-income_files\\figure-html"
+    ],
+    "filters": [],
+    "includes": {}
+  }
+}
