@@ -56,9 +56,9 @@ fig.show()
 
 
 <p align=center> 
-<a href="https://www.youtube.com/embed/2HSWM3fKldY"><img src="images/SEC.svg" alt="HTML tutorial" style="width:1in;"></a>
+<a href="https://www.youtube.com/embed/2HSWM3fKldY"><img src="images/SEC.svg" alt="SEC" style="width:1in;"></a>
 </p>
 
 <p align=center> 
-<a href="https://bbcx-investments.com/borrowing-saving/retirement-planning-sim"><img src="images/Rice_Owl.jpg" style="width:1in;"></a>
+<a href="https://bbcx-investments.com/borrowing-saving/retirement-planning-sim"><img src="images/Rice_Owl.jpg" alt="BBCX Investments Library" style="width:1in;"></a>
 </p>
