@@ -5,37 +5,121 @@ A chapter about fixed income
 <<<<<<< HEAD
 Some text tested by yh
 =======
+
 ## Basic Concepts
+
+
 
 ### Spot Rates, Zero-Coupon Rates
 
-A zero-coupon bond is a bond which doesn't pay any coupons. It is issued at a discount and at expiration date, the investor gets the face value (par value) back. Spot rate is the discount rate which makes the present value of a zero-coupon bond to its current market price.
+A zero-coupon bond is a bond which doesn't pay any coupon. It is issued at a discount and the investor gets the face value (par value) back at expiration date. Spot rate is the discount rate which makes the present value of a zero-coupon bond equal to its current market price. Consider Treasury Bills which are zero-coupon bonds. The prices of the Treasury zero-coupon bonds tell us the present values of future risk-free dollars. 
 
-We will use semi-annual compounding for most of this chapter. Let N be number of semi-annual periods, $C_{N}$ is the price of a zero-coupon bond with N semi-annual periods to maturity, $r_{N}$ is the N period spot rate.
+We will use semi-annual compounding for most of this chapter as in the US both Treasury bonds and corporate bonds pay semi annual coupons. Let N be number of semi-annual periods, $Q_{N}$ is the price of a zero-coupon bond with N semi-annual periods to maturity, $r_{N}$ is the N period spot rate.
 
 Then we have: 
 $$ Q_{N}= \frac{100}{(1+\frac{r_{N}}{2})^N}  $$ 
 
-$r_{N}$ is the rate at which we should be using to discount cashflows from period N. If we know a collection of spot rate $r_{1}$, $r_{2}$...$r_{N}$, then we can price a bond with any cashflows by simply discounting each cashflow with the corresponding spot rate.
+$r_{N}$ is the rate at which we should be using to discount cashflows from period N. If we know a collection of spot rate $r_{1}$, $r_{2}$...$r_{N}$, then we can price a bond with any cashflows by discounting each cashflow with the corresponding spot rate. Treasury Bills have maturities less than one year. Although STRIPS (Separate Trading of Registered Interest and Principal of Securities) are in fact Treasury zero coupon bonds, due to their low liqudity level, practitioners seldom infer spot rates from STRIPS. Instead, practitioners construct their own spot rate curve based on Treasury coupon bonds prices. 
+
+Suppose we have a two year Treasury coupon bond with 4% coupon rate. With semi-annual coupon payment, the cash flow from this bond will be: 2, 2, 2, and 102. The theoretical price of this bond can be computed by discounting each future cash flow using corresponding spot rates.
+
+$$ P= \frac{2}{(1+\frac{r_{1}}{2})^1}+\frac{2}{(1+\frac{r_{2}}{2})^2}+\frac{2}{(1+\frac{r_{3}}{2})^3}+\frac{102}{(1+\frac{r_{4}}{2})^4}  $$ 
+
+### Forward Rate
+
+A forward rate is an interest rate for borrowing and lending for a future time period. Like forward price and futures price, forwards rate are known today. Forward rates can be derived from the term structure of spot rates.
+
+Denote the forward rate as $f^{m}_{n}$, which is the interest rate for an $m$ period ahead $n$ period loan. For instance $f^{1}_{1}$ means one period ahead one period forward rate. It is an interest rate for borrowing and lending from period 1 to period 2. Consider two different ways of investing in risk-free asset for one year (2 semi-annual periods). The first way is investing in 2 period T-bill. One dollar will grow to $(1+\frac{r_2}{2})^2$. The second way is investing in 1 period T-bill and then lock in an interest rate to invest from period 1 to period 2 today. Under the second way, one dollar will grow to  $(1+\frac{r_1}{2})(1+\frac{f^1_1}{2})$.  Since we know the forward rate today, the return on these two ways of investing should be exactly the same under no arbitrage principle. When we set $(1+\frac{r_2}{2})^2=(1+\frac{r_1}{2})(1+\frac{f^1_1}{2})$, we can solve for $f^1_1$. 
 
 
-```{python}
 
-from pandas_datareader import DataReader as pdr
-import matplotlib.pyplot as plt
-
-treasury30=pdr('DGS30', 'fred',start=1980)
-plt.plot(treasury30)
-plt.title('US Treasury 30 year yield')
-plt.show()
-```
-## New Section
-
-### Forward Rates
 
 ### Yield to Maturity
 
+Yield to maturity is the discount rate that makes the present value of all future cash flows from a bond equa to the current market value of the bond. Let $y$ be the yield to maturity, $N$ is number of semi-annual periods till maturity and $c$ is the coupon per year. Then we have the following.  
+
+
+$$ P= \frac{\frac{c}{2}}{(1+\frac{y}{2})^1}+\frac{\frac{c}{2}}{(1+\frac{y}{2})^2}+\frac{\frac{c}{2}}{(1+\frac{y}{2})^3}+...\frac{100+\frac{c}{2}}{(1+\frac{y}{2})^N}  $$ 
+
+Yield and bond price are negatively related to each other. When the yield is the same as the coupon rate, the bond will be trading at par. When the yield is lower than the coupon rate, the bond will be trading above par value (premium bond), and when yield is higher than the coupon rate, the bond will be trading below par (discount bond).
+
+For zero-coupon bond, as there is only one cash flow at the maturity date, yield is the same as the spot rate. 
+
+Add a plot of price and yield
+
+```{python}
+
+import numpy_financial as npf
+import numpy as np
+import matplotlib.pyplot as plt
+
+maturity=30
+coupon_rate=0.08
+n=maturity*2
+coupon=coupon_rate*100/2
+yldout=[]
+
+
+for price in range(80,120,2):
+    cashflows=[-price]+[coupon]*n
+    cashflows[-1]+=100
+    yld=2*npf.irr(cashflows) #double the semi annual yield
+    yldout.append(yld)
+
+plt.plot(yldout, range(80,120,2))
+plt.plot([0.08],[100], 'ro')
+plt.xlabel("Yield")
+plt.ylabel("Price")
+plt.axhline(y=100, color='red', linestyle='--')
+plt.title("Price and Yield")
+```
+
+
 ### Term Structure of Interest Rate
+
+From the animated plot below, we can see the evolution of the yield curve over the years. 
+
+
+```{python}
+#| align: center
+
+from pandas_datareader import DataReader as pdr
+import plotly.express as px
+
+files = ["DGS" + x for x in ["1MO", "3MO", "1", "2", "3", "5", "10", "20", "30"]]
+df = pdr(files, "fred", start=1920) / 100
+
+df.index.name = "date"
+df.index = df.index.to_period("M").astype(str)
+df = df.groupby("date").first()
+df = df.dropna(subset=["DGS3MO", "DGS30"])
+df.columns = [1 / 12, 1 / 4, 1, 2, 3, 5, 10, 20, 30]
+df = df.stack()
+df = df.reset_index()
+df.columns = ["date", "term", "rate"]
+
+hover_data = dict(date=False, term=True, rate=True)
+fig = px.line(
+        df,
+        x="term",
+        y="rate",
+        animation_frame="date",
+        hover_name="date",
+        hover_data=hover_data,
+)
+
+fig.update_layout(
+    template="none",
+    xaxis_title="Years to Maturity",
+    yaxis_title="Yield",
+    yaxis_tickformat=".1%",
+)
+fig.update_yaxes(tickformat=".1%", range=[0, df.rate.max() + 0.001])
+fig.update_xaxes(tickvals=[1, 3, 5, 10, 20, 30], range=[0, 30])
+fig.layout.updatemenus[0].buttons[0].args[1]["frame"]["duration"] = 200
+fig.show()  
+```
+
 
 ## Price Risk
 
