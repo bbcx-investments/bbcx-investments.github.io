@@ -1,4 +1,4 @@
-# Rebalancing
+# Rebalancing {#sec-rebalancing}
 
 ```{python}
 #| echo: false
@@ -511,7 +511,7 @@ def figtbl(mn1, mn2, sd1, sd2, c, rs, extra, asset1_name, asset2_name):
     mnTang = portTang @ mns
     sdTang = np.sqrt(portTang @ cov @ portTang)
     srTang = (mnTang - rs)/sdTang
-    string0 = '(Year 1) tangency portfolio ' if rb == rs else 'efficient low risk portfolio' if rb != rs else 'tangency portfolio'
+    string0 = 'Year 1 (tangency portfolio) ' if rb == rs else 'efficient low risk portfolio' if rb != rs else 'tangency portfolio'
     string, cd = custom(string0, [portTang], srTang,0)
     trace = go.Scatter(
         x=[sdTang],

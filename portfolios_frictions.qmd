@@ -1260,7 +1260,7 @@ figtbl(mn_stock,mn_bond,sd_stock,sd_bond,corr,rs,extra,raver1, raver2, "Stock","
 
 ### Short-Sales and Hedging {-}
 
-In @sec-diversification, we assumed that short-selling is allowed.  Short-selling of some assets may sometimes improve mean-variance efficiency.  Recall that diversification benefits increase for lower levels of correlations.  All else equal, negative correlation between two assets provides more diversification benefits than positive portfolio correlation.  Short-selling a security that is positively correlated with other assets can be thought of as created a new security that has negative correlation with the other assets, and thus may provide a diversification benefit.  Shorting an asset to lower risk is a special form of diversification called **hedging**.  
+In @sec-diversification, we assumed that short-selling is allowed.  Short-selling of some assets may sometimes improve mean-variance efficiency.  In particular, short-selling a security that is positively correlated with another holding can **hedge** price movements in the long asset position.  
 
 @fig-frontier-gmv-shorting shows how the GMV portfolio and frontier changes if short-sales are not allowed for any of the three equity portfolios.  Notice that the global minimum variance portfolio with short-selling involves shorting emerging market equity and invests the proceeds and initial capital in a combination of US and developed international equities.  Without this possibility, the GMV portfolio without short-sales has a higher standard deviation (and invests nothing in the emerging market portfolio). 
 
@@ -1425,7 +1425,67 @@ figtbl(mn1, mn2, mn3, sd1, sd2, sd3, corr12, corr13, corr23, ["US Equity", "Deve
 
 The frontier with short-selling coincides with the frontier without short-selling for many expected return values, but shorting allows an investor to reach expected returns values below the minimum expected returns of the assets (the US equity portfolio) and above the maximum expected return of the underlying assets (the emerging market portfolio).  These portfolios entail shorting the emerging market fund or the US equity fund, respectively.  
 
-Within the set of expected returns possible without shorting, lower risk portfolios are possible with shorting for expected returns close to the US market fund's expected return and close to the emerging market fund's expected return.  Thus, short-selling may provide additional diversification benefits relative to those available to a short-sale-constrained investor.
+Within the set of expected returns possible without shorting, lower risk portfolios are possible with shorting for expected returns close to the US market fund's expected return and close to the emerging market fund's expected return.  For the former case, the emerging market fund is shorted and serves as a hedge against long positions in the other two funds.  For the latter case, the US equity fund serves as a hedge.
+
+The improvement in mean-variance efficiency is sometimes more dramatic than the example above.  For instance, @fig-industry-frontiers shows the frontiers for portfolios of 48 industries when shorts sales are or are not allowed.  In this case, allowing short sales shifts the frontier leftward for the full range of expected returns obtainable with long-only portfolios of industries.
+
+``` {python}
+#| label: fig-industry-frontiers
+#| fig-cap:  Industry Portfolio Frontiers with and without Short-Selling
+import pandas as pd
+import numpy as np
+from pandas_datareader import DataReader as pdr
+from cvxopt import matrix
+from cvxopt.solvers import qp as Solver, options as SolverOptions
+from scipy.optimize import minimize_scalar
+import plotly.graph_objects as go
+
+SolverOptions["show_progress"] = False
+# Read data and clean-up missing data (coded -99.99)
+ff48 = pdr("48_Industry_Portfolios", "famafrench", start=1900)[0]
+
+# Clean-up missings
+for c in ff48.columns:
+    ff48[c] = np.where(ff48[c]==-99.99, np.nan, ff48[c])
+ff48 = ff48/100
+
+# Estimate inputs from historical data
+mns = ff48.mean()
+sds = ff48.std()
+C = ff48.corr()
+cov = np.diag(sds) @ C @ np.diag(sds)
+
+# Frontier with shorting              
+ss  = portfolio(mns.values,cov.values, Shorts = True)
+frontier_ss  = [ss.frontier(m) for m in np.linspace(mns.min(), mns.max(),50)]
+mu_ss = [wgt @ mns for wgt in frontier_ss]
+sd_ss = [np.sqrt(wgt @ cov @ wgt) for wgt in frontier_ss]
+
+# Frontier without shorting
+noss= portfolio(mns.values,cov.values, Shorts = False)
+frontier_noss= [noss.frontier(m) for m in np.linspace(mns.min(), mns.max(),50)]
+mu_noss = [wgt @ mns for wgt in frontier_noss]
+sd_noss = [np.sqrt(wgt @ cov @ wgt) for wgt in frontier_noss]
+
+# Plot the frontiers
+string =  "Frontier with shorting allowed<br>"
+string += "Expected Return (monthly): %{y:.2%}<br>"
+string += "Standard Deviation (monthly): %{x:.2%}<br>"
+string += "<extra></extra>"
+trace_ss  = go.Scatter(x=sd_ss, y=mu_ss, mode="lines", name='With shorting', hovertemplate=string)
+string =  "Frontier with no short selling <br>"
+string += "Expected Return (monthly): %{y:.2%}<br>"
+string += "Standard Deviation (monthly): %{x:.2%}<br>"
+string += "<extra></extra>"
+trace_noss= go.Scatter(x=sd_noss, y=mu_noss, mode="lines", name='Without shorting', hovertemplate=string)
+fig = go.Figure()
+fig.add_trace(trace_ss)
+fig.add_trace(trace_noss)
+fig.update_layout(legend=dict(yanchor="top", y =0.99, xanchor="left", x=0.01))
+fig.update_yaxes(title="Expected Return (monthly)", tickformat=".2%", range=[0.5*np.min(mu_noss+mu_ss), 1.05*np.max(mu_noss+mu_ss)])
+fig.update_xaxes(title="Standard Deviation (monthly)", tickformat=".2%", range=[0.5*np.min(sd_noss+sd_ss), 1.05*np.max(sd_noss+sd_ss)])
+fig.show()
+```
 
 ### GMV and Frontier Portfolios {-}
 

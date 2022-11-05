@@ -1,5 +1,4 @@
-
-# Optimal Portfolios: Sensitivity to Inputs
+# Optimal Portfolios: Sensitivity to Inputs  {#sec-input-sensitivity}
 
 Optimal risky portfolios can be quite sensitive to the inputs, which consist of expected returns, standard deviations, and correlations across assets.  An example is provided in the first section below.  In practice, one must estimate these inputs.  Expected returns are notoriously hard to estimate using historical data, which we discuss in detail in SECTION LINK, so we often resort to models for inputs here or we assume expected returns are equal across assets.  Asset volatilities and correlations can be forecasted more sucessfully.  Forecasting correlations in portfolios with many assets is complicated by the fact that the number of correlations we need to estimate rises quadratically with the number of assets.
 
@@ -742,18 +741,100 @@ There are unfortunately not hard-and-fast rules on when to try to estimate expec
 
 ## Empirical Performance: Stocks, Bonds, and Gold
 
-We now examine how well we would have done forming optimal portfolios historically with the S&P 500, Treasury bonds, corporate bonds, and gold.  As in the previous section, we consider strategies differing in the extent to which they rely on estimates of expected returns, standard deviations, and correlations.  We use rolling windows of 20 years to estimate each input using historical data.  The data starts in 1968, so our first out-of-sample return is in 1988.  We rebalance the portfolio annually.  We optimally locate along the capital allocation line for each strategy's optimal portfolio, assuming a risk aversion of 5.^[This is a somewhat high risk aversion.  With lower risk aversion choices, some strategies have single year return realizations below -100%.]
+We now examine how well we would have done forming optimal portfolios historically with the S&P 500, Treasury bonds, corporate bonds, and gold.  As in the previous section, we consider strategies differing in the extent to which they rely on estimates of expected returns, standard deviations, and correlations.  We use rolling windows of 20 years to estimate each input using historical data.  The data starts in 1968, so our first out-of-sample return is in 1988.  We rebalance the portfolio annually.  Each year, we locate our portfolio along the capital allocation line in oreder to match the expected return of an equal-weighted portfolio (which is the cross-sectional average of the historical average returns).
 
 @fig-stockbondsgold-sharpe shows the realized Sharpe ratio for each strategy.  Est-All underperformed each of the other strategies, including Est-None.  The noisiness in estimating expected returns does not lead to better investment results compared to any of the strategies that assume expected returns are equal across the assets.
 
-Est-SD (risk parity) performs the best in terms of Sharpe ratio in the thirty or so years of implementing each strategy, followed by the Est-None and Est-SD-Corr strategies.  For this set of assets and sample, estimating differences in volatility across assets was beneficial to performance.  However, estimating correlations in addition to volatilities led to worse outcomes in terms of Sharpe ratios.  In fact, Est-SD-Corr underperformed both the Est-SD and Est-None strategies.
-
-
+Est-SD (risk parity) performs the best in terms of Sharpe ratio in the thirty or so years of implementing each strategy, followed by the Est-SD-Corr and Est-None strategies.  For this set of assets and sample, estimating differences in volatility and correlations across assets was beneficial to performance.  
 
 ```{python}
 #| echo: false
 import quandl
 quandl.ApiConfig.api_key = "f-5zoU2G4zzHaUtkJ7BY"
+
+
+def tangency(means, cov, rf, short_lb):
+    '''
+    short_lb: lower bound on position weights
+    examples: 0  = no short-selling
+              -1 = no more than -100% in a given asset
+              None=no restrictions on short-selling
+    '''
+
+    n = len(means)
+    def f(w):
+        mn = w @ means
+        sd = np.sqrt(w.T @ cov @ w)
+        return -(mn - rf) / sd
+    # Initial guess (equal-weighted)
+    w0 = (1/n)*np.ones(n)
+    # Constraint: fully-invested portfolio
+    A = np.ones(n)
+    b = 1
+    cons = [{"type": "eq", "fun": lambda x: A @ x - b}]
+    bnds = [(short_lb, None) for i in range(n)] 
+    # Optimization
+    wgts_tangency = minimize(f, w0, bounds=bnds, constraints=cons).x
+    return wgts_tangency
+def gmv(cov, short_lb): 
+    '''
+    short_lb: lower bound on position weights
+    examples: 0  = no short-selling
+              -1 = no more than -100% in a given asset
+              None=no restrictions on short-selling
+    '''    
+    n = len(cov)
+    Q = matrix(cov, tc="d")
+    p = matrix(np.zeros(n), (n, 1), tc="d")
+    if short_lb==None:
+        # No position limits
+        G = matrix(np.zeros((n,n)), tc="d")
+        h = matrix(np.zeros(n), (n, 1), tc="d")
+    else:
+        # Constraint: short-sales not allowed
+        G = matrix(-np.identity(n), tc="d")
+        h = matrix(-short_lb * np.ones(n), (n, 1), tc="d")
+    # Fully-invested constraint
+    A = matrix(np.ones(n), (1, n), tc="d")
+    b = matrix([1], (1, 1), tc="d")
+    sol = Solver(Q, p, G, h, A, b, options={'show_progress': False})
+    wgts_gmv = np.array(sol["x"]).flatten() if sol["status"] == "optimal" else np.array(n * [np.nan])
+    return wgts_gmv    
+
+def optimal(means, cov, raver, rs, rb, short_lb):
+    '''
+    short_lb: lower bound on position weights
+    examples: 0  = no short-selling
+              -1 = no more than -100% in a given asset
+              None=no restrictions on short-selling
+    '''  
+    n = len(cov)
+    Q = np.zeros((n + 2, n + 2))
+    Q[2:, 2:] = raver * cov
+    Q = matrix(Q, tc="d")
+    p = np.array([-rs, -rb] + list(-means))
+    p = matrix(p, (n + 2, 1), tc="d")
+    if short_lb==None:
+        # Constraint: short-sales unconstrained, saving weight positive, borrowing weight negative
+        G = np.zeros((2, n + 2))
+        G[0, 0] = -1
+        G[1, 1] = 1
+        G = matrix(G, (2, n+2), tc="d")
+        h = matrix([0, 0], (2, 1), tc="d")
+    else:    
+        # Constraint: short-sales constrained, saving weight positive, borrowing weight negative
+        G = -np.identity(n + 2)
+        G[1, 1] = 1
+        G = matrix(G, (n+2, n+2), tc="d")
+        h = matrix(np.zeros(n+2), (n+2, 1), tc="d")
+    # Constraint: fully-invested portfolio
+    A = matrix(np.ones(n+2), (1, n+2), tc="d")
+    b = matrix([1], (1, 1), tc="d")
+    sol = Solver(Q, p, G, h, A, b)
+    # function returns vector of risky asset weights
+    return np.array(sol["x"]).flatten()[2:] if sol["status"] == "optimal" else None    
+
+
 ```
 
 
@@ -849,9 +930,12 @@ for i in np.arange(window,window+T):
     for j, asset in enumerate(asset_list):
         df.loc[i,'wgt'+asset+'_' + model] = wgts[j]
     df.loc[i,'portret_'+model] = df.loc[i,ret_list].values @ wgts
-    df.loc[i,'wgt_cal_'+model] = (wgts @ means - r) / (raver * (wgts @ cov @ wgts))
-    df.loc[i,'wgt_cal_'+model] = max(0,df.loc[i,'wgt_cal_'+model])
+    # df.loc[i,'wgt_cal_'+model] = (wgts @ means - r) / (raver * (wgts @ cov @ wgts))
+    # df.loc[i,'wgt_cal_'+model] = max(0,df.loc[i,'wgt_cal_'+model])
+    df.loc[i,'wgt_cal_'+model] = (means.mean() - r)/ (wgts @ means - r)
     df.loc[i,'raver_portret_'+model] = r + df.loc[i,'wgt_cal_'+model]  * (df.loc[i,'portret_'+model] -r)
+    df.loc[i,'expret_'+model] = r + df.loc[i,'wgt_cal_'+model]  * (means @ wgts - r)
+    df.loc[i,'sd'+model] = df.loc[i,'wgt_cal_'+model] * np.sqrt(wgts @ cov @ wgts)
 
     # Estimate only covariance matrix
     model = 'est_cov'
@@ -859,10 +943,12 @@ for i in np.arange(window,window+T):
     for j, asset in enumerate(asset_list):
         df.loc[i,'wgt'+asset+'_' + model] = wgts[j]
     df.loc[i,'portret_'+model] = df.loc[i,ret_list].values @ wgts
-    df.loc[i,'wgt_cal_'+model] = (means.mean() - r) / (raver * (wgts @ cov @ wgts))
-    df.loc[i,'wgt_cal_'+model] = max(0,df.loc[i,'wgt_cal_'+model])
+    # df.loc[i,'wgt_cal_'+model] = (means.mean() - r) / (raver * (wgts @ cov @ wgts))
+    # df.loc[i,'wgt_cal_'+model] = max(0,df.loc[i,'wgt_cal_'+model])
+    df.loc[i,'wgt_cal_'+model] = 1.0
     df.loc[i,'raver_portret_'+model] = r + df.loc[i,'wgt_cal_'+model]  * (df.loc[i,'portret_'+model] -r)
-
+    df.loc[i,'expret_'+model] = r + df.loc[i,'wgt_cal_'+model]  * (means.mean() - r)
+    df.loc[i,'sd'+model] = df.loc[i,'wgt_cal_'+model] *np.sqrt(wgts @ cov @ wgts)
 
     # Estimate only standard deviations in covariance matrix
     model = 'est_sds'
@@ -873,9 +959,12 @@ for i in np.arange(window,window+T):
     for j, asset in enumerate(asset_list):
         df.loc[i,'wgt'+asset+'_' + model] = wgts[j]
     df.loc[i,'portret_'+model] = df.loc[i,ret_list].values @ wgts
-    df.loc[i,'wgt_cal_'+model] = (means.mean() - r) / (raver * (wgts @ cov @ wgts))		
-    df.loc[i,'wgt_cal_'+model] = max(0,df.loc[i,'wgt_cal_'+model])
+    # df.loc[i,'wgt_cal_'+model] = (means.mean() - r) / (raver * (wgts @ cov @ wgts))		
+    # df.loc[i,'wgt_cal_'+model] = max(0,df.loc[i,'wgt_cal_'+model])
+    df.loc[i,'wgt_cal_'+model] = 1.0
     df.loc[i,'raver_portret_'+model] = r + df.loc[i,'wgt_cal_'+model]  * (df.loc[i,'portret_'+model] -r)    
+    df.loc[i,'expret_'+model] = r + df.loc[i,'wgt_cal_'+model]  * (means.mean() - r)
+    df.loc[i,'sd'+model] = df.loc[i,'wgt_cal_'+model] *np.sqrt(wgts @ cov @ wgts)
 
     # Equal-weighted portfolio
     model = 'ew'
@@ -883,9 +972,12 @@ for i in np.arange(window,window+T):
         cov[j,j] = (sds.mean())**2
     wgts = (1/n)*np.ones(n)
     df.loc[i,'portret_'+model] = df.loc[i,ret_list].values @ wgts
-    df.loc[i,'wgt_cal_'+model] = (means.mean() - r) / (raver * (wgts @ cov @ wgts))
-    df.loc[i,'wgt_cal_'+model] = max(0,df.loc[i,'wgt_cal_'+model])
+    # df.loc[i,'wgt_cal_'+model] = (means.mean() - r) / (raver * (wgts @ cov @ wgts))
+    # df.loc[i,'wgt_cal_'+model] = max(0,df.loc[i,'wgt_cal_'+model])
+    df.loc[i,'wgt_cal_'+model] = 1.0
     df.loc[i,'raver_portret_'+model] = r + df.loc[i,'wgt_cal_'+model]  * (df.loc[i,'portret_'+model] -r)   
+    df.loc[i,'expret_'+model] = r + df.loc[i,'wgt_cal_'+model]  * (means.mean() - r)
+    df.loc[i,'sd'+model] = df.loc[i,'wgt_cal_'+model] *np.sqrt(wgts @ cov @ wgts)     
 
 # Summarize sharpe ratio, avg ret, sd(ret) for each model
 portret_list = ['raver_portret_' +  model for model in ['est_all', 'est_cov', 'est_sds','ew']]
@@ -928,7 +1020,7 @@ fig.show()
 
 ```
 
-@fig-stockbondsgold-timeseries plots the realized returns for each strategy.  The hoverdata contains the optimal risky portfolio weights as well as the fraction of capital allocated to the risky portfolio.  Est-All and Est-SD-Corr produce the most volatile return series.  However, as seen in @fig-stockbondsgold-sharpe, they do not produce average returns high enough to make up for this additional risk to generate Sharpe ratios as high as Est-SD or Est-None.  Attempting to estimate expected returns and correlations for these assets would not have paid off.
+@fig-stockbondsgold-timeseries plots the realized returns for each strategy.  The hoverdata contains the optimal risky portfolio weights as well as the fraction of capital allocated to the risky portfolio.  Since we match the expected return for the Est-None portfolio, only Est-All has time-varying allocation to the optimal all-risky portfolio since it is allows for different expected returns across assets.
 
 ```{python}
 #| label: fig-stockbondsgold-timeseries
@@ -963,7 +1055,236 @@ fig.show()
 ```
 
 
-
 ## Empirical Performance: Industry Portfolios
 
-TBD
+``` {python}
+#| echo: false
+# Define portfolio class
+class portfolio:
+
+    def __init__(self, means, cov, Shorts):
+        self.means = np.array(means)
+        self.cov = np.array(cov)
+        self.Shorts = Shorts
+        self.n = len(means)
+        if Shorts:
+            w = np.linalg.solve(cov, np.ones(self.n))
+            self.GMV = w / np.sum(w)
+            w = np.linalg.solve(cov, means)
+            self.piMu = w / np.sum(w)
+        else:
+            n = self.n
+            Q = matrix(cov, tc="d")
+            p = matrix(np.zeros(n), (n, 1), tc="d")
+            G = matrix(-np.identity(n), tc="d")
+            h = matrix(np.zeros(n), (n, 1), tc="d")
+            A = matrix(np.ones(n), (1, n), tc="d")
+            b = matrix([1], (1, 1), tc="d")
+            sol = Solver(Q, p, G, h, A, b)
+            self.GMV = np.array(sol["x"]).flatten() if sol["status"] == "optimal" else np.array(n * [np.nan])
+
+    def frontier(self, m):
+        if self.Shorts:
+            gmv = self.GMV
+            piMu = self.piMu
+            m1 = gmv @ self.means
+            m2 = piMu @ self.means
+            a = (m - m2) / (m1 - m2)
+            return a * gmv + (1 - a) * piMu
+        else:
+            n = self.n
+            Q = matrix(self.cov, tc="d")
+            p = matrix(np.zeros(n), (n, 1), tc="d")
+            G = matrix(-np.identity(n), tc="d")
+            h = matrix(np.zeros(n), (n, 1), tc="d")
+            A = matrix(np.vstack((np.ones(n), self.means)), (2, n), tc="d")
+            b = matrix([1, m], (2, 1), tc="d")
+            sol = Solver(Q, p, G, h, A, b)
+            return np.array(sol["x"]).flatten() if sol["status"] == "optimal" else np.array(n * [np.nan])
+
+    def tangency(self, r):
+        if self.Shorts:
+            w = np.linalg.solve(self.cov, self.means - r)
+            return w / np.sum(w)
+        else:
+            def f(m):
+                w = self.frontier(m)
+                mn = w @ self.means
+                sd = np.sqrt(w.T @ self.cov @ w)
+                return - (mn - r) / sd
+            m = minimize_scalar(f, bounds=[max(r, np.min(self.means)), max(r, np.max(self.means))], method="bounded").x
+            return self.frontier(m)
+
+    def optimal(self, raver, rs=None, rb=None):
+        n = self.n
+        if self.Shorts:
+            if (rs or rs==0) and (rb or rb==0):
+                Q = np.zeros((n + 2, n + 2))
+                Q[2:, 2:] = raver * self.cov
+                Q = matrix(Q, tc="d")
+                p = np.array([-rs, rb] + list(-self.means))
+                p = matrix(p, (n + 2, 1), tc="d")
+                G = np.zeros((2, n + 2))
+                G[0, 0] = G[1, 1] = -1
+                G = matrix(G, (2, n+2), tc="d")
+                h = matrix([0, 0], (2, 1), tc="d")
+                A = matrix([1, -1] + n*[1], (1, n+2), tc="d")
+                b = matrix([1], (1, 1), tc="d")
+                sol = Solver(Q, p, G, h, A, b)
+                return np.array(sol["x"]).flatten()[2:] if sol["status"] == "optimal" else None
+            else:
+                w = np.linalg.solve(self.cov, self.means)
+                a = np.sum(w)
+                return (a/raver)*self.piMu + (1-a/raver)*self.GMV
+        else:
+           if (rs or rs==0) and (rb or rb==0):
+                Q = np.zeros((n + 2, n + 2))
+                Q[2:, 2:] = raver * self.cov
+                Q = matrix(Q, tc="d")
+                p = np.array([-rs, rb] + list(-self.means))
+                p = matrix(p, (n+2, 1), tc="d")
+                G = matrix(-np.identity(n + 2), tc="d")
+                h = matrix(np.zeros(n+2), (n+2, 1), tc="d")
+                A = matrix([1, -1] + n * [1], (1, n+2), tc="d")
+                b = matrix([1], (1, 1), tc="d")
+                sol = Solver(Q, p, G, h, A, b)
+                return np.array(sol["x"]).flatten()[2:] if sol["status"] == "optimal" else None
+           else:
+                Q = matrix(raver * self.cov, tc="d")
+                p = matrix(-self.means, (n, 1), tc="d")
+                G = matrix(-np.identity(n), tc="d")
+                h = matrix(np.zeros(n), (n, 1), tc="d")
+                A = matrix(np.ones(n), (1, n), tc="d")
+                b = matrix([1], (1, 1), tc="d")
+                sol = Solver(Q, p, G, h, A, b)
+                return np.array(sol["x"]).flatten() if sol["status"] == "optimal" else None
+```
+
+
+@sec-optimal-portfolios-practice discussed how allowing short sales could result in improvements in mean-variance efficiency.  One example of this was industry portfolios, in which the frontier with short-sales lay entirely to the left of the frontier without shorting in expected return-standard deviation space.  The discussion above, however, suggests that some or all of these efficiency gains may be challenging to obtain out-of-sample given the large number of parameters one needs to estimate for 48 industry portfolios.
+
+To assess this, we run the following exercise.  Using data from 1970 to 2022, we estimate historical average returns, standard deviations, and correlations for 48 industry portfolios each month.  We start in forming portfolios in 1980 in order to have an initial estimation of 120 months of data.  We use expanding windows to estimate inputs.  Based on the estimated inputs each month, we consider the optimal portfolio for a mean-variance investor with risk aversion of 3 that either is or is not short-sale constrained.
+
+@fig-industry-ssc-oos plots the resulting time series of realized returns.  It is clear that when shorting is allowed, the return series is much more volatile.  Less clear from the plot is that the average return is also higher for the portfolio with shorting.  However, the increase in average return is not enough to offset the higher volatility.  The realized Sharpe ratio of the portfolio without short-selling is higher than that of the portfolio with short-selling (0.1573 versus 0.1244, respectively).  Thus, the possible efficiency gains of allowing short-selling would not have materialized for portfolios of industries when historical estimates are used for expected returns, standard deviations, and correlations.
+
+
+```{python}
+#| label: fig-industry-ssc-oos
+#| fig-cap: Industry Portfolios
+import pandas as pd
+import numpy as np
+from pandas_datareader import DataReader as pdr
+from cvxopt import matrix
+from cvxopt.solvers import qp as Solver, options as SolverOptions
+from scipy.optimize import minimize_scalar
+import plotly.graph_objects as go
+
+SolverOptions["show_progress"] = False
+
+# Read data and clean-up missing data (coded -99.99)
+ff48 = pdr("48_Industry_Portfolios", "famafrench", start=1900)[0]
+
+# Clean-up missings
+for c in ff48.columns:
+    ff48[c] = np.where(ff48[c]==-99.99, np.nan, ff48[c])
+ff48 = ff48/100
+
+# Read factor data
+ff3 = pdr('F-F_Research_Data_Factors','famafrench', start=1900)[0]/100
+df = ff48.join(ff3['RF'])
+df = df.loc['1970-01':].copy()  # There is missing data prior to 1970
+
+# Estimation window
+WINDOW = 120
+# Risk aversion 
+RAVER = 3
+
+
+asset_list = ff48.columns
+dates = df.index[WINDOW:]
+df['retp_ss'] = np.nan
+df['retp_noss'] = np.nan
+df['retp_ew'] = np.nan
+df['sum_risky_ss'] = np.nan
+df['sum_risky_noss'] = np.nan
+df['sum_risky_ew'] = np.nan
+
+# DataFrame for tracking industry weights
+df_wgts = pd.DataFrame(dtype=float, columns = pd.MultiIndex.from_product([['ss','noss','ew'], asset_list]), index=dates)
+
+
+#The following uses an expanding window to estimate parameters
+for d in dates:
+    data= df.loc[:d-1,asset_list] 
+    mns = data.mean()
+    sds = data.std()
+    C   = data.corr()
+    cov = np.diag(sds)@ C @ np.diag(sds)
+    n = len(mns)
+    rf = df.loc[d,'RF']
+    # print(f'Date: {d}\n')
+
+    # Optimal portfolios w/ shorts
+    ss  = portfolio(mns.values,cov.values, Shorts = True)
+    wgt_ss = ss.optimal(RAVER, rf, rf)
+    if wgt_ss.sum()<0:
+        wgt_ss = 0.0*wgt_ss
+    df.loc[d,'sum_risky_ss'] = wgt_ss.sum()
+    df.loc[d,'retp_ss'] = rf + wgt_ss @ (df.loc[d,asset_list] - rf)
+    df_wgts.loc[d,('ss',slice(None))] = wgt_ss
+    # print(f'\n\tWith Short-sales:')
+    # print(f'\n\tTotal Risky Weight: {wgt_ss.sum(): .2f}\n\tMin Weight: {wgt_ss.min(): .2f}\n\tMax Weight: {wgt_ss.max(): .2f}')
+
+    # Optimal portfolios w/o shorts
+    noss  = portfolio(mns.values,cov.values, Shorts = False)
+    wgt_noss = noss.optimal(RAVER, rf, rf)
+    if wgt_noss.sum()<0:
+        wgt_noss = 0.0*wgt_noss    
+    df.loc[d,'sum_risky_noss'] = wgt_noss.sum()        
+    df.loc[d,'retp_noss'] = rf + wgt_noss @ (df.loc[d,asset_list] - rf)
+    df_wgts.loc[d,('noss',slice(None))] = wgt_noss
+    # print(f'\n\tWithout Short-sales:')
+    # print(f'\n\tTotal Risky Weight: {wgt_noss.sum(): .2f}\n\tMin Weight: {wgt_noss.min(): .2f}\n\tMax Weight: {wgt_noss.max(): .2f}')    
+
+    # Equal-weighted
+    mns = mns.mean()*np.ones(n)
+    sds = sds.mean()*np.ones(n)
+    cov = np.diag(sds) @ np.identity(n) @ np.diag(sds)
+    ew = portfolio(mns, cov, Shorts=True)
+    wgt_ew = ew.optimal(RAVER,rf,rf)
+    if wgt_ew.sum()<0:
+        wgt_ew = 0.0*wgt_ew    
+    df.loc[d,'retp_ew'] = rf + wgt_ew @ (df.loc[d,asset_list] - rf)
+    df.loc[d,'sum_risky_ew'] = wgt_ew.sum() 
+    df_wgts.loc[d,('ew',slice(None))] = wgt_ew       
+    # print(f'\n\tEqual-weighted:')
+    # print(f'\n\tTotal Risky Weight: {wgt_ew.sum(): .2f}\n\tMin Weight: {wgt_ew.min(): .2f}\n\tMax Weight: {wgt_ew.max(): .2f}')    
+
+portrets = df[['retp_ss','retp_noss','retp_ew','RF']+['sum_risky_' + v for v in ['ss','noss','ew']]]
+portrets = portrets[portrets.retp_ss.isnull()==False]
+portrets['Date'] = portrets.index.to_timestamp('M')
+
+# Plot the time-series of returns (sum of risky portfolio weights as hoverdata)
+fig = go.Figure()
+
+label_dict = {'ss': 'With short sales',
+            'noss': 'Without short sales'}        
+
+for model in ['ss', 'noss']:
+    string =  "Strategy: " + label_dict[model] +" <br>"
+    string += "Date: %{x}<br>"
+    string += "Return: %{y:0.1%}<br>"
+    string += "Total Weight in Risky Portfolio: %{customdata: 0.2%} <br>"
+    string += "<extra></extra>"
+
+    wgt_list = ['wgt_cal_'+ model] + ['wgt'+asset + "_" + model for asset in asset_list]
+    trace=go.Scatter(x=portrets['Date'], y=portrets['retp_'+model], customdata=portrets['sum_risky_'+model], 
+        hovertemplate=string, name = label_dict[model])
+    fig.add_trace(trace)
+fig.layout.yaxis["title"] = "Return"
+fig.layout.xaxis["title"] = "Date"
+fig.update_yaxes(tickformat=".0%")
+fig.update_layout(legend=dict(yanchor="top", y =0.99, xanchor="left", x=0.01))
+fig.show()
+
+```
