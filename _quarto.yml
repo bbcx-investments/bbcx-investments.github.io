@@ -26,5 +26,6 @@ execute:
   freeze: auto
 
 comments:
-  hypothesis: true
+  giscus:
+    repo: bbcx-investments/publish
 
