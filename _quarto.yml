@@ -12,7 +12,6 @@ book:
     - diversification.qmd
     - portfolios.qmd
     - portfolios_frictions.qmd
-    - fixed-income.qmd
     
 
 format:
