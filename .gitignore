@@ -1,6 +1,7 @@
 /.vscode/
 /docs/CNAME
 .nojekyll
+/.quarto
 
 
 # Byte-compiled / optimized / DLL files
