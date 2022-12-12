@@ -1,11 +1,3 @@
-# Fixed Income
-
-A chapter about fixed income
-
-
-## Basic Concepts
-
-
 
 ### Spot Rates, Zero-Coupon Rates
 
