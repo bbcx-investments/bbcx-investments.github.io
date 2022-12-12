@@ -2,9 +2,6 @@
 
 A chapter about fixed income
 
-<<<<<<< HEAD
-Some text tested by yh
-=======
 
 ## Basic Concepts
 
@@ -126,4 +123,3 @@ fig.show()
 ## Bond with Embedded options
 
 ## Structured Finance Product
->>>>>>> 4794731284305c4c7d7cecbc8c1ea443cb2c345a

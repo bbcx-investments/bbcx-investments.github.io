@@ -9,13 +9,22 @@ book:
   chapters:
     - index.qmd
     - miracle.qmd
+    - diversification.qmd
+    - portfolios.qmd
+    - portfolios_frictions.qmd
+    - fixed-income.qmd
     
 
 format:
   html:
     theme: cosmo
     code-fold: true
-
+    toc: true
+    toc-depth: 2
+    
 execute:
   freeze: auto
+
+comments:
+  hypothesis: true
 
