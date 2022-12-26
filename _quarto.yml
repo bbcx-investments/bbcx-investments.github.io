@@ -5,7 +5,7 @@ project:
 book:
   title: "Modern Investments: Theory, Data, and Practice"
   author: "Kerry Back, Barbara Bennett, Kevin Crotty, and Yuhang Xing"
-  date: "9/27/2022"
+  date: "1/1/2023"
   chapters:
     - index.qmd
     - miracle.qmd
@@ -17,12 +17,9 @@ book:
 format:
   html:
     theme: cosmo
-    code-fold: true
-    toc: true
-    toc-depth: 2
-    
 execute:
   freeze: auto
+  echo: false
 
 comments:
   hypothesis: true

@@ -2,7 +2,7 @@
 
 # Miracle of Compound Interest
 
-If an investment account earns a steady rate of return and funds are not withdrawn from the account, then the account balance will grow exponentially.  This is sometimes called the "miracle of compound interest."  @fig-miracle-exponential shows the growth of an investment account earning 8% per year, which is what the U.S. stock market earned in real terms over the thirty year period 1992-2021.  Each dollar grows to roughly $10 over a 30 year period at an 8% annual return.  The exponential nature of the growth can be seen from the figure.  Hover over the plot to see the exact values.
+If an investment account earns a steady rate of return and funds are not withdrawn from the account, then the account balance will grow exponentially.  This is sometimes called the "miracle of compound interest."  @fig-miracle-exponential shows the growth of an investment account earning 8% per year, which is what the U.S. stock market earned in real terms over the thirty year period 1992-2021.  Each dollar grows to roughly $10 over a 30 year period at an 8% annual return.  The exponential nature of the growth can be seen from the figure.  Hover your cursor over the plot to see the exact values.
 
 ```{python}
 #| label: fig-miracle-exponential
@@ -57,14 +57,16 @@ The values in @fig-miracle-exponential are calculated from the following logic. 
 Continuing with this logic, we can see that after $n$ years, we have $1.08^n$.  Thus, the number of years is the exponent of the factor 1.08, which is the definition of exponential growth.
 
 As remarked above, the exponential growth is due to earning returns on top of returns or "interest on interest."  After two years at 8%, we have
-$$1.08^2 = 1 + 0.08 + 0.08 + (0.08\times 0.08).$$  Linear growth would be just adding up the returns $0.08 + 0.08$.  Exponential growth is due to the "interest on interest" term $0.08 \times 0.08.$  This is a small number when there are only two years, but these terms add up to a very large number over many years.  They are responsible for the growth in the investment account quadrupling (from $2.17 to $9.06) when the investment horizon is doubled (from 15 to 30 years) with 8% returns.
+$$1.08^2 = 1 + 0.08 + 0.08 + (0.08\times 0.08).$$  
+Linear growth would be just adding up the returns $0.08 + 0.08$.  Exponential growth is due to the "interest on interest" term $0.08 \times 0.08.$  This is a small number when there are only two years, but these terms add up to a very large number over many years.  They are responsible for the growth in the investment account quadrupling (from $2.17 to $9.06) when the investment horizon is doubled (from 15 to 30 years) with 8% returns.
 
 ## Future values and present values
 
-We call $1.08^n$ the future value of $1 for an $n$-year horizon and 8\% returns.  We can write this more generally as $(1+r)^n$, where $r$ is the rate of return (0.08 in our example).  The future value $(1+r)^n$ is what \\$1 grows to in $n$ years when the rate of return is $r$.  
+We call $1.08^n$ the future value of $1 for an $n$-year horizon and 8\% returns.  More generally, the future value of $1 for an $n$-year horizon is $(1+r)^n$, where $r$ is the rate of return (0.08 in our example).  The future value $(1+r)^n$ is what \\$1 grows to in $n$ years when the rate of return is $r$.  
 
-We also call $1 the present value of $(1+r)^n$.  It is how much you need to invest to reach $(1+r)^n$ in $n$ years when the rate of return is $r$.  More generally, we call [$x$ the present value of $y$]{style="color: Tomato;"}, and we call [$y$ the future value of $x$]{style="color: Tomato;"} when $x$ and $y$ are related as 
-$$y=x(1+r)^n,$$ because $x$ will grow to $y$ in $n$ years when the rate of return is $r$.  To see this, consider a concrete example, say $x=10$.  We can think of an investment account starting with $x=10$ as the sum of 10 hypothetical separate accounts, each starting with $1.  We just saw that $1 will grow to $(1+r)^n$ dollars in $n$ years when the rate of return is $r$.  At the end of the $n$ years, we can hypothetically consolidate the separate accounts, having a total of 10 times $(1+r)^n$; in other words, $x(1+r)^n$.
+We also call $1 the present value of $(1+r)^n$.  It is how much you need to invest to reach $(1+r)^n$ in $n$ years when the rate of return is $r$.  More generally, [$x$ is the present value of $y$]{style="color: Tomato;"}, and [$y$ is the future value of $x$]{style="color: Tomato;"} when $x$ and $y$ are related as 
+$$y=x(1+r)^n,$$ 
+because $x$ will grow to $y$ in $n$ years when the rate of return is $r$.  
 
 We compute the future value $y$ from the present value $x$ by mutliplying $x$ by $(1+r)^n$, so we call $(1+r)^n$ the [future value factor]{style="color: Tomato;"}.  Because the relation $y=x(1+r)^n$ is equivalent to 
 $$x = \frac{y}{(1+r)^n},$$
@@ -111,19 +113,6 @@ fig.update_layout(
 fig.show()
 ```
 
-::: callout-tip
-
-# Future and present value factors
-
-The numpy arange function is useful for creating sequences (arrays) of future value and present value factors.  
-``` p
-import numpy as np
-n = 30
-r = 0.08
-fvFactors = (1+r)**np.arange(1, n+1)
-pvFactors = (1+r)**np.arange(-1, -n-1, -1)
-```
-:::
 
 ## Multiple cash flows
 
@@ -134,54 +123,30 @@ $$x_0(1+r)^n + x_1(1+r)^{n-1} + x_2(1+r)^{n-2} + \cdots +
 x_m(1+r)^{n-m}.$$
 
 
-::: callout-tip
-
-# Calculating future values as a sum of array products
-
-The total future value can be calculated by summing the product of two arrays as in the following example.  
-``` p
-import numpy as np
-n = 10
-m = 4
-r = 0.08
-x0, x1, x2, x3, x4 = 100, 120, 130, 140, 150
-x = np.array([x0, x1, x2, x3, x4])
-fvFactors = (1+r)**np.arange(n, n-m-1, -1)
-total = np.sum(x*fvFactors)
-```
-:::
-
 Now, consider the opposite question.  Suppose we want to spend some amount $y_1$ in one year, a possibly different amount $y_2$ in two years, and continuing for $m$ years.  If we want to finance all of these expenditures from a current investment account, how much do we need to have in the account now, assuming we always earn a return $r$ on the remaining balance?  The answer is that we need to have the total present value of the future values $y_1, y_2, \ldots, y_m$; that is, we need
 $$\frac{y_1}{1+r} + \frac{y_2}{(1+r)^2} + \cdots + \frac{y_m}{(1+r)^m}.$$
 
-::: callout-tip
-
-# Calculating present values as a sum of array products
-
-The total present value can also be computed by summing the product of two arrays as in the following example.  
-``` p
-import numpy as np
-m = 4
-r = 0.08
-y1, y2, y3, y4 = 100, 120, 130, 140, 150
-y = np.array([y1, y2, y3, y4])
-pvFactors = (1+r)**np.arange(-1, -m-1, -1)
-total = np.sum(y*pvFactors)
-```
-:::
 
 Our examples here involved only positive cash flows, but it is also possible to compute total future values or total present values in this way when some cash flows are positive and some are negative.  In this case, the total present value is usually called the [net present value]{style="color: Tomato;"}, being the present value of the positive cash flows net of the present value of the negative cash flows.
 
 ## Perpetuities and annuities
 
-An annuity is a level sequence of cash flows that extend for a finite period of time.  A perpetuity is a level sequence of cash flows that extend forever.  Annuities are encountered frequently, for example, in mortgage or other loan payments.  Perpetuities are encountered less often; however, studying them is still useful, in part because it leads to a simple valuation formula for annuities.
+An annuity is a level sequence of cash flows that extends for a finite period of time.  A perpetuity is a level sequence of cash flows that extends forever.  Annuities are encountered frequently, for example, in mortgage or other loan payments.  Perpetuities are used when valuing companies.  The value of the stock of a company comes from the cash the company pays to shareholders, and there is no definite time at which these cash flows will end, so it is common to model them as perpetual. 
 
-Suppose we want to spend $y$ in one year, another $y$ in two years, and so on forever.  How much do we need to have in an investment account today to finance all of these expenditures, if the account always earns $r$ per year?  The answer is the sum of the present values, which is
+Let's start with perpetuities.  Suppose we want to spend \$100 in one year, another \$100 in two years, and so on forever.  How much do we need to have in an investment account today to finance all of these expenditures, if the account always earns 10\% per year?  The answer is \$1,000, because the 10\% return in a year on a \$1,000 investment will be \$100, which we can spend without depleting our capital.  Hence, we can earn and spend \$100 per year forever.  More generally, [the present value of a cash flow of any amount $y$ per year at a rate of return of $r$ per year is $y/r$]{style="color: Tomato;"}, because an investment of $y/r$ will earn $y/r \times r = y$ each year.  
+
+
+
+::: callout-note
+
+# Perpetuities and geometric series
+
+An alternative calculation of the present value of a perpetuity is to add up the infinite sequence of discounted cash flows as
 $$\frac{y}{1+r} + \frac{y}{(1+r)^2} + \frac{y}{(1+r)^3} + \cdots$$
-The series of terms $y/(1+r)^n$ is a geometric series, and the present value is the sum of a geometric series, which by a standard formula equals
+This is a geometric series, with each term being smaller than the previous term by a factor of $1/(1+r)$.  By a standard formula, the sum is 
 $$\frac{y/(1+r)}{1- 1/(1+r)} = \frac{y}{r}.$$
-Thus, $y/r$ is the present value of a perpetuity of $y$ per year, given a rate of return of $r$ per year.
-We can also reach this conclusion without using the formula for the sum of a geometric series.  If we start with $y/r$ in the account, then we will earn $r \times y/r=y$ in the first year, which we can spend without depleting our capital of $y/r$.  Clearly, we can continue this forever, so $y/r$ is exactly the amount we need to finance an expenditure of $y$ per year.
+:::
+
 
 Now consider an annuity of $y$ per year for $n$ years.  The present value is
 $$\frac{y}{1+r} + \frac{y}{(1+r)^2}  + \cdots + \frac{y}{(1+r)^n}$$
@@ -200,58 +165,20 @@ Hence, the present value of the annuity is
 $$\frac{y}{r} - \frac{1}{(1+r)^n} \times \frac{y}{r} = \frac{y}{r} \left(1-\frac{1}{(1+r)^n}\right) = y \times \text{AF}.$$
 :::
 
-::: callout-tip
-
-# Calculating annuity values
-
-Here are three ways to compute the present value of an annuity in python.  You may need to install the numpy_financial library ("pip install numpy-financial") for the third.  
-``` p
-import numpy as np
-n = 10
-y = 100
-r = 0.08
-
-# method 1
-pvFactors = (1+r)**np.arange(-1, -n-1, -1)
-pv = y * np.sum(pvFactors)
-
-# method 2
-AF = (1/r) * (1 - (1+r)**(-n))
-pv = y * AF
-
-# method 3
-import numpy_financial as npf
-pv = npf.pv(rate=r, nper=n, pmt=-y)
-```
-:::
-
-We sometimes encounter finite or infinite sequences of cash flows that grow at a constant rate.  Consider a cash flow of $y$ in one year, $(1+g)y$ in two years, $(1+g)^2y$ in three years, etc., for some growth rate $g$. If the growing cash flows go on forever, then the present value is
+When valuing a company, we often model the cash flows to shareholders as being perpetual and growing over time.  So, we need a version of the perpetuity formula that can accomodate growing cash flows.  [The present value of an infinite sequence of cash flows that begins with $y$ in a year and then grows at a constant rate of $g$ per year forever, when the discount rate is $r>g$, is $y/(r-g)$]{style="color:tomato"}.  For example, the present value of getting \$100 in one year, $1.03 \times \text{\$}100 = \text{\$}103$ in two years, $(1.03)^2 \times \text{\$}100$ in three years, continuing forever, when the discount rate is 10\% is $\text{\$}100/(0.10 - 0.03)= \text{\$1,428.57}$.  This is the correct amount because the return in one year will be \$142.86, from which one can spend \$100 and reinvest \$42.86, producing an account balance that is 3\% higher than at the start.  This reinvestment of the extra return can continue forever, resulting in an account that grows perpetually at 3\% and which finances cash flows that grow at 3\%.  We could also compute the present value by computing the infinite sum
 $$\frac{y}{1+r} + \frac{(1+g)y}{(1+r)^2} + \frac{(1+g)^2y}{(1+r)^3} + \cdots$$
-If $g \ge r$, meaning that growth in the cash flows is so fast that it offsets or more than offsets the discounting, then the terms in this series are constant or rising, so the sum is infinite.  If $g<r$, then the formula for the sum of a geometric series shows that the present value is
-$$\frac{y/(1+r)}{1-(1+g)/(1+r)} =  \frac{y}{r-g}.$$
-We can also see this by assuming that we start with $y/(r-g)$.  In the first year, we earn $ry/(r-g)$ from which we can spend $y$ and reinvest $ry/(r-g)-y =gy/(r-g)$, so our account will grow at rate $g$.  This growth is enough to finance a cash flow growing at rate $g$, and this can continue forever.  
-
-::: callout-note
-
-# Valuing growing annuities
-
-If a sequence of growing cash flows lasts for a finite number $n$ of years, then it is a growing annuity, and its value is the difference of the values of two growing perpetuities.  Similar to the case of a level annuity, we can compute the value of a growing annuity as
-$$\frac{y}{r-g} - \frac{1}{(1+r)^n} \times \frac{y}{r-g} = \frac{y}{r-g}\left(1 - \frac{1}{(1+r)^n}\right).$$
-:::
+using the same formula as in 
+If $g \ge r$, meaning that growth in the cash flows is so fast that it offsets or more than offsets the discounting, then the terms in this series are constant or rising, so the present value is infinite.  
 
 ## Monthly rates, etc.
 
-We frequently encounter rates of return, including interest rates, at frequencies other than a year, for example, when calculating monthly mortgage payments.  There are two ways of relating monthly rates to annual rates.  One is to compound monthly rates; the other is to multiply by 12.
+We frequently encounter rates of return, including interest rates, at frequencies other than a year, for example, when calculating monthly mortgage payments.  There are two ways of relating monthly rates to annual rates.  One is to compound monthly rates, which includes 'interest on interest' as we have discussed before.  The other way is to multiply by 12, which would be linear rather than exponential growth.
 
-First we address compounding.  Just as we calculated a future value by compounding an annual rate, we can also calculate a future value by compounding a monthly rate.  The future value of $1 in one year, with a monthly rate of $r_m$, is $(1+r_m)^{12}$.  The growth in value is
-$$(1+r_m)^{12} - 1.$$
-This is the annual rate of return obtained by monthly compounding at the monthly rate $r_m$.  For example, if the monthly rate is 1%, then the annual rate is
-$$ r_a = (1+r_m)^{12} - 1 = 1.01^{12} - 1 = 0.1268.$$
-So, a monthly rate of 1% compounds to 12.68% annually.  
+First we address compounding.  If we earn interest or some other return monthly at rate $r_m$, then the rate of return per year is $(1+r_m)^{12}-1$.  For example, if we earn 1\% per month, then in one year, each dollar invested will grow to $1.01^{12} = 1.1268$ dollars, which is a rate of return of 12.68\%.
 
-We can reverse this calculation and compute the monthly rate given the annual rate.  The formula for the monthly rate is
+We can reverse this calculation to compute a monthly rate given an annual rate $r_a$.  The formula for the monthly rate is
 $$r_m = (1+r_a)^{1/12} - 1.$$
-If we plug in $r_a = 0.1268$, we'll get $r_m = 0.01$ (up to rounding error).  
+For example, if we plug in $r_a = 0.1268$, we'll get $r_m = 0.01$ (up to rounding error).  
 
 This is a logical way to define monthly rates from annual rates, but it is not the way a bank does it when you take out a loan.  If a bank says that the annual rate is 12.68%, then it will charge you
 $$\frac{0.1268}{12} = 0.0106.$$
@@ -266,96 +193,31 @@ $$\left(1 + \frac{0.1268}{365}\right)^{365} - 1 = 0.1351.$$
 Thus, increasing the compounding frequency increases the corresponding annual rate. 
 
 ::: callout-note
-## Continuously compounded returns
+# Continuously compounded returns
 
  We could consider even more frequent compounding.  In the limit, as compounding becomes continuous, we can invoke a result from mathematical analysis to obtain
 $$\lim_{n \rightarrow \infty}  \left(1 + \frac{0.1268}{n}\right)^{n} - 1  = e^{0.1268} - 1 = 0.1352,$$
 where $e$ is the natural exponential ($2.718\ldots$).  More generally, [continuous compounding]{style="color: Tomato"} at rate $z$ means that \$1 grows to $e^z$ dollars in a year.  For any return $r$, there is an equivalent [continuously compounded return]{style="color: Tomato"} given by $\log (1+r)$ where $\log$ denotes the natural logarithm function.  To see this, let $z=\log (1+r)$.  With continuous compounding at rate $z$, \$1 grows to $e^z = e^{\log (1+r)} = 1+r$.  Thus, continuous compounding at rate $\log (1+r)$ is the same as earning $r$.  Obviously, continuous compounding is never encountered in practice, but it is a useful "as if" device for some calculations.
 
-.
-
 :::
 
-## Principal, payments, and rate
+## Loan payments, etc.
 
-When buying a car or home, we might have one or more of the following questions.
+The payments on a loan are determined by the fact that the present value of the payments equals the amount borrowed (the loan principal).  If the loan has level payments $P$, then the loan principal $L$ satisfies
+$$L = P \times \text{AF} = \frac{P}{r}\left(1-\frac{1}{(1+r)^n}\right)\,.$$
+From this equation, we can calculate any of the loan parameters in terms of the others.  Thus, we can answer any of the following questions:
 
-1.  I know how much I want to borrow, what the term of the loan will be, and what the rate will be.  What will my payments be?
-2.  I know what the term of the loan will be and what the rate will be, and I know the payment that I can afford.  How much can I borrow?
-3.  I know what the term of the loan will be, how much I want to borrow, and how much I can afford to pay.  What rate do I need to get?
+1.  ($P$) I know how much I want to borrow, what the term of the loan will be, and what the rate will be.  What will my payments be?
+2.  ($L$) I know what the term of the loan will be and what the rate will be, and I know the payment that I can afford.  How much can I borrow?
+3.  ($r$) I know what the term of the loan will be, how much I want to borrow, and how much I can afford to pay.  What rate do I need to get?
 
-In this section, we explain how to answer these questions.  For concreteness, suppose the loan will have monthly payments.  We will work in terms of an annual rate $r$ and calculate the monthly rate as $r/12$ the way banks do.  Analogous calculations can be used to answer the questions for loans with annual payments.
+These are standard questions, and their answers -- which are obtained by solving the above equation -- are provided by online financial calculators and by the Excel and numpy_financial functions PMT, PV, and RATE.
 
-Our guiding principle is the formula for the present value of an annuity:
-$$\text{PV} = y \times \text{AF}$$
-where the annuity factor, with a monthly rate of $r/12$ and a term of $n$ years (so, $12n$ months), is
-$$\text{AF} = \frac{1}{r/12}\left(1 - \frac{1}{(1+r/12)^{12n}}\right).$$
-This formula applies to the given questions with PV equal to the loan amount and $y$ equal to the loan payment.  In other words, the relation between the loan amount and the loan payments is that the present value of the payments equals the loan amount (loan principal).  
+For loans with monthly payments, we need to input the number of months as the number of periods and the monthly rate as the rate.  
+For example, for a 30-year mortgage at a rate of 6\%, we would input $30 \times 12$ as the number of periods and $0.06/12$ as the rate.
 
-The answers to the questions are as follows.  It is a bit more complicated to calculate the required rate than it is to calculate the payment and loan amount.
+Each payment on a loan pays the interest that has accrued during the previous period plus something towards principal.  As the principal is paid down, the interest decreases, so the payment towards principal increases.  Tracking the principal over time is called creating an amortization table.  Let's create such a table.  By doing so, we will also see why the present value of the payments equals the principal of a loan.  
 
-1.  The loan payment is the loan amount divided by the annuity factor.
-2.  The loan amount is the loan payment multiplied by the annuity factor.
-3.  The required rate is the rate that makes the annuity factor equal to the ratio of the loan amount to the loan payment.
-
-::: callout-tip
-
-# Calculating principals and payments
-
-Here are ways to calculate a loan payment or loan amount.  
-``` p
-import numpy as np
-n = 30     # number of years
-r = 0.04   # annual rate
-
-AF = (12/r) * (1 - (1+r/12)**(-12*n))
-
-# calculate the loan payment
-principal = 100000
-payment = principal / AF
-
-# calculate the loan amount
-payment = 2000
-principal = payment * AF
-```
-:::
-
-Let's also answer a fourth question, which might occasionally arise:
-
-4.  I know what the term of the loan will be, how much I want to borrow, how much I can afford to pay, and what the rate will be.  If my payments aren't enough, and I can get a balloon structure (a final payoff at maturity), how much will the balloon be?
-
-If there is a balloon structure, then the loan principal equals the present value of the non-balloon payments ($\text{payment} \times \text{AF}$) plus the present value of the balloon, which is
-$$\text{balloon} \times \frac{1}{(1+r/12)^{12n}}.$$
-Thus,
-$$\text{balloon} = \left(1+\frac{r}{12}\right)^{12n} \times (\text{principal} - \text{payment} \times AF)$$
-This is the future value of the present value "shortage;" that is, it is the future value of the loan amount in excess of the present value of the monthly payments.  
-
-::: callout-tip
-
-# Using numpy-financial
-
-Here are the answers to all four questions, using functions from numpy-financial.  The sign conventions are that the loan principal is positive (a cash inflow) and loan payments (regular payments and balloon) are negative.  If the balloon calculation turns out to be positive, it means we've overpaid the bank and should get money back.  We can include a balloon when answering the first three questions by setting, for example, **fv=-100000** when the balloon is $100,000.
-``` p
-import numpy_financial as npf
-n = 30     # number of years
-
-# question 1
-r, principal = 0.04, 500000
-payment = npf.pmt(rate=r/12, nper=n*12, pv=principal, fv=0)
- 
-# question 2
-r, payment = 0.04, -2000
-principal = npf.pv(rate=r/12, nper=n*12, pmt=payment, fv=0)
- 
-# question 3
-principal, payment = 500000, -2000
-rate = 12*npf.rate(nper=n*12, pv=principal, pmt=payment, fv=0)
- 
-# question 4
-r, principal, payment = 0.04, 500000, -2000
-balloon = npf.fv(rate=r/12, nper=n*12, pmt=payment, pv=amount)
- ```
-:::
 
 **ADD AMORTIZATION TABLE**
 
@@ -363,7 +225,7 @@ balloon = npf.fv(rate=r/12, nper=n*12, pmt=payment, pv=amount)
 
 In the decade 1971--1980, the U.S. stock market returned an average of 9.2% per year.  A dollar invested at the first of January in 1971 would have grown to $2.40 by the end of December in 1980.  As decades go, this is quite far from the worst for the U.S. stock market.^[Of the nine decades, 1931-1940, ..., 2011-2020, it ranks fifth.]  However, the 1970's were a time of high inflation.  What was the market performance in real terms?  To be more precise, if we had invested $1 at the begining of January, 1971, by how much would our real buying power have grown by the end of December, 1980?  In other words, what was our return in constant dollars?  We will see here how to answer these questions.
 
-The standard measure of the inflation rate is the percent change in a price index.  In the U.S., the standard price index used for this calculation is the Consumer Price Index -- All Urban calculated by the Bureau of Labor Statistics.  It represents the cost of a basket of goods sampled in 87 urban areas across the U.S.  To have 7% inflation in a year means that the basket of goods costs 7% more at the end of the year than at the beginning, or in other words that
+The term inflation rate means the percent change in a price index.  In the U.S., the standard price index used for this calculation is the Consumer Price Index -- All Urban calculated by the Bureau of Labor Statistics.  It represents the cost of a basket of goods sampled in 87 urban areas across the U.S.  To have 7% inflation in a year means that the basket of goods costs 7% more at the end of the year than at the beginning, or in other words that
 $$\frac{\text{CPI at end of year}}{\text{CPI at beginning of year}} = 1.07.$$
 
 Consider an item that costs $100 today.  Suppose there is 7\% inflation in the coming year, and the item costs $107 at the end of the year.  Suppose also that our portfolio earns 10\% in the year.  To calculate our real return, consider each $100 that we have at the start of the year.  Each $100 could buy one item.  In a year's time, the $100 grows to $110, and the item costs $107, so we could buy one and have $3 left over, which would buy 3/107 units.  This 3/107 is the growth in our buying power relative to the start of the year, so our [real return]{style="color: Tomato"} is 3/107.  
@@ -484,11 +346,108 @@ fig.update_layout(
     template="none",
     xaxis_title="Month",
     yaxis_title="Account Balance",
-    yaxis_tickprefix="$", yaxis_tickformat=".2s"
+    yaxis_tickprefix="$", 
+    yaxis_tickformat=".0f"
 )
 fig.show()
 ```
+
 The ending balance of the account is the future value of the initial balance plus the future values of the deposits minus the future values of the withdrawals. 
+
+
+
+We probably want to ask: 
+
+> Given our current balance, planned deposits, and anticipated rate of return, what withdrawals will we be able to make?
+
+Or: 
+
+> Given the withdrawals we plan to make, our current blance, and anticipated rate of return, what deposits do we need to make? 
+
+ To answer questions of this type, the "sum of future values" representation is convenient.  The future values (of the initial balance, deposits, and withdrawals) are all proportional to inputs ($B_0$, $D_1$, and $W$), so it is straightforward to solve for those inputs.  An interactive page with user inputs that also solves for the growth rate $g$ is provided at the [BBCX Investments Library](https://bbcx-investments.com/borrowing-saving/retirement-solution).
+
+
+
+## Retirement planning simulation
+
+**TBD**
+
+## Python
+
+::: callout-tip
+
+# Present and future value factors
+
+The numpy arange function is useful for creating sequences (arrays) of future value and present value factors.  
+``` p
+import numpy as np
+n = 30
+r = 0.08
+fvFactors = (1+r)**np.arange(1, n+1)
+pvFactors = (1+r)**np.arange(-1, -n-1, -1)
+```
+:::
+
+
+::: callout-tip
+
+# Calculating future values as a sum of array products
+
+The total future value can be calculated by summing the product of two arrays as in the following example.  
+``` p
+import numpy as np
+n = 10
+m = 4
+r = 0.08
+x0, x1, x2, x3, x4 = 100, 120, 130, 140, 150
+x = np.array([x0, x1, x2, x3, x4])
+fvFactors = (1+r)**np.arange(n, n-m-1, -1)
+total = np.sum(x*fvFactors)
+```
+:::
+
+::: callout-tip
+
+# Calculating present values as a sum of array products
+
+The total present value can also be computed by summing the product of two arrays as in the following example.  
+``` p
+import numpy as np
+m = 4
+r = 0.08
+y1, y2, y3, y4 = 100, 120, 130, 140, 150
+y = np.array([y1, y2, y3, y4])
+pvFactors = (1+r)**np.arange(-1, -m-1, -1)
+total = np.sum(y*pvFactors)
+```
+:::
+
+::: callout-tip
+
+# Using numpy-financial
+
+Here are the answers to all four questions, using functions from numpy-financial.  The sign conventions are that the loan principal is positive (a cash inflow) and loan payments (regular payments and balloon) are negative.  If the balloon calculation turns out to be positive, it means we've overpaid the bank and should get money back.  We can include a balloon when answering the first three questions by setting, for example, **fv=-100000** when the balloon is $100,000.
+``` p
+import numpy_financial as npf
+n = 30     # number of years
+
+# question 1
+r, principal = 0.04, 500000
+payment = npf.pmt(rate=r/12, nper=n*12, pv=principal, fv=0)
+ 
+# question 2
+r, payment = 0.04, -2000
+principal = npf.pv(rate=r/12, nper=n*12, pmt=payment, fv=0)
+ 
+# question 3
+principal, payment = 500000, -2000
+rate = 12*npf.rate(nper=n*12, pv=principal, pmt=payment, fv=0)
+ 
+# question 4
+r, principal, payment = 0.04, 500000, -2000
+balloon = npf.fv(rate=r/12, nper=n*12, pmt=payment, pv=amount)
+ ```
+:::
 
 ::: callout-tip
 ## Calculating the ending balance as a sum of future values
@@ -517,16 +476,6 @@ Bn = FVB + np.sum(FVD) - np.sum(FVW)
 ```
 :::
 
-We probably want to ask: 
-
-> Given our current balance, planned deposits, and anticipated rate of return, what withdrawals will we be able to make?
-
-Or: 
-
-> Given the withdrawals we plan to make, our current blance, and anticipated rate of return, what deposits do we need to make? 
-
- To answer questions of this type, the "sum of future values" representation is convenient.  The future values (of the initial balance, deposits, and withdrawals) are all proportional to inputs ($B_0$, $D_1$, and $W$), so it is straightforward to solve for those inputs.  An interactive page with user inputs that also solves for the growth rate $g$ is provided at the [BBCX Investments Library](https://bbcx-investments.com/borrowing-saving/retirement-solution).
-
 ::: callout-tip
 
 ## Creating a feasible retirement plan
@@ -553,8 +502,3 @@ FVW = W * (1+r)**np.arange(n-m, 0, -1)
 B0 = (np.sum(FVW) - np.sum(FVD)) / (1+r)**n
 ```
 :::
-
-## Retirement planning simulation
-
-**TBD**
-
