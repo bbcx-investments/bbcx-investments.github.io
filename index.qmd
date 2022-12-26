@@ -4,4 +4,8 @@ This is a draft of a piece of a planned book about investments.  An innovative f
 
 The book is part of a twofold effort to enhance investments education.  The other piece is an interactive website [bbcx-investments.com](http://bbcx-investments.com/) that derives figures and tables from live data and user inputs to illustrate investments concepts.  
 
+```{=html}
+<iframe width="800" height="1000" src="https://bbcx-investments.com/" title="BBCX Investments"></iframe>
+```
+
 
