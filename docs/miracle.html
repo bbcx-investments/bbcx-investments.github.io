@@ -380,9 +380,14 @@ Continuously compounded returns
 <li>(<span class="math inline">\(L\)</span>) I know what the term of the loan will be and what the rate will be, and I know the payment that I can afford. How much can I borrow?</li>
 <li>(<span class="math inline">\(r\)</span>) I know what the term of the loan will be, how much I want to borrow, and how much I can afford to pay. What rate do I need to get?</li>
 </ol>
-<p>These are standard questions, and their answers – which are obtained by solving the above equation – are provided by online financial calculators and by the Excel and numpy_financial functions PMT, PV, and RATE.</p>
-<p>For loans with monthly payments, we need to input the number of months as the number of periods and the monthly rate as the rate.<br>
-For example, for a 30-year mortgage at a rate of 6%, we would input <span class="math inline">\(30 \times 12\)</span> as the number of periods and <span class="math inline">\(0.06/12\)</span> as the rate.</p>
+<p>These are standard questions, and their answers – which are obtained by solving the above equation – are provided by online financial calculators and by the Excel and numpy_financial functions pmt, pv, and rate. For loans with monthly payments, we need to input the number of months as the number of periods and the monthly rate as the rate. For example, for a 30-year mortgage at a rate of 6%, we would input <span class="math inline">\(30 \times 12\)</span> as the number of periods and <span class="math inline">\(0.06/12\)</span> as the rate.</p>
+<p>Sometimes a loan will have a balloon payment, meaning an extra payment at the end to make up for the periodic payments being too small. The amount of any balloon <span class="math inline">\(B\)</span> is determined by the equation <span class="math display">\[L = P \times \text{AF} + \frac{B}{(1+r)^n}\,.\]</span> This again reflects the fact that the present value of all payments equals the principal of a loan. The amount of a balloon payment can be calculated from the Excel and numpy_financial function fv.</p>
+<p>Here is a calculator for <span class="math inline">\(P\)</span>, <span class="math inline">\(L\)</span>, <span class="math inline">\(r\)</span>, and <span class="math inline">\(B\)</span>, in each case taking the other three as given.</p>
+<div class="grid">
+<div class="g-col-12">
+<iframe width="1200" height="600" src="https://bbcx-investments.com/borrowing-saving/_amortization" title="BBCX Investments"></iframe>
+</div>
+</div>
 <p>Each payment on a loan pays the interest that has accrued during the previous period plus something towards principal. As the principal is paid down, the interest decreases, so the payment towards principal increases. Tracking the principal over time is called creating an amortization table. Let’s create such a table. By doing so, we will also see why the present value of the payments equals the principal of a loan.</p>
 <p><strong>ADD AMORTIZATION TABLE</strong></p>
 </section>
