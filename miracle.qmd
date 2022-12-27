@@ -304,7 +304,7 @@ This is a little cumbersome to say, so in finance we simply say that $r$ is the 
 $$n \log (1+r) = \log (1+r_1) + \cdots \log (1+r_n)$$
 or, equivalently,
 $$\log (1+r) = \frac{\log (1+r_1) + \cdots + \log (1+r_n)}{n}.$$
-Thus, "geometric average" means "average in logs."  As discussed earlier, these logarithms of one-plus-returns are called continuously compounded returns, so  "geometric average" means a normal (arithmetic) average for continuously compounded returns.  For example, suppose an asset drops by 50\% and then has a 100\% return, getting back to even.  The continuously compounded returns are $\log (1-0.5) = \log 0.5$ and $\log (1+1) = \log 2$, and it is indeed true that $\log 0.5 + \log 2 = 0$, so the average continuously compounded return represents the true experience of the asset -- it broke even.
+Thus, "geometric average" means "average in logs."  As discussed earlier, these logarithms of one-plus-returns are called continuously compounded returns, so  "geometric average" means a normal (arithmetic) average for continuously compounded returns.  
 :::
 
 ## Retirement planning
