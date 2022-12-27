@@ -130,9 +130,7 @@ $$\frac{y_1}{1+r} + \frac{y_2}{(1+r)^2} + \cdots + \frac{y_m}{(1+r)^m}.$$
 Our examples here involved only positive cash flows, but it is also possible to compute total future values or total present values in this way when some cash flows are positive and some are negative.  In this case, the total present value is usually called the [net present value]{style="color: Tomato;"}, being the present value of the positive cash flows net of the present value of the negative cash flows.  The following illustrates net present value calculations.
 
 ::: {.grid}
-
 ::: {.g-col-12}
-
 
 ```{=html}
 <iframe width="1200" height="400" src="https://bbcx-investments.com/borrowing-saving/_npv" title="BBCX Investments"></iframe>
@@ -223,10 +221,23 @@ From this equation, we can calculate any of the loan parameters in terms of the 
 2.  ($L$) I know what the term of the loan will be and what the rate will be, and I know the payment that I can afford.  How much can I borrow?
 3.  ($r$) I know what the term of the loan will be, how much I want to borrow, and how much I can afford to pay.  What rate do I need to get?
 
-These are standard questions, and their answers -- which are obtained by solving the above equation -- are provided by online financial calculators and by the Excel and numpy_financial functions PMT, PV, and RATE.
+These are standard questions, and their answers -- which are obtained by solving the above equation -- are provided by online financial calculators and by the Excel and numpy_financial functions pmt, pv, and rate. For loans with monthly payments, we need to input the number of months as the number of periods and the monthly rate as the rate.  For example, for a 30-year mortgage at a rate of 6\%, we would input $30 \times 12$ as the number of periods and $0.06/12$ as the rate.
 
-For loans with monthly payments, we need to input the number of months as the number of periods and the monthly rate as the rate.  
-For example, for a 30-year mortgage at a rate of 6\%, we would input $30 \times 12$ as the number of periods and $0.06/12$ as the rate.
+Sometimes a loan will have a balloon payment, meaning an extra payment at the end to make up for the periodic payments being too small.  The amount of any balloon $B$ is determined by the equation
+$$L = P \times \text{AF} + \frac{B}{(1+r)^n}\,.$$
+This again reflects the fact that the present value of all payments equals the principal of a loan.  The amount of a balloon payment can be calculated from the Excel and numpy_financial function fv.  
+
+Here is a calculator for $P$, $L$, $r$, and $B$, in each case taking the other three as given.
+
+::: {.grid}
+::: {.g-col-12}
+
+```{=html}
+<iframe width="1200" height="600" src="https://bbcx-investments.com/borrowing-saving/_amortization" title="BBCX Investments"></iframe>
+```
+
+:::
+:::
 
 Each payment on a loan pays the interest that has accrued during the previous period plus something towards principal.  As the principal is paid down, the interest decreases, so the payment towards principal increases.  Tracking the principal over time is called creating an amortization table.  Let's create such a table.  By doing so, we will also see why the present value of the payments equals the principal of a loan.  
 
@@ -293,7 +304,7 @@ This is a little cumbersome to say, so in finance we simply say that $r$ is the 
 $$n \log (1+r) = \log (1+r_1) + \cdots \log (1+r_n)$$
 or, equivalently,
 $$\log (1+r) = \frac{\log (1+r_1) + \cdots + \log (1+r_n)}{n}.$$
-Thus, "geometric average" means "average in logs."  As discussed earlier, these logarithms of one-plus-returns are called continuously compounded returns, so  "geometric average" means a normal (arithmetic) average for continuously compounded returns.  For example, suppose an asset drops by 50\% and then has a 100\% return, getting back to even.  The continuously compounded returns are $\log (1-0.5) = \log 0.5$ and $\log (1+1) = \log 2$, and it is indeed true that $\log 0.5 + \log 2 = 0$, so the average continuously compounded return represents the true experience of the asset -- it broke even.
+Thus, "geometric average" means "average in logs."  As discussed earlier, these logarithms of one-plus-returns are called continuously compounded returns, so  "geometric average" means a normal (arithmetic) average for continuously compounded returns.  
 :::
 
 ## Retirement planning
