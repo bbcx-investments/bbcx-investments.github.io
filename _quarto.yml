@@ -14,7 +14,10 @@ book:
 format:
   html:
     theme: cosmo
-    page-layout: full
+    toc: true
+    toc-depth: 2
+    toc-location: left
+    toc-title: Chapter Contents
 
 execute:
   cache: true
