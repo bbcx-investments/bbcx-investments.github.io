@@ -133,7 +133,7 @@ Our examples here involved only positive cash flows, but it is also possible to 
 ::: {.g-col-12}
 
 ```{=html}
-<iframe width="1200" height="400" src="https://bbcx-investments.com/borrowing-saving/_npv" title="BBCX Investments"></iframe>
+<iframe width="800" height="400" src="https://bbcx-investments.com/borrowing-saving/_npv" title="BBCX Investments"></iframe>
 ```
 
 :::
