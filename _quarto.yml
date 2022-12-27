@@ -17,6 +17,7 @@ book:
 format:
   html:
     theme: cosmo
+    page-layout: full
 execute:
   freeze: auto
   echo: false
