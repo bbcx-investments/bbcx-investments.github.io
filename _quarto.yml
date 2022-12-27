@@ -16,8 +16,7 @@ format:
     theme: cosmo
     toc: true
     toc-depth: 2
-    toc-location: left
-    toc-title: Chapter Contents
+    toc-title: Chapter contents
 
 execute:
   cache: true

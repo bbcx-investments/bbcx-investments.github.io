@@ -187,8 +187,11 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 </li>
     </ul>
     </div>
-    <nav id="TOC" role="doc-toc" class="toc-active">
-    <h2 id="toc-title">Chapter Contents</h2>
+</nav>
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">Chapter contents</h2>
    
   <ul class="collapse">
   <li><a href="#future-values-and-present-values" id="toc-future-values-and-present-values" class="nav-link active" data-scroll-target="#future-values-and-present-values"><span class="toc-section-number">1.1</span>  Future values and present values</a></li>
@@ -203,9 +206,6 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
   <li><a href="#sec-miracle-python" id="toc-sec-miracle-python" class="nav-link" data-scroll-target="#sec-miracle-python"><span class="toc-section-number">1.10</span>  Python</a></li>
   </ul>
 </nav>
-</nav>
-<!-- margin-sidebar -->
-    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
     </div>
 <!-- main -->
 <main class="content" id="quarto-document-content">
@@ -316,7 +316,7 @@ x_m(1+r)^{n-m}.\]</span></p>
 <figure class="figure">
 <iframe width="780" height="400" src="https://bbcx-investments.com/borrowing-saving/_npv">
 </iframe>
-<p></p><figcaption class="figure-caption">Figure&nbsp;1.3: The net present value is the sum of the present value of the cash flows. The present value of each cash flow is the cash flow multiplied by the present value factor. The light blue cells are editable.</figcaption><p></p>
+<p></p><figcaption class="figure-caption">Figure&nbsp;1.3: The net present value is the sum of the present values of the cash flows. The present value of each cash flow is the cash flow multiplied by the present value factor. The light blue cells are editable.</figcaption><p></p>
 </figure>
 </div>
 </section>
@@ -359,7 +359,7 @@ Deriving the annuity formula
 <p>First we address compounding. If we earn interest or some other return monthly at rate <span class="math inline">\(r_m\)</span>, then the rate of return per year is <span class="math inline">\((1+r_m)^{12}-1\)</span>. For example, if we earn 1% per month, then in one year, each dollar invested will grow to <span class="math inline">\(1.01^{12} = 1.1268\)</span> dollars, which is a rate of return of 12.68%.</p>
 <p>We can reverse this calculation to compute a monthly rate given an annual rate <span class="math inline">\(r_a\)</span>. The formula for the monthly rate is <span class="math display">\[r_m = (1+r_a)^{1/12} - 1.\]</span> For example, if we plug in <span class="math inline">\(r_a = 0.1268\)</span>, we’ll get <span class="math inline">\(r_m = 0.01\)</span> (up to rounding error).</p>
 <p>This is a logical way to define monthly rates from annual rates, but it is not the way a bank does it when you take out a loan. If a bank says that the annual rate is 12.68%, then it will charge you <span class="math display">\[\frac{0.1268}{12} = 0.0106.\]</span> So, the bank will charge you 1.06% monthly. Obviously, this works in the bank’s favor, relative to the calculation based on compounding.</p>
-<p>Returning to the compounding calculation, we could also compound at frequencies other than a month or a year. If we compound daily at a daily rate of <span class="math inline">\(r_d\)</span>, then the corresponding annual rate is <span class="math display">\[r_a = (1+r_d)^{365} - 1.\]</span> The annual rate achieved by compounding is higher the more frequently a bank compounds. Continuing with our previous example of 12.68%, with monthly compounding we have <span class="math display">\[\left(1 + \frac{0.1268}{12}\right)^{12} - 1 = 0.1344\]</span> and with daily compounding we have <span class="math display">\[\left(1 + \frac{0.1268}{365}\right)^{365} - 1 = 0.1351.\]</span> Thus, increasing the compounding frequency increases the corresponding annual rate.</p>
+<p>Returning to the compounding calculation, we could also compound at frequencies other than a month or a year. If we compound daily at a daily rate of <span class="math inline">\(r_d\)</span>, then the corresponding annual rate is <span class="math display">\[r_a = (1+r_d)^{365} - 1.\]</span> The annual rate achieved by compounding is higher the more frequently a bank compounds. Continuing with our previous example of 12%, with monthly compounding we have <span class="math display">\[r_a = \left(1 + \frac{0.12}{12}\right)^{12} - 1 = 0.1268\]</span> as observed before, and with daily compounding we have <span class="math display">\[r_a = \left(1 + \frac{0.12}{365}\right)^{365} - 1 = 0.12747.\]</span> Thus, increasing the compounding frequency increases the corresponding annual rate.</p>
 <div class="callout-note callout callout-style-default callout-captioned">
 <div class="callout-header d-flex align-content-center">
 <div class="callout-icon-container">
@@ -370,7 +370,7 @@ Continuously compounded returns
 </div>
 </div>
 <div class="callout-body-container callout-body">
-<p>We could consider even more frequent compounding. In the limit, as compounding becomes continuous, we can invoke a result from mathematical analysis to obtain <span class="math display">\[\lim_{n \rightarrow \infty}  \left(1 + \frac{0.1268}{n}\right)^{n} - 1  = e^{0.1268} - 1 = 0.1352,\]</span> where <span class="math inline">\(e\)</span> is the natural exponential (<span class="math inline">\(2.718\ldots\)</span>). More generally, <span style="color: Tomato">continuous compounding</span> at rate <span class="math inline">\(z\)</span> means that $1 grows to <span class="math inline">\(e^z\)</span> dollars in a year. For any return <span class="math inline">\(r\)</span>, there is an equivalent <span style="color: Tomato">continuously compounded return</span> given by <span class="math inline">\(\log (1+r)\)</span> where <span class="math inline">\(\log\)</span> denotes the natural logarithm function. To see this, let <span class="math inline">\(z=\log (1+r)\)</span>. With continuous compounding at rate <span class="math inline">\(z\)</span>, $1 grows to <span class="math inline">\(e^z = e^{\log (1+r)} = 1+r\)</span>. Thus, continuous compounding at rate <span class="math inline">\(\log (1+r)\)</span> is the same as earning <span class="math inline">\(r\)</span>. Obviously, continuous compounding is never encountered in practice, but it is a useful “as if” device for some calculations.</p>
+<p>We could consider even more frequent compounding. In the limit, as compounding becomes continuous, we can invoke a result from mathematical analysis to obtain <span class="math display">\[\lim_{n \rightarrow \infty}  \left(1 + \frac{0.12}{n}\right)^{n} - 1  = e^{0.12} - 1 = 0.12750,\]</span> where <span class="math inline">\(e\)</span> is the natural exponential <span class="math inline">\(2.718\ldots\)</span>. More generally, <span style="color: Tomato">continuous compounding</span> at rate <span class="math inline">\(z\)</span> means that $1 grows to <span class="math inline">\(e^z\)</span> dollars in a year. For any return <span class="math inline">\(r\)</span>, there is an equivalent <span style="color: Tomato">continuously compounded return</span> given by <span class="math inline">\(\log (1+r)\)</span> where <span class="math inline">\(\log\)</span> denotes the natural logarithm function. To see this, let <span class="math inline">\(z=\log (1+r)\)</span>. With continuous compounding at rate <span class="math inline">\(z\)</span>, $1 grows to <span class="math inline">\(e^z = e^{\log (1+r)} = 1+r\)</span>. Thus, continuous compounding at rate <span class="math inline">\(\log (1+r)\)</span> is the same as earning <span class="math inline">\(r\)</span>. Obviously, continuous compounding is never encountered in practice, but it is a useful “as if” device for some calculations.</p>
 </div>
 </div>
 </section>
@@ -384,7 +384,7 @@ Continuously compounded returns
 </ol>
 <p>These are standard questions, and their answers – which are obtained by solving the above equation – are provided by online financial calculators and by the Excel and numpy-financial functions pmt, pv, and rate. See <a href="#sec-miracle-python"><span>Section&nbsp;1.10</span></a>. For loans with monthly payments, we need to input the number of months as the number of periods and the monthly rate as the rate. For example, for a 30-year mortgage at a rate of 6%, we would input <span class="math inline">\(30 \times 12\)</span> as the number of periods and <span class="math inline">\(0.06/12\)</span> as the rate.</p>
 <p>Sometimes a loan will have a balloon payment, meaning an extra payment at the end to make up for the periodic payments being too small. The amount of any balloon <span class="math inline">\(B\)</span> is determined by the equation <span class="math display">\[L = P \times \text{AF} + \frac{B}{(1+r)^n}\,.\]</span> This again reflects the fact that the present value of all payments equals the principal. The amount of a balloon payment can be calculated from the Excel and numpy-financial function fv.</p>
-<p>Each payment on a loan pays the interest that has accrued during the previous period plus something towards principal. As the principal is paid down, the interest decreases, so the payment towards principal increases. Tracking the principal over time is called creating an amortization table. Let’s create such a table. By doing so, we will also see why the present value of the payments equals the principal of a loan.</p>
+<p>Each payment on a loan pays the interest that has accrued during the previous period plus something towards principal. As the principal is paid down, the interest decreases, so the payment towards principal increases. Tracking the principal over time is called creating an amortization table. Let’s create such a table. By doing so, we will also see why the present value of the payments equals the principal.</p>
 <p><strong>ADD AMORTIZATION TABLE</strong></p>
 </section>
 <section id="inflation-and-real-returns" class="level2" data-number="1.6">
