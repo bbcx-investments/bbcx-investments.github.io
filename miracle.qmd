@@ -129,6 +129,20 @@ $$\frac{y_1}{1+r} + \frac{y_2}{(1+r)^2} + \cdots + \frac{y_m}{(1+r)^m}.$$
 
 Our examples here involved only positive cash flows, but it is also possible to compute total future values or total present values in this way when some cash flows are positive and some are negative.  In this case, the total present value is usually called the [net present value]{style="color: Tomato;"}, being the present value of the positive cash flows net of the present value of the negative cash flows.
 
+The following interactive webpage presents present value calculations.
+
+::: {.grid}
+
+::: {.g-col-12}
+
+
+```{=html}
+<iframe width="1200" height="600" src="https://bbcx-investments.com/borrowing-saving/npv" title="BBCX Investments"></iframe>
+```
+
+:::
+:::
+
 ## Perpetuities and annuities
 
 An annuity is a level sequence of cash flows that extends for a finite period of time.  A perpetuity is a level sequence of cash flows that extends forever.  Annuities are encountered frequently, for example, in mortgage or other loan payments.  Perpetuities are used when valuing companies.  The value of the stock of a company comes from the cash the company pays to shareholders, and there is no definite time at which these cash flows will end, so it is common to model them as perpetual. 
