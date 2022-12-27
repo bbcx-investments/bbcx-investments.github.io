@@ -129,7 +129,7 @@ $$\frac{y_1}{1+r} + \frac{y_2}{(1+r)^2} + \cdots + \frac{y_m}{(1+r)^m}.$$
 
 Our examples here involved only positive cash flows, but it is also possible to compute total future values or total present values in this way when some cash flows are positive and some are negative.  In this case, the total present value is usually called the [net present value]{style="color: Tomato;"}, being the present value of the positive cash flows net of the present value of the negative cash flows.  @fig-miracle-npv illustrates net present value calculations.
 
-::: {#fig-miracle-npv}
+::: {.border #fig-miracle-npv} 
 <iframe width="780" height="400" src="https://bbcx-investments.com/borrowing-saving/_npv"></iframe>
 
 The net present value is the sum of the present values of the cash flows.  The present value of each cash flow is the cash flow multiplied by the present value factor.  The light blue cells are editable.
