@@ -233,7 +233,7 @@ Here is a calculator for $P$, $L$, $r$, and $B$, in each case taking the other t
 ::: {.g-col-12}
 
 ```{=html}
-<iframe width="1200" height="600" src="https://bbcx-investments.com/borrowing-saving/_amortization" title="BBCX Investments"></iframe>
+<iframe width="800" height="600" src="https://bbcx-investments.com/borrowing-saving/_amortization" title="BBCX Investments"></iframe>
 ```
 
 :::
