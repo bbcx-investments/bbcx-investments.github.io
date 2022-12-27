@@ -25,6 +25,8 @@ execute:
   freeze: auto
   echo: false
 
+fig-cap-location: top
+
 comments:
   hypothesis: true
   giscus:
