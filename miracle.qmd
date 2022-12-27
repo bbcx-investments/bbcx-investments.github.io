@@ -208,7 +208,7 @@ where $e$ is the natural exponential $2.718\ldots$.  More generally, [continuous
 
 :::
 
-## Loan payments, etc.
+## Loan payments {#sec-miracle-loans}
 
 The payments on a loan are determined by the fact that the present value of the payments equals the amount borrowed (the loan principal).  If the loan has level payments $P$, then the loan principal $L$ satisfies
 $$L = P \times \text{AF} = \frac{P}{r}\left(1-\frac{1}{(1+r)^n}\right)\,.$$
@@ -382,11 +382,15 @@ Or:
 
 ## Python {#sec-miracle-python}
 
-::: callout-tip
 
-# Present and future value factors
+The numpy arange function is useful for creating sequences (arrays) of future value and present value factors.  The future value factors created by the following are an array
 
-The numpy arange function is useful for creating sequences (arrays) of future value and present value factors.  
+$$(1+r), (1+r)^2, \ldots, (1+r)^n\,,$$
+
+and the present value factors are an array
+
+$$\frac{1}{1+r}, \frac{1}{(1+r)^2}, \ldots, \frac{1}{(1+r)^n}\,.$$
+
 ``` p
 import numpy as np
 n = 30
@@ -394,68 +398,68 @@ r = 0.08
 fvFactors = (1+r)**np.arange(1, n+1)
 pvFactors = (1+r)**np.arange(-1, -n-1, -1)
 ```
-:::
 
+The future value and present value of a sequence of cash flows can be computed by summing the products of arrays as in the following example.  The future value is computed as of year $n$.
 
-::: callout-tip
-
-# Calculating future values as a sum of array products
-
-The total future value can be calculated by summing the product of two arrays as in the following example.  
 ``` p
-import numpy as np
 n = 10
 m = 4
 r = 0.08
-x0, x1, x2, x3, x4 = 100, 120, 130, 140, 150
-x = np.array([x0, x1, x2, x3, x4])
+c0, c1, c2, c3, c4 = 100, 120, 130, 140, 150
+cashFlows = np.array([c0, c1, c2, c3, c4])
+
 fvFactors = (1+r)**np.arange(n, n-m-1, -1)
-total = np.sum(x*fvFactors)
-```
-:::
+totalFV = np.sum(cashFlows*fvFactors)
 
-::: callout-tip
-
-# Calculating present values as a sum of array products
-
-The total present value can also be computed by summing the product of two arrays as in the following example.  
-``` p
-import numpy as np
-m = 4
-r = 0.08
-y1, y2, y3, y4 = 100, 120, 130, 140, 150
-y = np.array([y1, y2, y3, y4])
 pvFactors = (1+r)**np.arange(-1, -m-1, -1)
-total = np.sum(y*pvFactors)
+totalPV = np.sum(y*pvFactors)
 ```
-:::
 
-::: callout-tip
 
-# Using numpy-financial
+Here is the "financial calculator" code for @sec-miracle-loans.  The sign conventions are that the loan principal is positive (a cash inflow) and loan payments (regular payments and balloon) are negative.  If the balloon calculation turns out to be positive, it means we've overpaid the bank and should get money back.  We can include a balloon when answering the first three questions by setting, for example, **fv=-100000** when the balloon is $100,000.  The following is for a loan with monthly payments.  The rates are all expressed as annual rates $r$ with the monthly rate being $r/12$.  The rate that is calculated in #3 is also an annual rate.
 
-Here are the answers to all four questions, using functions from numpy-financial.  The sign conventions are that the loan principal is positive (a cash inflow) and loan payments (regular payments and balloon) are negative.  If the balloon calculation turns out to be positive, it means we've overpaid the bank and should get money back.  We can include a balloon when answering the first three questions by setting, for example, **fv=-100000** when the balloon is $100,000.
 ``` p
 import numpy_financial as npf
 n = 30     # number of years
 
-# question 1
+# 1. payment
 r, principal = 0.04, 500000
-payment = npf.pmt(rate=r/12, nper=n*12, pv=principal, fv=0)
+payment = npf.pmt(
+    rate=r/12, 
+    nper=n*12, 
+    pv=principal, 
+    fv=0
+)
  
-# question 2
+# 2. principal
 r, payment = 0.04, -2000
-principal = npf.pv(rate=r/12, nper=n*12, pmt=payment, fv=0)
+principal = npf.pv(
+    rate=r/12, 
+    nper=n*12, 
+    pmt=payment, 
+    fv=0
+)
  
-# question 3
+# 3. rate
 principal, payment = 500000, -2000
-rate = 12*npf.rate(nper=n*12, pv=principal, pmt=payment, fv=0)
+rate = 12*npf.rate(
+    nper=n*12, 
+    pv=principal, 
+    pmt=payment, 
+    fv=0
+)
  
-# question 4
+# 4. balloon
 r, principal, payment = 0.04, 500000, -2000
-balloon = npf.fv(rate=r/12, nper=n*12, pmt=payment, pv=amount)
+balloon = npf.fv(
+    rate=r/12, 
+    nper=n*12, 
+    pmt=payment, 
+    pv=principal
+)
  ```
-:::
+
+TO BE CONTINUED
 
 ::: callout-tip
 ## Calculating the ending balance as a sum of future values

@@ -198,7 +198,7 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
   <li><a href="#multiple-cash-flows" id="toc-multiple-cash-flows" class="nav-link" data-scroll-target="#multiple-cash-flows"><span class="toc-section-number">1.2</span>  Multiple cash flows</a></li>
   <li><a href="#perpetuities-and-annuities" id="toc-perpetuities-and-annuities" class="nav-link" data-scroll-target="#perpetuities-and-annuities"><span class="toc-section-number">1.3</span>  Perpetuities and annuities</a></li>
   <li><a href="#monthly-rates-etc." id="toc-monthly-rates-etc." class="nav-link" data-scroll-target="#monthly-rates-etc."><span class="toc-section-number">1.4</span>  Monthly rates, etc.</a></li>
-  <li><a href="#loan-payments-etc." id="toc-loan-payments-etc." class="nav-link" data-scroll-target="#loan-payments-etc."><span class="toc-section-number">1.5</span>  Loan payments, etc.</a></li>
+  <li><a href="#sec-miracle-loans" id="toc-sec-miracle-loans" class="nav-link" data-scroll-target="#sec-miracle-loans"><span class="toc-section-number">1.5</span>  Loan payments</a></li>
   <li><a href="#inflation-and-real-returns" id="toc-inflation-and-real-returns" class="nav-link" data-scroll-target="#inflation-and-real-returns"><span class="toc-section-number">1.6</span>  Inflation and real returns</a></li>
   <li><a href="#geometric-average-returns" id="toc-geometric-average-returns" class="nav-link" data-scroll-target="#geometric-average-returns"><span class="toc-section-number">1.7</span>  Geometric average returns</a></li>
   <li><a href="#retirement-planning" id="toc-retirement-planning" class="nav-link" data-scroll-target="#retirement-planning"><span class="toc-section-number">1.8</span>  Retirement planning</a></li>
@@ -374,8 +374,8 @@ Continuously compounded returns
 </div>
 </div>
 </section>
-<section id="loan-payments-etc." class="level2" data-number="1.5">
-<h2 data-number="1.5" class="anchored" data-anchor-id="loan-payments-etc."><span class="header-section-number">1.5</span> Loan payments, etc.</h2>
+<section id="sec-miracle-loans" class="level2" data-number="1.5">
+<h2 data-number="1.5" class="anchored" data-anchor-id="sec-miracle-loans"><span class="header-section-number">1.5</span> Loan payments</h2>
 <p>The payments on a loan are determined by the fact that the present value of the payments equals the amount borrowed (the loan principal). If the loan has level payments <span class="math inline">\(P\)</span>, then the loan principal <span class="math inline">\(L\)</span> satisfies <span class="math display">\[L = P \times \text{AF} = \frac{P}{r}\left(1-\frac{1}{(1+r)^n}\right)\,.\]</span> From this equation, we can calculate any of the loan parameters in terms of the others. Thus, we can answer any of the following questions:</p>
 <ol type="1">
 <li>(<span class="math inline">\(P\)</span>) I know how much I want to borrow, what the term of the loan will be, and what the rate will be. What will my payments be?</li>
@@ -484,96 +484,67 @@ if (outputEl) {{
 </section>
 <section id="sec-miracle-python" class="level2" data-number="1.10">
 <h2 data-number="1.10" class="anchored" data-anchor-id="sec-miracle-python"><span class="header-section-number">1.10</span> Python</h2>
-<div class="callout-tip callout callout-style-default callout-captioned">
-<div class="callout-header d-flex align-content-center">
-<div class="callout-icon-container">
-<i class="callout-icon"></i>
-</div>
-<div class="callout-caption-container flex-fill">
-Present and future value factors
-</div>
-</div>
-<div class="callout-body-container callout-body">
-<p>The numpy arange function is useful for creating sequences (arrays) of future value and present value factors.</p>
+<p>The numpy arange function is useful for creating sequences (arrays) of future value and present value factors. The future value factors created by the following are an array</p>
+<p><span class="math display">\[(1+r), (1+r)^2, \ldots, (1+r)^n\,,\]</span></p>
+<p>and the present value factors are an array</p>
+<p><span class="math display">\[\frac{1}{1+r}, \frac{1}{(1+r)^2}, \ldots, \frac{1}{(1+r)^n}\,.\]</span></p>
 <div class="sourceCode" id="cb1"><pre class="sourceCode p code-with-copy"><code class="sourceCode pascal"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="kw">import</span> numpy <span class="kw">as</span> np</span>
 <span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>n = <span class="dv">30</span></span>
 <span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>r = <span class="dv">0.08</span></span>
 <span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>fvFactors = (<span class="dv">1</span>+r)**np.arange(<span class="dv">1</span>, n+<span class="dv">1</span>)</span>
 <span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>pvFactors = (<span class="dv">1</span>+r)**np.arange(-<span class="dv">1</span>, -n<span class="dv">-1</span>, -<span class="dv">1</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</div>
-</div>
-<div class="callout-tip callout callout-style-default callout-captioned">
-<div class="callout-header d-flex align-content-center">
-<div class="callout-icon-container">
-<i class="callout-icon"></i>
-</div>
-<div class="callout-caption-container flex-fill">
-Calculating future values as a sum of array products
-</div>
-</div>
-<div class="callout-body-container callout-body">
-<p>The total future value can be calculated by summing the product of two arrays as in the following example.</p>
-<div class="sourceCode" id="cb2"><pre class="sourceCode p code-with-copy"><code class="sourceCode pascal"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="kw">import</span> numpy <span class="kw">as</span> np</span>
-<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>n = <span class="dv">10</span></span>
-<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>m = <span class="dv">4</span></span>
-<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>r = <span class="dv">0.08</span></span>
-<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>x0, x1, x2, x3, x4 = <span class="dv">100</span>, <span class="dv">120</span>, <span class="dv">130</span>, <span class="dv">140</span>, <span class="dv">150</span></span>
-<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>x = np.<span class="kw">array</span>([x0, x1, x2, x3, x4])</span>
+<p>The future value and present value of a sequence of cash flows can be computed by summing the products of arrays as in the following example. The future value is computed as of year <span class="math inline">\(n\)</span>.</p>
+<div class="sourceCode" id="cb2"><pre class="sourceCode p code-with-copy"><code class="sourceCode pascal"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>n = <span class="dv">10</span></span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>m = <span class="dv">4</span></span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>r = <span class="dv">0.08</span></span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>c0, c1, c2, c3, c4 = <span class="dv">100</span>, <span class="dv">120</span>, <span class="dv">130</span>, <span class="dv">140</span>, <span class="dv">150</span></span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>cashFlows = np.<span class="kw">array</span>([c0, c1, c2, c3, c4])</span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a>fvFactors = (<span class="dv">1</span>+r)**np.arange(n, n-m<span class="dv">-1</span>, -<span class="dv">1</span>)</span>
-<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a>total = np.sum(x*fvFactors)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</div>
-</div>
-<div class="callout-tip callout callout-style-default callout-captioned">
-<div class="callout-header d-flex align-content-center">
-<div class="callout-icon-container">
-<i class="callout-icon"></i>
-</div>
-<div class="callout-caption-container flex-fill">
-Calculating present values as a sum of array products
-</div>
-</div>
-<div class="callout-body-container callout-body">
-<p>The total present value can also be computed by summing the product of two arrays as in the following example.</p>
-<div class="sourceCode" id="cb3"><pre class="sourceCode p code-with-copy"><code class="sourceCode pascal"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="kw">import</span> numpy <span class="kw">as</span> np</span>
-<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>m = <span class="dv">4</span></span>
-<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>r = <span class="dv">0.08</span></span>
-<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>y1, y2, y3, y4 = <span class="dv">100</span>, <span class="dv">120</span>, <span class="dv">130</span>, <span class="dv">140</span>, <span class="dv">150</span></span>
-<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>y = np.<span class="kw">array</span>([y1, y2, y3, y4])</span>
-<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>pvFactors = (<span class="dv">1</span>+r)**np.arange(-<span class="dv">1</span>, -m<span class="dv">-1</span>, -<span class="dv">1</span>)</span>
-<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a>total = np.sum(y*pvFactors)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</div>
-</div>
-<div class="callout-tip callout callout-style-default callout-captioned">
-<div class="callout-header d-flex align-content-center">
-<div class="callout-icon-container">
-<i class="callout-icon"></i>
-</div>
-<div class="callout-caption-container flex-fill">
-Using numpy-financial
-</div>
-</div>
-<div class="callout-body-container callout-body">
-<p>Here are the answers to all four questions, using functions from numpy-financial. The sign conventions are that the loan principal is positive (a cash inflow) and loan payments (regular payments and balloon) are negative. If the balloon calculation turns out to be positive, it means we’ve overpaid the bank and should get money back. We can include a balloon when answering the first three questions by setting, for example, <strong>fv=-100000</strong> when the balloon is $100,000.</p>
-<div class="sourceCode" id="cb4"><pre class="sourceCode p code-with-copy"><code class="sourceCode pascal"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="kw">import</span> numpy_financial <span class="kw">as</span> npf</span>
-<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>n = <span class="dv">30</span>     <span class="st"># </span>number <span class="kw">of</span> years</span>
-<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a><span class="st"># </span>question <span class="dv">1</span></span>
-<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a>r, principal = <span class="dv">0.04</span>, <span class="dv">500000</span></span>
-<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a>payment = npf.pmt(rate=r/<span class="dv">12</span>, nper=n*<span class="dv">12</span>, pv=principal, fv=<span class="dv">0</span>)</span>
-<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a> </span>
-<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a><span class="st"># </span>question <span class="dv">2</span></span>
-<span id="cb4-9"><a href="#cb4-9" aria-hidden="true" tabindex="-1"></a>r, payment = <span class="dv">0.04</span>, -<span class="dv">2000</span></span>
-<span id="cb4-10"><a href="#cb4-10" aria-hidden="true" tabindex="-1"></a>principal = npf.pv(rate=r/<span class="dv">12</span>, nper=n*<span class="dv">12</span>, pmt=payment, fv=<span class="dv">0</span>)</span>
-<span id="cb4-11"><a href="#cb4-11" aria-hidden="true" tabindex="-1"></a> </span>
-<span id="cb4-12"><a href="#cb4-12" aria-hidden="true" tabindex="-1"></a><span class="st"># </span>question <span class="dv">3</span></span>
-<span id="cb4-13"><a href="#cb4-13" aria-hidden="true" tabindex="-1"></a>principal, payment = <span class="dv">500000</span>, -<span class="dv">2000</span></span>
-<span id="cb4-14"><a href="#cb4-14" aria-hidden="true" tabindex="-1"></a>rate = <span class="dv">12</span>*npf.rate(nper=n*<span class="dv">12</span>, pv=principal, pmt=payment, fv=<span class="dv">0</span>)</span>
-<span id="cb4-15"><a href="#cb4-15" aria-hidden="true" tabindex="-1"></a> </span>
-<span id="cb4-16"><a href="#cb4-16" aria-hidden="true" tabindex="-1"></a><span class="st"># </span>question <span class="dv">4</span></span>
-<span id="cb4-17"><a href="#cb4-17" aria-hidden="true" tabindex="-1"></a>r, principal, payment = <span class="dv">0.04</span>, <span class="dv">500000</span>, -<span class="dv">2000</span></span>
-<span id="cb4-18"><a href="#cb4-18" aria-hidden="true" tabindex="-1"></a>balloon = npf.fv(rate=r/<span class="dv">12</span>, nper=n*<span class="dv">12</span>, pmt=payment, pv=amount)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</div>
-</div>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a>totalFV = np.sum(cashFlows*fvFactors)</span>
+<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a>pvFactors = (<span class="dv">1</span>+r)**np.arange(-<span class="dv">1</span>, -m<span class="dv">-1</span>, -<span class="dv">1</span>)</span>
+<span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a>totalPV = np.sum(y*pvFactors)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>Here is the “financial calculator” code for <a href="#sec-miracle-loans"><span>Section&nbsp;1.5</span></a>. The sign conventions are that the loan principal is positive (a cash inflow) and loan payments (regular payments and balloon) are negative. If the balloon calculation turns out to be positive, it means we’ve overpaid the bank and should get money back. We can include a balloon when answering the first three questions by setting, for example, <strong>fv=-100000</strong> when the balloon is $100,000. The following is for a loan with monthly payments. The rates are all expressed as annual rates <span class="math inline">\(r\)</span> with the monthly rate being <span class="math inline">\(r/12\)</span>. The rate that is calculated in #3 is also an annual rate.</p>
+<div class="sourceCode" id="cb3"><pre class="sourceCode p code-with-copy"><code class="sourceCode pascal"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="kw">import</span> numpy_financial <span class="kw">as</span> npf</span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>n = <span class="dv">30</span>     <span class="st"># </span>number <span class="kw">of</span> years</span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a><span class="st"># </span><span class="dv">1.</span> payment</span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>r, principal = <span class="dv">0.04</span>, <span class="dv">500000</span></span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>payment = npf.pmt(</span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a>    rate=r/<span class="dv">12</span>, </span>
+<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a>    nper=n*<span class="dv">12</span>, </span>
+<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a>    pv=principal, </span>
+<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a>    fv=<span class="dv">0</span></span>
+<span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb3-12"><a href="#cb3-12" aria-hidden="true" tabindex="-1"></a> </span>
+<span id="cb3-13"><a href="#cb3-13" aria-hidden="true" tabindex="-1"></a><span class="st"># </span><span class="dv">2.</span> principal</span>
+<span id="cb3-14"><a href="#cb3-14" aria-hidden="true" tabindex="-1"></a>r, payment = <span class="dv">0.04</span>, -<span class="dv">2000</span></span>
+<span id="cb3-15"><a href="#cb3-15" aria-hidden="true" tabindex="-1"></a>principal = npf.pv(</span>
+<span id="cb3-16"><a href="#cb3-16" aria-hidden="true" tabindex="-1"></a>    rate=r/<span class="dv">12</span>, </span>
+<span id="cb3-17"><a href="#cb3-17" aria-hidden="true" tabindex="-1"></a>    nper=n*<span class="dv">12</span>, </span>
+<span id="cb3-18"><a href="#cb3-18" aria-hidden="true" tabindex="-1"></a>    pmt=payment, </span>
+<span id="cb3-19"><a href="#cb3-19" aria-hidden="true" tabindex="-1"></a>    fv=<span class="dv">0</span></span>
+<span id="cb3-20"><a href="#cb3-20" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb3-21"><a href="#cb3-21" aria-hidden="true" tabindex="-1"></a> </span>
+<span id="cb3-22"><a href="#cb3-22" aria-hidden="true" tabindex="-1"></a><span class="st"># </span><span class="dv">3.</span> rate</span>
+<span id="cb3-23"><a href="#cb3-23" aria-hidden="true" tabindex="-1"></a>principal, payment = <span class="dv">500000</span>, -<span class="dv">2000</span></span>
+<span id="cb3-24"><a href="#cb3-24" aria-hidden="true" tabindex="-1"></a>rate = <span class="dv">12</span>*npf.rate(</span>
+<span id="cb3-25"><a href="#cb3-25" aria-hidden="true" tabindex="-1"></a>    nper=n*<span class="dv">12</span>, </span>
+<span id="cb3-26"><a href="#cb3-26" aria-hidden="true" tabindex="-1"></a>    pv=principal, </span>
+<span id="cb3-27"><a href="#cb3-27" aria-hidden="true" tabindex="-1"></a>    pmt=payment, </span>
+<span id="cb3-28"><a href="#cb3-28" aria-hidden="true" tabindex="-1"></a>    fv=<span class="dv">0</span></span>
+<span id="cb3-29"><a href="#cb3-29" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb3-30"><a href="#cb3-30" aria-hidden="true" tabindex="-1"></a> </span>
+<span id="cb3-31"><a href="#cb3-31" aria-hidden="true" tabindex="-1"></a><span class="st"># </span><span class="dv">4.</span> balloon</span>
+<span id="cb3-32"><a href="#cb3-32" aria-hidden="true" tabindex="-1"></a>r, principal, payment = <span class="dv">0.04</span>, <span class="dv">500000</span>, -<span class="dv">2000</span></span>
+<span id="cb3-33"><a href="#cb3-33" aria-hidden="true" tabindex="-1"></a>balloon = npf.fv(</span>
+<span id="cb3-34"><a href="#cb3-34" aria-hidden="true" tabindex="-1"></a>    rate=r/<span class="dv">12</span>, </span>
+<span id="cb3-35"><a href="#cb3-35" aria-hidden="true" tabindex="-1"></a>    nper=n*<span class="dv">12</span>, </span>
+<span id="cb3-36"><a href="#cb3-36" aria-hidden="true" tabindex="-1"></a>    pmt=payment, </span>
+<span id="cb3-37"><a href="#cb3-37" aria-hidden="true" tabindex="-1"></a>    pv=principal</span>
+<span id="cb3-38"><a href="#cb3-38" aria-hidden="true" tabindex="-1"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>TO BE CONTINUED</p>
 <div class="callout-tip callout callout-style-default callout-captioned">
 <div class="callout-header d-flex align-content-center">
 <div class="callout-icon-container">
@@ -584,25 +555,25 @@ Calculating the ending balance as a sum of future values
 </div>
 </div>
 <div class="callout-body-container callout-body">
-<div class="sourceCode" id="cb5"><pre class="sourceCode p code-with-copy"><code class="sourceCode pascal"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="kw">import</span> numpy <span class="kw">as</span> np</span>
-<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>m, n = <span class="dv">360</span>, <span class="dv">720</span></span>
-<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>g, r = <span class="dv">0.001</span>, <span class="dv">0.005</span></span>
-<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>B0, D1, W = <span class="dv">100000</span>, <span class="dv">1000</span>, <span class="dv">10000</span></span>
-<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a><span class="st"># </span><span class="kw">array</span> <span class="kw">of</span> deposits</span>
-<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a>D = D1 * (<span class="dv">1</span>+g)**np.arange(m)</span>
-<span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb5-9"><a href="#cb5-9" aria-hidden="true" tabindex="-1"></a><span class="st"># </span>future value <span class="kw">of</span> initial balance</span>
-<span id="cb5-10"><a href="#cb5-10" aria-hidden="true" tabindex="-1"></a>FVB = B0 * (<span class="dv">1</span>+r)**n</span>
-<span id="cb5-11"><a href="#cb5-11" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb5-12"><a href="#cb5-12" aria-hidden="true" tabindex="-1"></a><span class="st"># </span>future values <span class="kw">of</span> deposits</span>
-<span id="cb5-13"><a href="#cb5-13" aria-hidden="true" tabindex="-1"></a>FVD = D * (<span class="dv">1</span>+r)**np.arange(n<span class="dv">-1</span>, n-m<span class="dv">-1</span>, -<span class="dv">1</span>)</span>
-<span id="cb5-14"><a href="#cb5-14" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb5-15"><a href="#cb5-15" aria-hidden="true" tabindex="-1"></a><span class="st"># </span>future values <span class="kw">of</span> withdrawals</span>
-<span id="cb5-16"><a href="#cb5-16" aria-hidden="true" tabindex="-1"></a>FVW = W * (<span class="dv">1</span>+r)**np.arange(n-m, <span class="dv">0</span>, -<span class="dv">1</span>)</span>
-<span id="cb5-17"><a href="#cb5-17" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb5-18"><a href="#cb5-18" aria-hidden="true" tabindex="-1"></a><span class="st"># </span>account balance <span class="kw">at</span> <span class="kw">end</span></span>
-<span id="cb5-19"><a href="#cb5-19" aria-hidden="true" tabindex="-1"></a>Bn = FVB + np.sum(FVD) - np.sum(FVW)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode" id="cb4"><pre class="sourceCode p code-with-copy"><code class="sourceCode pascal"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="kw">import</span> numpy <span class="kw">as</span> np</span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>m, n = <span class="dv">360</span>, <span class="dv">720</span></span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>g, r = <span class="dv">0.001</span>, <span class="dv">0.005</span></span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>B0, D1, W = <span class="dv">100000</span>, <span class="dv">1000</span>, <span class="dv">10000</span></span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a><span class="st"># </span><span class="kw">array</span> <span class="kw">of</span> deposits</span>
+<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a>D = D1 * (<span class="dv">1</span>+g)**np.arange(m)</span>
+<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-9"><a href="#cb4-9" aria-hidden="true" tabindex="-1"></a><span class="st"># </span>future value <span class="kw">of</span> initial balance</span>
+<span id="cb4-10"><a href="#cb4-10" aria-hidden="true" tabindex="-1"></a>FVB = B0 * (<span class="dv">1</span>+r)**n</span>
+<span id="cb4-11"><a href="#cb4-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-12"><a href="#cb4-12" aria-hidden="true" tabindex="-1"></a><span class="st"># </span>future values <span class="kw">of</span> deposits</span>
+<span id="cb4-13"><a href="#cb4-13" aria-hidden="true" tabindex="-1"></a>FVD = D * (<span class="dv">1</span>+r)**np.arange(n<span class="dv">-1</span>, n-m<span class="dv">-1</span>, -<span class="dv">1</span>)</span>
+<span id="cb4-14"><a href="#cb4-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-15"><a href="#cb4-15" aria-hidden="true" tabindex="-1"></a><span class="st"># </span>future values <span class="kw">of</span> withdrawals</span>
+<span id="cb4-16"><a href="#cb4-16" aria-hidden="true" tabindex="-1"></a>FVW = W * (<span class="dv">1</span>+r)**np.arange(n-m, <span class="dv">0</span>, -<span class="dv">1</span>)</span>
+<span id="cb4-17"><a href="#cb4-17" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-18"><a href="#cb4-18" aria-hidden="true" tabindex="-1"></a><span class="st"># </span>account balance <span class="kw">at</span> <span class="kw">end</span></span>
+<span id="cb4-19"><a href="#cb4-19" aria-hidden="true" tabindex="-1"></a>Bn = FVB + np.sum(FVD) - np.sum(FVW)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 </div>
 <div class="callout-tip callout callout-style-default callout-captioned">
@@ -615,26 +586,26 @@ Creating a feasible retirement plan
 </div>
 </div>
 <div class="callout-body-container callout-body">
-<div class="sourceCode" id="cb6"><pre class="sourceCode p code-with-copy"><code class="sourceCode pascal"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>m, n = <span class="dv">360</span>, <span class="dv">720</span></span>
-<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>g, r = <span class="dv">0.001</span>, <span class="dv">0.005</span></span>
-<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a><span class="st"># </span>solving <span class="kw">for</span> W</span>
-<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a>B0, D1 = <span class="dv">100000</span>, <span class="dv">1000</span></span>
-<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a>FVB = B0 * (<span class="dv">1</span>+r)**n</span>
-<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a>FVD = D1 * (<span class="dv">1</span>+g)**np.arange(m) * (<span class="dv">1</span>+r)**np.arange(n<span class="dv">-1</span>, n-m<span class="dv">-1</span>, -<span class="dv">1</span>)</span>
-<span id="cb6-8"><a href="#cb6-8" aria-hidden="true" tabindex="-1"></a>W = (FVB + np.sum(FVD)) / np.sum((<span class="dv">1</span>+r)**np.arange(n-m, <span class="dv">0</span>, -<span class="dv">1</span>))</span>
-<span id="cb6-9"><a href="#cb6-9" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb6-10"><a href="#cb6-10" aria-hidden="true" tabindex="-1"></a><span class="st"># </span>solving <span class="kw">for</span> D1</span>
-<span id="cb6-11"><a href="#cb6-11" aria-hidden="true" tabindex="-1"></a>B0, W = <span class="dv">100000</span>, <span class="dv">10000</span></span>
-<span id="cb6-12"><a href="#cb6-12" aria-hidden="true" tabindex="-1"></a>FVB = B0 * (<span class="dv">1</span>+r)**n</span>
-<span id="cb6-13"><a href="#cb6-13" aria-hidden="true" tabindex="-1"></a>FVW = W * (<span class="dv">1</span>+r)**np.arange(n-m, <span class="dv">0</span>, -<span class="dv">1</span>)</span>
-<span id="cb6-14"><a href="#cb6-14" aria-hidden="true" tabindex="-1"></a>D1 = (np.sum(FVW) - FVB) / np.sum((<span class="dv">1</span>+g)**np.arange(m) * (<span class="dv">1</span>+r)**np.arange(n<span class="dv">-1</span>, n-m<span class="dv">-1</span>, -<span class="dv">1</span>))</span>
-<span id="cb6-15"><a href="#cb6-15" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb6-16"><a href="#cb6-16" aria-hidden="true" tabindex="-1"></a><span class="st"># </span>solving <span class="kw">for</span> B0</span>
-<span id="cb6-17"><a href="#cb6-17" aria-hidden="true" tabindex="-1"></a>D1, W = <span class="dv">1000</span>, <span class="dv">10000</span></span>
-<span id="cb6-18"><a href="#cb6-18" aria-hidden="true" tabindex="-1"></a>FVD = D1 * (<span class="dv">1</span>+g)**np.arange(m) * (<span class="dv">1</span>+r)**np.arange(n<span class="dv">-1</span>, n-m<span class="dv">-1</span>, -<span class="dv">1</span>)</span>
-<span id="cb6-19"><a href="#cb6-19" aria-hidden="true" tabindex="-1"></a>FVW = W * (<span class="dv">1</span>+r)**np.arange(n-m, <span class="dv">0</span>, -<span class="dv">1</span>)</span>
-<span id="cb6-20"><a href="#cb6-20" aria-hidden="true" tabindex="-1"></a>B0 = (np.sum(FVW) - np.sum(FVD)) / (<span class="dv">1</span>+r)**n</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode" id="cb5"><pre class="sourceCode p code-with-copy"><code class="sourceCode pascal"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>m, n = <span class="dv">360</span>, <span class="dv">720</span></span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>g, r = <span class="dv">0.001</span>, <span class="dv">0.005</span></span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a><span class="st"># </span>solving <span class="kw">for</span> W</span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a>B0, D1 = <span class="dv">100000</span>, <span class="dv">1000</span></span>
+<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a>FVB = B0 * (<span class="dv">1</span>+r)**n</span>
+<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a>FVD = D1 * (<span class="dv">1</span>+g)**np.arange(m) * (<span class="dv">1</span>+r)**np.arange(n<span class="dv">-1</span>, n-m<span class="dv">-1</span>, -<span class="dv">1</span>)</span>
+<span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a>W = (FVB + np.sum(FVD)) / np.sum((<span class="dv">1</span>+r)**np.arange(n-m, <span class="dv">0</span>, -<span class="dv">1</span>))</span>
+<span id="cb5-9"><a href="#cb5-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-10"><a href="#cb5-10" aria-hidden="true" tabindex="-1"></a><span class="st"># </span>solving <span class="kw">for</span> D1</span>
+<span id="cb5-11"><a href="#cb5-11" aria-hidden="true" tabindex="-1"></a>B0, W = <span class="dv">100000</span>, <span class="dv">10000</span></span>
+<span id="cb5-12"><a href="#cb5-12" aria-hidden="true" tabindex="-1"></a>FVB = B0 * (<span class="dv">1</span>+r)**n</span>
+<span id="cb5-13"><a href="#cb5-13" aria-hidden="true" tabindex="-1"></a>FVW = W * (<span class="dv">1</span>+r)**np.arange(n-m, <span class="dv">0</span>, -<span class="dv">1</span>)</span>
+<span id="cb5-14"><a href="#cb5-14" aria-hidden="true" tabindex="-1"></a>D1 = (np.sum(FVW) - FVB) / np.sum((<span class="dv">1</span>+g)**np.arange(m) * (<span class="dv">1</span>+r)**np.arange(n<span class="dv">-1</span>, n-m<span class="dv">-1</span>, -<span class="dv">1</span>))</span>
+<span id="cb5-15"><a href="#cb5-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-16"><a href="#cb5-16" aria-hidden="true" tabindex="-1"></a><span class="st"># </span>solving <span class="kw">for</span> B0</span>
+<span id="cb5-17"><a href="#cb5-17" aria-hidden="true" tabindex="-1"></a>D1, W = <span class="dv">1000</span>, <span class="dv">10000</span></span>
+<span id="cb5-18"><a href="#cb5-18" aria-hidden="true" tabindex="-1"></a>FVD = D1 * (<span class="dv">1</span>+g)**np.arange(m) * (<span class="dv">1</span>+r)**np.arange(n<span class="dv">-1</span>, n-m<span class="dv">-1</span>, -<span class="dv">1</span>)</span>
+<span id="cb5-19"><a href="#cb5-19" aria-hidden="true" tabindex="-1"></a>FVW = W * (<span class="dv">1</span>+r)**np.arange(n-m, <span class="dv">0</span>, -<span class="dv">1</span>)</span>
+<span id="cb5-20"><a href="#cb5-20" aria-hidden="true" tabindex="-1"></a>B0 = (np.sum(FVW) - np.sum(FVD)) / (<span class="dv">1</span>+r)**n</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 </div>
 
