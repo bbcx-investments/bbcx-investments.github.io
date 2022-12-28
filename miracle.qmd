@@ -129,17 +129,10 @@ $$\frac{y_1}{1+r} + \frac{y_2}{(1+r)^2} + \cdots + \frac{y_m}{(1+r)^m}.$$
 
 Our examples here involved only positive cash flows, but it is also possible to compute total future values or total present values in this way when some cash flows are positive and some are negative.  In this case, the total present value is usually called the [net present value]{style="color: Tomato;"}, being the present value of the positive cash flows net of the present value of the negative cash flows.  @fig-miracle-npv illustrates net present value calculations.
 
-<<<<<<< HEAD
-::: {#fig-miracle-npv}
-<iframe width="780" height="400" src="https://bbcx-investments.com/borrowing-saving/_npv"></iframe>
-
-The net present value is the sum of the present values of the cash flows.  The present value of each cash flow is the cash flow multiplied by the present value factor.  The light blue cells are editable.
-=======
 ::: {#fig-miracle-npv} 
 <iframe width="780" height="400" src="https://bbcx-investments.com/borrowing-saving/_npv"></iframe>
 
 The net present value is the sum of the present values of the cash flows, and the present value of each cash flow is the cash flow multiplied by the present value factor.  The light blue cells are editable.
->>>>>>> a6679a0c2a7fed0e17ab143c100bd38d1c1f962b
 :::
 
 ## Perpetuities and annuities
@@ -241,7 +234,7 @@ Each payment goes partly towards interest and partly towards principal.  At date
 The amount owed on a loan after the last payment is zero, so at that point in time, the future value of the original loan principal equals the future value of all of the loan payments.  Discounting both future values by $1/(1+r)^n$, we see also that the present value, as of date 0, of the original loan principal equals the present value of all of the loan payments.  The present value at date 0 of the principal is just the principal, because it is received at date 0.  Hence, the loan principal equals the present value of all payments, as we have said before. 
 
 ::: {#fig-miracle-amortization} 
-<iframe width="780" height="650" src="https://bbcx-investments.com/borrowing-saving/_amortization-schedule"></iframe>
+<iframe width="780" height="700" src="https://bbcx-investments.com/borrowing-saving/_amortization-schedule"></iframe>
 
 A loan payment is calculated for the parameters set by the sliders for either monthly or annual payments.  The figure on the left shows the division of each payment between principal and interest.  The figure on the right is the amortization schedule, showing the remaining balance on the loan just before each payment.
 :::
