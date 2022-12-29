@@ -29,6 +29,5 @@ fig-cap-location: top
 
 comments:
   hypothesis: true
-  giscus:
-    repo: bbcx-investments/publish
+  
 
