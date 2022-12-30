@@ -247,7 +247,7 @@ A loan payment is calculated for the parameters set by the sliders for either mo
 
 In the decade 1971--1980, the U.S. stock market returned an average of 9.2% per year.  A dollar invested at the first of January in 1971 would have grown to $2.40 by the end of December in 1980.  As decades go, this is quite far from the worst for the U.S. stock market.^[Of the nine decades, 1931-1940, ..., 2011-2020, it ranks fifth.]  However, the 1970's were a time of high inflation.  What was the market performance in real terms?  To be more precise, if we had invested $1 at the begining of January, 1971, by how much would our real buying power have grown by the end of December, 1980?  In other words, what was our return in constant dollars?  We will see here how to answer these questions.
 
-The term "inflation rate" means the percent change in a price index.  In the U.S., the standard price index used for this calculation is the Consumer Price Index -- All Urban calculated by the Bureau of Labor Statistics.  It represents the cost of a basket of goods sampled in 87 urban areas across the U.S.  To have 7% inflation in a year means that the basket of goods costs 7% more at the end of the year than at the beginning, or in other words that
+The term "inflation rate" means the percentage change in a price index.  In the U.S., the standard price index used for this calculation is the Consumer Price Index -- All Urban calculated by the Bureau of Labor Statistics.  It represents the cost of a basket of goods sampled in 87 urban areas across the U.S.  To have 7% inflation in a year means that the basket of goods costs 7% more at the end of the year than at the beginning, or in other words that
 $$\frac{\text{CPI at end of year}}{\text{CPI at beginning of year}} = 1.07.$$
 
 Consider an item that costs $100 today.  Suppose there is 7\% inflation in the coming year, and the item costs $107 at the end of the year.  Suppose also that our portfolio earns 10\% in the year.  To calculate our real return, consider each $100 that we have at the start of the year.  Each $100 could buy one item.  In a year's time, the $100 grows to $110, and the item costs $107, so we could buy one and have $3 left over, which would buy 3/107 units.  This 3/107 is the growth in our buying power relative to the start of the year, so our [real return]{style="color: Tomato"} is 3/107.  
@@ -346,7 +346,7 @@ A common situation is that funds have been deposited at different dates into an 
 
 We know from previous sections that the deposits can finance the withdrawals at a constant rate of return if and only if the present value of the deposits is as much or more than the present value of the withdrawals.  Treating the deposits as negative cash flows and the withdrawals as positive cash flows, this is equivalent to the NPV being less than or equal to zero.  So, the answer to the question posed in the previous paragraph is the rate of return that makes the NPV equal to zero.  This rate of return is called the [internal rate of return or IRR]{style="color: tomato"}.  It can be calculated with the Excel or numpy-financial irr function.  @fig-miracle-irr illustrates the calculation.  
 
-Complications can arise when the sequence of cash flows changes sign more than once, for example, when there is a deposit then a withdrawal then another deposit and then another withdrawal.  In such situations, there may be multiple rates of return for which the NPV is zero or there may be no rate of return for which the NPV is zero.
+Complications can arise for some sequences of cash flows, though this is relatively rare in practice.  In some cases there may be multiple rates of return for which the NPV is zero or there may be no rate of return for which the NPV is zero.  This complication never arises if the sequence of cash flows changes sign only once.
 
 
 ::: {#fig-miracle-irr} 
@@ -365,44 +365,25 @@ This is an $n$--th order polynomial in the variable $x = 1/(1+r)$.  The equation
 
 ## Python {#sec-miracle-python}
 
+The numpy-financial function npv can be used to calculate the total present value of multiple cash flows.  If instead we want the total future value, then we can multiply the present value by the future value factor as in the following example.  In this case, the cash flows end at date 4, and the future value is computed as of date 10.  This could represent investments made at dates 0, 1, 2, 3, and 4 which remain invested until date 10.
 
-The numpy arange function is useful for creating sequences (arrays) of future value and present value factors.  The future value factors created by the following are an array
-
-$$(1+r), (1+r)^2, \ldots, (1+r)^n\,,$$
-
-and the present value factors are an array
-
-$$\frac{1}{1+r}, \frac{1}{(1+r)^2}, \ldots, \frac{1}{(1+r)^n}\,.$$
 
 ``` p
-import numpy as np
-n = 30
-r = 0.08
-fvFactors = (1+r)**np.arange(1, n+1)
-pvFactors = (1+r)**np.arange(-1, -n-1, -1)
-```
+import numpy_financial as npf
 
-The future value and present value of a sequence of cash flows can be computed by summing the products of arrays as in the following example.  The future value is computed as of year $n$.
-
-``` p
 n = 10
 m = 4
 r = 0.08
 c0, c1, c2, c3, c4 = 100, 120, 130, 140, 150
-cashFlows = np.array([c0, c1, c2, c3, c4])
+cashFlows = [c0, c1, c2, c3, c4]
 
-fvFactors = (1+r)**np.arange(n, n-m-1, -1)
-totalFV = np.sum(cashFlows*fvFactors)
-
-pvFactors = (1+r)**np.arange(-1, -m-1, -1)
-totalPV = np.sum(y*pvFactors)
+pv = npf.npv(r, cashFlows)
+fv = pv * (1+r)**n
 ```
-
 
 Here is the "financial calculator" code for @sec-miracle-loans.  The sign conventions are that the loan principal is positive (a cash inflow) and loan payments (regular payments and balloon) are negative.  If the balloon calculation turns out to be positive, it means we've overpaid the bank and should get money back.  We can include a balloon when answering the first three questions by setting, for example, **fv=-100000** when the balloon is $100,000.  The following is for a loan with monthly payments.  The rates are all expressed as annual rates $r$ with the monthly rate being $r/12$.  The rate that is calculated in #3 is also an annual rate.
 
 ``` p
-import numpy_financial as npf
 n = 30     # number of years
 
 # 1. payment
@@ -442,14 +423,32 @@ balloon = npf.fv(
 )
  ```
 
-TO BE CONTINUED
+We can track a loan balance or retirement plan by looping over dates.  We will illustrate for a loan balance.  We will calculate the balance at each date *after* the payment at that date and store the sequence of balances in a list.
 
-::: callout-tip
-## Calculating the ending balance as a sum of future values
- 
+```p
+principal = 20000     # initial balance
+r = .06/12            # monthly interest rate
+n = 5*12              # number of months
+
+P = npf.pmt(
+    rate=r, 
+    nper=n, 
+    pv=principal, 
+    fv=0
+)
+
+L = [principal]
+for i in range(1, n+1):
+    L.append(L[-1]*(1+r) + P)   # recall P is negative
+```
+    
+We can calculate the ending balance for a loan or retirement plan by computing the future value of all cash flows as of the ending date.  We illustrate for a retirement plan.  We allow the deposits to grow at a rate $g$, and we allow the withdrawals to grow (or decline if $h<0$) at a rate $h$.  An easy way to generate a sequence of growing or declining numbers is to use the numpy arange function.
+
 
 ```p
 import numpy as np
+
+
 m, n = 360, 720
 g, r = 0.001, 0.005
 B0, D1, W = 100000, 1000, 10000
