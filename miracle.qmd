@@ -6,7 +6,7 @@ If an investment account earns a steady rate of return and funds are not withdra
 
 ```{python}
 #| label: fig-miracle-exponential
-#| fig-cap: "Growth of an Investment Account"
+#| fig-cap: "Growth of an investment account at different rates of return."
 
 import plotly.graph_objects as go
 import numpy as np
@@ -76,7 +76,7 @@ The values in  @fig-miracle-exponential are future value factors at 4% and 8%, f
 
 ```{python}
 #| label: fig-miracle-pvfactors
-#| fig-cap: "Present Value Factors"
+#| fig-cap: "Present value factors at different discount rates."
 
 import plotly.graph_objects as go
 import numpy as np
@@ -326,9 +326,10 @@ The figure tracks a retirement account balance in which deposits (savings) are m
 
 ## Retirement planning simulation
 
-One sometimes encounters the view that there is little risk in long-run investing, for example, in the stock market.  This view is often based on the argument that the law of averages will hold in the long run.  Whether there is risk in long-run investing depends on one's definition of "risk," but there is certainly substantial uncertainty about how much wealth one will accumulate through long-run investing.
+One sometimes encounters the view that there is little risk in long-run investing, for example, in the stock market.   Whether this is true depends on how we define "risk."  If we define it as the probability of losing money, then there indeed seems to be little risk in the stock market in the long run.  For example, there has not been a 20-year period in the U.S. stock market since at least the 1920s in which the market has gone down from the beginning to the end of the period.  However, if we define "risk" as uncertainty about the outcome -- as we will do in this book -- then there is substantial risk in long-run investing, as we will see.  
 
-The law of averages dictates the average outcome of a gamble that is repeated many times, but it does not dictate the cumulative gain or loss of a gambler.  Consider a good blackjack player who plays at roughly even odds with the house.  After a long night of playing, her average gain per hand will probably be close to zero, but she might have a lot of chips in front of her or she may have lost a lot.  Her cumulative gain or loss is of course her average gain or loss *multiplied by the number of gambles*, and with a large number of gambles an average near zero can still correspond to a very large cumulative gain or loss.
+The view that there is little risk in the long run is sometimes based on the argument that the law of averages will hold in the long run.  This is a mistaken argument.
+The law of averages dictates the average outcome of a gamble that is repeated many times, but it does not dictate the cumulative gain or loss of a gambler.  Consider a good blackjack player who plays at roughly even odds with the house.  After a long night of playing, her average gain per hand will probably be close to zero, but she might have a lot of chips in front of her or she may have lost a lot.  Her cumulative gain or loss is of course her average gain or loss *multiplied by the number of gambles*, and with a large number of gambles an average near zero can still correspond to a very large cumulative gain or loss.^[The wealth of someone playing a fair game is called a "random walk" -- it steps up or down randomly depending on the outcome of the game.  There is a theorem in probability theory that a random walk walks everywhere.  For example, if two people flip a fair coin for $1, then, with probability one, if they play long enough, one person will eventually be $1 million ahead.  Furthermore, if they continue to play long enough, then the other player will eventually be $1 million ahead.  And, we can replace $1 million by $1 billion or any other number.  Of course, "play long enough" can mean to play very long indeed.]
 
 The stock market offers better than even odds, so one expects to win on average, but how much one will win is very uncertain.  We can investigate this by simulating the retirement plan of the previous section, drawing a random return each month from a normal distribution with some mean and variance.  @sec-miracle-python explains how to perform this simulation in python.  @fig-miracle-retirement-sim presents the results.  An important fact is that accumulations from compounding random returns are positively skewed, so the mean of the distribution of final wealth is higher than the median.  The median answers the question "what do I have a 50% chance of achieving?", so it is probably the statistic on which we should be focused.  
 
