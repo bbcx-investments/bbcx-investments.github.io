@@ -487,7 +487,7 @@ ending_balance = pv * (1+r)**(m+n)
 
 When we simulate, we will have different returns each month, so we can't use the npv function to compute the present value.  Instead, we will compute future value factors by compounding the monthly returns, then multiply the cash flows by the future value factors to compute the future value of each cash flow, and then sum the future values to obtain the ending balance.  The numpy cumprod function is useful for computing the future value factors.  Given an array (a, b, c), the cumprod function returns (a, a\*b, a\*b\*c).  For us, these numbers will be 1+returns, and we want the sequence to be declining in the number of products (all of the returns for the first FV factor, ..., only one return for the last FV factor).  To obtain this, we apply the cumprod function and then flip the result to obtain (a\*b\*c, a\*b, a).^[These are random returns, so it doesn't matter if we compute (a\*b\*c, a\*b, a) or (c\*b\*a, c\*b, c).  If the ordering of the returns mattered and a were the first and c the last, then we would need to reverse the order (by flipping) to obtain (c, b, a) and then apply cumprod and flip  to obtain (c\*b\*a, c\*b, c).]
 
-The first part of the code for the simulation repeats calculations from the previous retirement planning exercise
+The first part of the code for the simulation repeats calculations from the previous retirement planning exercise.
 
 ```.p
 m = 25*12              # number of monthly deposits
