@@ -389,7 +389,7 @@ cashFlows = [c0, c1, c2, c3]
 irr = npf.irr(cashFlows)
 ```
 
-Here is the financial calculator code for @sec-miracle-loans.  The sign conventions are that the loan principal is positive (a cash inflow) and loan payments (regular payments and balloon) are negative.  If the balloon calculation turns out to be positive, it means we've overpaid the bank and should get money back.  We can include a balloon when answering the first three questions by setting, for example, **fv=-100000** when the balloon is $100,000.  The following is for a loan with monthly payments.  The rates are all expressed as annual rates $r$ with the monthly rate being $r/12$.  The rate that is calculated in #3 is also an annual rate.
+Here is the financial calculator code for @sec-miracle-loans.  The sign conventions are that the loan principal is positive (a cash inflow) and loan payments (regular payments and balloon) are negative.  If the balloon calculation turns out to be positive, it means we've overpaid the bank and should get money back.  We can include a balloon when answering the first three questions by setting, for example, fv=-100000 when the balloon is $100,000.  The following is for a loan with monthly payments.  The rates are all expressed as annual rates $r$ with the monthly rate being $r/12$.  The rate that is calculated in #3 is also an annual rate.
 
 ``` p
 n = 30     # number of years
